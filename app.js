@@ -1,48 +1,44 @@
-const express = require('express');
-const morgan = require('morgan');
-const cors = require('cors')
+const express = require("express");
+const morgan = require("morgan");
+const cors = require("cors");
 const session = require("express-session");
 const cookieParser = require("cookie-parser");
-const route = require('./modules/users/users.routes');
-
-
+const route = require("./modules/users/users.routes");
 
 const app = express();
 
-app.use(cors());
-app.use(express.urlencoded({ extended: true }))
-app.use(express.json())
-app.use(morgan('dev'))
+app.use(cors({
+  origin: ['http://localhost:5173', 'http://localhost:5174', 'http://10.0.2.2:8081'], 
+  credentials: true, 
+}));
+
+app.use(express.urlencoded({ extended: true }));
+app.use(express.json());
+app.use(morgan("dev"));
 
 app.use(cookieParser());
+
 app.use(
-    session({
-        secret: "changeit",
-        resave: true,
-        saveUninitialized: true,
-        cookie: { maxAge: 600000 },
-    })
+  session({
+    secret: "changeit",
+    resave: true,
+    saveUninitialized: true,
+    cookie: { maxAge: 600000 },
+  })
 );
 
-
-app.use("/users", route)
-
-
-
-
+app.use("/users", route);
 
 app.use((req, res, next) => {
-    res.status.json({
-        message: "404! Route is not found"
-    })
-})
+  res.status.json({
+    message: "404! Route is not found",
+  });
+});
 
 app.use((err, req, res, next) => {
-    res.status(500).json({
-        message: "500! Something broken"
-    })
-})
+  res.status(500).json({
+    message: "500! Something broken",
+  });
+});
 
 module.exports = app;
-
-//hello

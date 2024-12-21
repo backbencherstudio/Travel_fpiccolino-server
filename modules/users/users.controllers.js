@@ -13,6 +13,16 @@ const {
   sendRegistrationOTPEmail,
 } = require("../../util/otpUtils");
 
+const generateToken = (id, email, role) => {
+  return sign({ userId: id, email, role }, process.env.WEBTOKEN_SECRET_KEY, {
+    expiresIn: "30d",
+  });
+};
+
+const hashPassword = async (password) => {
+  const salt = await bcrypt.genSalt(8);
+  return await bcrypt.hash(password, salt);
+};
 
 const setTokenCookie = (res, token) => {
   res.cookie("token", token, {
@@ -22,19 +32,8 @@ const setTokenCookie = (res, token) => {
   });
 };
 
-// Hash password function
-const hashPassword = async (password) => {
-  const saltRounds = 8;
-  try {
-    const hashedPassword = await bcrypt.hash(password, saltRounds);
-    return hashedPassword;
-  } catch (error) {
-    throw new Error('Error hashing password');
-  }
-};
-
 // Get all users
- const getAllUsers = async (req, res) => {
+const getAllUsers = async (req, res) => {
   try {
     let user = await User.find();
     // const token = req.cookies.authToken;
@@ -46,12 +45,12 @@ const hashPassword = async (password) => {
 };
 
 // Register user
- const registerUser = async (req, res) => {
+const registerUser = async (req, res) => {
   try {
     let { name, email, password, role } = req.body;
     console.log(name, email, password, role);
 
-    if (!(name && email && password && role)) {
+    if (!(name && email && password)) {
       res.status(400).json({
         message: "Please fill all required fields",
       });
@@ -116,12 +115,12 @@ const hashPassword = async (password) => {
 };
 
 // Resend OTP
- const resendOtp = async (req, res) => {
+const resendOtp = async (req, res) => {
   try {
     const { userData } = req.session;
 
     if (!userData?.email || !userData?.name) {
-      res.status(400).json({ message: "User data not found in session" });
+      res.status(400).json({ message: "User data not found!" });
       return;
     }
 
@@ -134,14 +133,14 @@ const hashPassword = async (password) => {
       .catch((err) => console.error("Error sending OTP email:", err));
 
     // Respond immediately without waiting for email to be sent
-    res.status(200).json({ message: "OTP resent successfully" });
+    res.status(200).json({ message: "OTP resent successfully", otp: true });
   } catch (error) {
     res.status(500).json({ message: error.message });
   }
 };
 
 // Verify OTP
- const verifyOTP = async (req, res) => {
+const verifyOTP = async (req, res) => {
   try {
     console.log(122, req.body);
     const { otp } = req.body;
@@ -168,31 +167,27 @@ const hashPassword = async (password) => {
       return;
     }
 
-    // Create new User and generate JWT token in parallel
     const newUser = new User(req.session.userData);
 
     // Generate JWT and save the user simultaneously
     const [savedUser, token] = await Promise.all([
-      newUser.save(), // Save the new user to the database
-      sign(
-        { userEmail: newUser.email, userId: newUser._id },
-        process.env.WEBTOKEN_SECRET_KEY,
-        { expiresIn: "1d" }
-      ),
+      newUser.save(),
+      generateToken(newUser._id, newUser.email, newUser.role),
     ]);
+    setTokenCookie(res, token);
 
     // Clear session data after successful save
     delete req.session.userData;
     delete req.session.otp;
 
-    const options = {
-      expires: new Date(Date.now() + 3 * 24 * 60 * 60 * 1000),
-      httpOnly: true,
-    };
+    // const options = {
+    //   expires: new Date(Date.now() + 3 * 24 * 60 * 60 * 1000),
+    //   httpOnly: true,
+    // };
 
     res
       .status(200)
-      .cookie("token", token, options)
+      // .cookie("token", token, options)
       .json({ token, user: savedUser, success: true });
   } catch (error) {
     res.status(500).json({ message: error.message });
@@ -200,7 +195,7 @@ const hashPassword = async (password) => {
 };
 
 // Authenticate user
- const authenticateUser = async (req, res) => {
+const authenticateUser = async (req, res) => {
   try {
     const { email, password } = req.body;
     console.log(email, password);
@@ -224,11 +219,10 @@ const hashPassword = async (password) => {
       return;
     }
 
-    const token = sign(
-      { userEmail: user.email, userId: user._id },
-      process.env.WEBTOKEN_SECRET_KEY,
-      { expiresIn: "1d" }
-    );
+    console.log(user);
+    const token = generateToken(user._id, user.email, user.role);
+
+    setTokenCookie(res, token);
 
     const options = {
       expires: new Date(Date.now() + 24 * 60 * 60 * 1000),
@@ -238,7 +232,7 @@ const hashPassword = async (password) => {
 
     res
       .status(200)
-      .cookie("token", token, options)
+      // .cookie("token", token, options)
       .json({ message: "Login successful", user, token });
   } catch (error) {
     res.status(500).json(error.message);
@@ -246,7 +240,7 @@ const hashPassword = async (password) => {
 };
 
 // Edit user profile
- const editUserProfile = async (req, res) => {
+const editUserProfile = async (req, res) => {
   try {
     console.log(req.body);
     if (!req.userId) {
@@ -271,7 +265,7 @@ const hashPassword = async (password) => {
 };
 
 // Forgot password OTP send
- const forgotPasswordOTPsend = async (req, res) => {
+const forgotPasswordOTPsend = async (req, res) => {
   try {
     const { email } = req.body;
     const user = await User.findOne({ email });
@@ -286,8 +280,7 @@ const hashPassword = async (password) => {
     req.session.otp = otp.toString();
     req.session.email = user.email;
 
-    if (user.name)
-      await sendForgotPasswordOTP(user.name, user.email, otp);
+    if (user.name) await sendForgotPasswordOTP(user.name, user.email, otp);
 
     res
       .status(200)
@@ -298,7 +291,7 @@ const hashPassword = async (password) => {
 };
 
 // Match forgot password OTP
-  const matchForgotPasswordOTP = async (req, res) => {
+const matchForgotPasswordOTP = async (req, res) => {
   try {
     const { otp } = req.body;
     if (!otp) {
@@ -327,7 +320,7 @@ const hashPassword = async (password) => {
 };
 
 // Reset password
- const resetPasssword = async (req, res) => {
+const resetPasssword = async (req, res) => {
   try {
     if (!req.session.isOtpValid) {
       res.status(400).json({ message: "OTP invalid" });
@@ -336,7 +329,9 @@ const hashPassword = async (password) => {
     const { password } = req.body;
 
     if (password.length < 6) {
-      res.status(400).json({ message: "Password must be at least 6 characters" });
+      res
+        .status(400)
+        .json({ message: "Password must be at least 6 characters" });
       return;
     }
 
@@ -356,8 +351,7 @@ const hashPassword = async (password) => {
   }
 };
 
-
- const checkAuthStatus = async (req, res) => {
+const checkAuthStatus = async (req, res) => {
   const JWT_SECRET = process.env.WEBTOKEN_SECRET_KEY;
 
   try {
@@ -392,7 +386,7 @@ const hashPassword = async (password) => {
   }
 };
 
-  const logout = (req, res) => {
+const logout = (req, res) => {
   try {
     res.clearCookie("token");
     res.status(200).json({ message: "Logged out successfully" });
@@ -400,5 +394,17 @@ const hashPassword = async (password) => {
     res.status(400).json({ message: error.message });
   }
 };
-  
-module.exports = {checkAuthStatus, logout, resetPasssword, matchForgotPasswordOTP, forgotPasswordOTPsend, editUserProfile, authenticateUser, verifyOTP, resendOtp, registerUser, getAllUsers};
+
+module.exports = {
+  checkAuthStatus,
+  logout,
+  resetPasssword,
+  matchForgotPasswordOTP,
+  forgotPasswordOTPsend,
+  editUserProfile,
+  authenticateUser,
+  verifyOTP,
+  resendOtp,
+  registerUser,
+  getAllUsers,
+};
