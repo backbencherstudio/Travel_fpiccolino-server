@@ -1,4 +1,4 @@
-export const emailMessage = (userName, email, OTP) => {
+const emailMessage = (userName, email, OTP) => {
   return `
   <div style="font-family: Arial, sans-serif; max-width: 600px; margin: auto; padding: 20px; border: 1px solid #ddd; border-radius: 10px; box-shadow: 0 4px 8px rgba(0,0,0,0.1);">
     <div style="text-align: center; margin-bottom: 20px;">
@@ -19,8 +19,7 @@ export const emailMessage = (userName, email, OTP) => {
 `;
 };
 
-
-export const emailUpdateOTP = (userName, email, newOTP) => {
+const emailUpdateOTP = (userName, email, newOTP) => {
   return `
     <div style="font-family: Arial, sans-serif; max-width: 600px; margin: auto; padding: 20px; border: 1px solid #ddd; border-radius: 10px; box-shadow: 0 4px 8px rgba(0,0,0,0.1);">
       <div style="text-align: center; margin-bottom: 20px;">
@@ -41,7 +40,7 @@ export const emailUpdateOTP = (userName, email, newOTP) => {
   `;
 };
 
-export const emailForgotPasswordOTP = (userName, email, OTP) => {
+const emailForgotPasswordOTP = (userName, email, OTP) => {
   return `
     <div style="font-family: Arial, sans-serif; max-width: 600px; margin: auto; padding: 20px; border: 1px solid #ddd; border-radius: 10px; box-shadow: 0 4px 8px rgba(0,0,0,0.1);">
       <div style="text-align: center; margin-bottom: 20px;">
@@ -63,7 +62,7 @@ export const emailForgotPasswordOTP = (userName, email, OTP) => {
 };
 
 
-export const resendRegistrationOTPEmail = (userName, email, OTP) => {
+ const resendRegistrationOTPEmail = (userName, email, OTP) => {
   return `
     <div style="font-family: Arial, sans-serif; max-width: 600px; margin: auto; padding: 20px; border: 1px solid #ddd; border-radius: 10px; box-shadow: 0 4px 8px rgba(0,0,0,0.1);">
       <div style="text-align: center; margin-bottom: 20px;">
@@ -83,3 +82,10 @@ export const resendRegistrationOTPEmail = (userName, email, OTP) => {
     </div>
   `;
 };
+
+module.exports = {
+  emailMessage,
+  emailUpdateOTP,
+  emailForgotPasswordOTP,
+  resendRegistrationOTPEmail,
+}
