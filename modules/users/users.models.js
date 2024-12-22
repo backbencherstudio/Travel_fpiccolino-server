@@ -4,7 +4,11 @@ const { Schema } = mongoose;
 const UserSchema = new Schema(
   {
     name: { type: String, required: [true, "name is required"] },
-    email: { type: String, required: [true, "email is required and unique"], unique: true },
+    email: {
+      type: String,
+      required: [true, "email is required and unique"],
+      unique: true,
+    },
     password: { type: String, required: true },
     firstName: { type: String },
     lastName: { type: String },
@@ -13,7 +17,12 @@ const UserSchema = new Schema(
       enum: ["admin", "user"],
       default: "user",
     },
-    avatar: { type: String }
+    avatar: { type: String },
+    phone: { type: String },
+    address: { type: String },
+    city: {type: String},
+    country: {type: String}
+
   },
   { timestamps: true }
 );

@@ -4,7 +4,7 @@ const dotenv = require("dotenv");
 dotenv.config();
 
 const verifyUser = async (req, res, next) => {
-  const { token } = req.cookies; // This should now be defined if cookies are parsed correctly
+  const { token } = req.cookies;  
   const JWT_SECRET = process.env.WEBTOKEN_SECRET_KEY;
 
   if (!token) {

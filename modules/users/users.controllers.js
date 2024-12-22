@@ -1,7 +1,6 @@
 require("dotenv").config();
 const { isEmail } = require("validator");
 const bcrypt = require("bcryptjs");
-const nodemailer = require("nodemailer");
 const { sign, verify } = require("jsonwebtoken");
 
 const User = require("./users.models");
@@ -190,7 +189,8 @@ const verifyOTP = async (req, res) => {
       // .cookie("token", token, options)
       .json({ token, user: savedUser, success: true });
   } catch (error) {
-    res.status(500).json({ message: error.message });
+    res.status(500).json(error);
+    console.log(error)
   }
 };
 
@@ -239,30 +239,39 @@ const authenticateUser = async (req, res) => {
   }
 };
 
-// Edit user profile
+
+
+
+
 const editUserProfile = async (req, res) => {
+  const normalizePath = (filePath) => filePath.replace(/\\/g, '/'); 
+
   try {
-    console.log(req.body);
     if (!req.userId) {
-      res.status(400).json({ message: "Unauthorized user" });
-    }
-    if (req.body.password) {
-      req.body.password = await hashPassword(req.body.password);
+      return res.status(401).json({ message: "Unauthorized user" });
     }
 
-    const updatedUser = await User.findByIdAndUpdate(req.userId, req.body, {
-      new: true,
-    });
+    if (req.file) {
+      // Save relative file path for avatar in the database
+      req.body.avatar = `/uploads/images/${req.file.filename}`;
+    }
+
+    if (req.body.password) {
+      req.body.password = await hashPassword(req.body.password);  // Hash the password if provided
+    }
+
+    const updatedUser = await User.findByIdAndUpdate(req.userId, req.body, { new: true });
 
     if (!updatedUser) {
-      res.status(404).json({ message: "User not found" });
-      return;
+      return res.status(404).json({ message: "User not found" });
     }
-    res.status(200).json(updatedUser);
+
+    res.status(200).json(updatedUser);  // Return updated user information
   } catch (error) {
-    res.status(500).json({ message: "Internal server error", error });
+    res.status(500).json({ message: "Internal server error", error: error.message });
   }
 };
+
 
 // Forgot password OTP send
 const forgotPasswordOTPsend = async (req, res) => {
