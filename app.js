@@ -3,7 +3,10 @@ const morgan = require("morgan");
 const cors = require("cors");
 const session = require("express-session");
 const cookieParser = require("cookie-parser");
-const route = require("./modules/users/users.routes");
+const user = require("./modules/users/users.routes");
+const blog = require("./modules/blog/blogs.routes");
+
+
 const path = require("path");
 
 
@@ -31,7 +34,9 @@ app.use(
   })
 );
 
-app.use("/users", route);
+
+app.use("/api/blogs", blog);
+app.use("/users", user);
 
 app.use((req, res, next) => {
   res.status.json({
