@@ -32,7 +32,7 @@ const sendEmail = async (to, subject, htmlContent) => {
 
 // Different email templates can be passed here
 const sendRegistrationOTPEmail = async (userName, email, otp) => {
-  await sendEmail(email, "Your OTP Code for SocialApp", emailMessage(userName, email, otp));
+  await sendEmail(email, "Your OTP Code for SocialApp", emailMessage(userName, email, otp)); 
 };
 
 const sendUpdateEmailOTP = async (userName, email, otp) => {
