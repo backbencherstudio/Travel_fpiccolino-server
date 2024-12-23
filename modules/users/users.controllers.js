@@ -2,6 +2,7 @@ require("dotenv").config();
 const { isEmail } = require("validator");
 const bcrypt = require("bcryptjs");
 const { sign, verify } = require("jsonwebtoken");
+const path = require("path");
 
 const User = require("./users.models");
 
@@ -11,6 +12,7 @@ const {
   sendForgotPasswordOTP,
   sendRegistrationOTPEmail,
 } = require("../../util/otpUtils");
+const { getImageUrl } = require("../../util/image_path");
 
 const generateToken = (id, email, role) => {
   return sign({ userId: id, email, role }, process.env.WEBTOKEN_SECRET_KEY, {
@@ -184,13 +186,14 @@ const verifyOTP = async (req, res) => {
     //   httpOnly: true,
     // };
 
+    console.log(savedUser)
     res
       .status(200)
       // .cookie("token", token, options)
       .json({ token, user: savedUser, success: true });
   } catch (error) {
     res.status(500).json(error);
-    console.log(error)
+    console.log(error);
   }
 };
 
@@ -198,53 +201,46 @@ const verifyOTP = async (req, res) => {
 const authenticateUser = async (req, res) => {
   try {
     const { email, password } = req.body;
-    console.log(email, password);
 
     if (!email || !password) {
-      res.status(400).json({ message: "Please fill all required fields" });
-      return;
+      return res.status(400).json({ message: "Please fill all required fields" });
     }
 
-    const user = await User.findOne({ email });
+    const user = await User.findOne({ email }).lean(); // Use `lean()` for a plain object
 
     if (!user) {
-      res.status(400).json({ message: "User not found!" });
-      return;
+      return res.status(400).json({ message: "User not found!" });
     }
 
     const passwordMatch = await bcrypt.compare(password, user.password);
 
     if (!passwordMatch) {
-      res.status(400).json({ message: "Invalid email or password" });
-      return;
+      return res.status(400).json({ message: "Invalid email or password" });
     }
 
-    console.log(user);
     const token = generateToken(user._id, user.email, user.role);
 
     setTokenCookie(res, token);
 
-    const options = {
-      expires: new Date(Date.now() + 24 * 60 * 60 * 1000),
-      httpOnly: true,
-      secure: true,
+    // Add `image_url` if the user has an image
+    const userResponse = {
+      ...user,
+      image_url: user.image ? getImageUrl(user.image) : null,
     };
 
-    res
-      .status(200)
-      // .cookie("token", token, options)
-      .json({ message: "Login successful", user, token });
+    return res.status(200).json({
+      message: "Login successful",
+      user: userResponse,
+      token,
+    });
   } catch (error) {
-    res.status(500).json(error.message);
+    console.error("Error in authenticateUser:", error);
+    return res.status(500).json({ message: "Internal server error" });
   }
 };
 
 
-
-
-
 const editUserProfile = async (req, res) => {
-  const normalizePath = (filePath) => filePath.replace(/\\/g, '/'); 
 
   try {
     if (!req.userId) {
@@ -252,26 +248,35 @@ const editUserProfile = async (req, res) => {
     }
 
     if (req.file) {
-      // Save relative file path for avatar in the database
-      req.body.avatar = `/uploads/images/${req.file.filename}`;
+      req.body.image = `/uploads/${req.file.filename}`;
     }
 
     if (req.body.password) {
-      req.body.password = await hashPassword(req.body.password);  // Hash the password if provided
+      req.body.password = await hashPassword(req.body.password);
     }
 
-    const updatedUser = await User.findByIdAndUpdate(req.userId, req.body, { new: true });
+    const updatedUser = await User.findByIdAndUpdate(req.userId, req.body, {
+      new: true,
+    });
+
+     
 
     if (!updatedUser) {
       return res.status(404).json({ message: "User not found" });
     }
 
-    res.status(200).json(updatedUser);  // Return updated user information
+    const userResponse = {
+      ...updatedUser,
+      image_url: updatedUser.image ? getImageUrl(updatedUser.image) : null,
+    };
+
+    res.status(200).json(userResponse);
   } catch (error) {
-    res.status(500).json({ message: "Internal server error", error: error.message });
+    res
+      .status(500)
+      .json({ message: "Internal server error", error: error.message });
   }
 };
-
 
 // Forgot password OTP send
 const forgotPasswordOTPsend = async (req, res) => {
@@ -367,8 +372,7 @@ const checkAuthStatus = async (req, res) => {
     const { token } = req.cookies;
 
     if (!token) {
-      res.status(400).json({ authenticated: false });
-      return;
+      return res.status(400).json({ authenticated: false });
     }
 
     verify(token, JWT_SECRET, async (err, decoded) => {
@@ -380,14 +384,20 @@ const checkAuthStatus = async (req, res) => {
 
       const userId = decoded.userId;
 
-      const userInfo = await User.findById(userId);
+      const userInfo = await User.findById(userId).lean(); // Use `lean()` to get plain JS object
+
       if (!userInfo) {
         return res
           .status(404)
           .json({ message: "User not found", authenticated: false });
       }
 
-      return res.status(200).json({ authenticated: true, user: userInfo });
+      const userResponse = {
+        ...userInfo,
+        image_url: getImageUrl(userInfo.image),
+      };
+
+      return res.status(200).json({ authenticated: true, user: userResponse });
     });
   } catch (error) {
     console.error("Error in checkAuthStatus:", error);

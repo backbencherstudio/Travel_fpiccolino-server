@@ -1,4 +1,4 @@
-const multer = require("multer");
+ 
 const {
   getAllUsers,
   checkAuthStatus,
@@ -14,6 +14,7 @@ const {
 } = require("./users.controllers");
 
 const { verifyUser } = require("../../middleware/verifyUser");
+const { upload } = require("../../middleware/Multer.config");
 
 const route = require("express").Router();
 
@@ -25,7 +26,7 @@ route.post("/verify-otp", verifyOTP);
 route.post("/resendotp", resendOtp);
 route.post("/login", authenticateUser);
 
-route.put("/update-profile", verifyUser, editUserProfile);
+route.put("/update-profile", upload.single("image"), verifyUser, editUserProfile);
 
 route.post("/logout", logout);
 

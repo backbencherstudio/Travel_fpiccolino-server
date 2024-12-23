@@ -3,14 +3,16 @@ const path = require("path");
 
 // File Storage Configuration
 const storage = multer.diskStorage({
-  destination: (req, file, cb) => {
-    cb(null, "uploads"); // Files will be saved in the "uploads" directory
+  destination: function (req, file, cb) {
+    cb(null, "uploads");
   },
-  filename: (req, file, cb) => {
-    cb(null, Date.now() + "-" + file.originalname);
+  filename: function (req, file, cb) {
+    const uniqueSuffix = Date.now() + "-" + Math.round(Math.random() * 1e9);
+    const ext = path.extname(file.originalname);  
+    cb(null, file.fieldname + "-" + uniqueSuffix + ext);
   },
 });
 
-const upload = multer({ storage });
+const upload = multer({ storage: storage });
 
-module.exports = { upload }; 
+module.exports = { upload };
