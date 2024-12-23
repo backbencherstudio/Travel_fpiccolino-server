@@ -36,11 +36,11 @@ const packageSchema = new mongoose.Schema(
     ],
     bookedFlights: [
       {
-        flightNumber: String,
-        departureTime: Date,
-        arrivalTime: Date,
-        breakTime: Number,
-        flightClass: String,
+        flightFrom: String,
+        flightTo: String,
+        departureTime: String,
+        arrivalTime: String,
+        breakTime: String,
         price: Number,
       },
     ],
