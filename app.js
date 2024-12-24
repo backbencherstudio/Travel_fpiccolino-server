@@ -1,12 +1,14 @@
+
 const express = require("express");
 const morgan = require("morgan");
 const cors = require("cors");
 const session = require("express-session");
+
 const cookieParser = require("cookie-parser");
 const user = require("./modules/users/users.routes");
-const blog = require("./modules/blog/blogs.routes");
-const package = require("./modules/package/package.routes");
-const category = require("./modules/category/category.routes");
+
+const package = require("./modules/package/package.routes")
+const blogss = require("./modules/blogs/blog.route")
 
 const path = require("path");
 
@@ -42,8 +44,7 @@ app.use(
 
 app.use("/users", user);
 app.use("/package", package);
-app.use("/blogs", blog);
-app.use("/category", category);
+app.use("/api/blogs", blogss);
 
 app.use(( req, res, next) => {
   res.status.json({

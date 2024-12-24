@@ -6,20 +6,18 @@ const blogSchema = new mongoose.Schema({
   heroSection: [
     {
       headerImg: { type: String },
-      header: { type: String},
-      text: { type: String},
-      mainHeading : {type: String},
-      mainSubHeading : {type: String}
+      header: { type: String },
+      text: { type: String },
+      mainHeading: { type: String },
+      mainSubHeading: { type: String },
     },
   ],
 
   contentList: [
     {
-     
       headings: [{ type: String, required: true }],
       image: { type: String, required: true }, // Storing the image URL or path
       paragraphs: [{ type: String, required: true }],
-      
     },
   ],
 
@@ -33,8 +31,6 @@ const blogSchema = new mongoose.Schema({
 });
 
 // Create a model from the schema
+const Blog = mongoose.model("Blog", blogSchema);
 
-
- 
-
-module.exports = mongoose.model("blog", blogSchema);
+module.exports = Blog;
