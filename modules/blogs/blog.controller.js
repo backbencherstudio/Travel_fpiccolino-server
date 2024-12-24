@@ -182,6 +182,34 @@ exports.deleteContentAtIndex = async (req, res) => {
     }
 };
 
+exports.UpdateCategory = async (req, res) => {
+    const { id } = req.params;
+    const { category } = req.body;
+  
+    try {
+      // Validate input
+      if (!category) {
+        return res.status(400).json({ error: 'Category is required' });
+      }
+  
+      // Update the blog's category
+      const updatedBlog = await Blog.findOneAndUpdate(
+        { _id: id }, 
+        { category },
+        { new: true } 
+      );
+  
+      if (!updatedBlog) {
+        return res.status(404).json({ error: 'Blog not found' });
+      }
+  
+      res.status(200).json(updatedBlog);
+    } catch (error) {
+        console.log(error);
+      res.status(500).json({ error: error.message });
+    }
+  };
+
 // Delete a blog
 exports.deleteBlog = async (req, res) => {
   try {
