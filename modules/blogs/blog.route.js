@@ -8,6 +8,7 @@ const {
   updateContentFields,
   updateSpecificFields,
   uploadsImage,
+  deleteContentAtIndex
 } = require("../blogs/blog.controller");
 // const { authenticate } = require("../middlewares/authMiddleware");
 // const { uploads } = require("../config/SingleMuler.config");
@@ -24,6 +25,7 @@ router.post('/createblog', createBlog);
 router.get('/blogGet/:id', getBlogById);
 router.patch('/updateHeroSection/:id', updateSpecificFields);
 router.patch('/updateContent/:id/:contentID', updateContentFields);
+router.delete('/deleteContent/:id/:contentID', deleteContentAtIndex);
 router.delete('/blogDelete/:id', deleteBlog);
 router.get('/allblogs', getAllBlogs);
 
