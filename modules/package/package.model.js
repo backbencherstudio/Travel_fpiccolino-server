@@ -26,22 +26,50 @@ const packageSchema = new mongoose.Schema(
     },
     includeItems: [
       {
-        type: String,
+        name: {
+          type: String,
+        },
+        text: {
+          type: String,
+        },
       },
     ],
     notIncludeItems: [
       {
-        type: String,
+        name: {
+          type: String,
+        },
+        text: {
+          type: String,
+        },
       },
     ],
     bookedFlights: [
       {
-        flightFrom: String,
-        flightTo: String,
-        departureTime: Date,
-        arrivalTime: Date,
-        breakTime: Number,
-        price: Number,
+        flightFrom: {
+          type: String,
+          required: true,
+        },
+        flightTo: {
+          type: String,
+          required: true,
+        },
+        departureTime: {
+          type: Date,
+          required: true,
+        },
+        arrivalTime: {
+          type: Date,
+          required: true,
+        },
+        breakTime: {
+          type: Date,
+          required: false,
+        },
+        price: {
+          type: Number,
+          required: true,
+        },
       },
     ],
     insurance: [
