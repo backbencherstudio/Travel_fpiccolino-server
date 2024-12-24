@@ -6,7 +6,7 @@ const session = require("express-session");
 
 const cookieParser = require("cookie-parser");
 const user = require("./modules/users/users.routes");
-const blog = require("./modules/blog/blogs.routes");
+const blog = require("./modules/blogs/blog.route");
 const package = require("./modules/package/package.routes");
 const category = require("./modules/category/category.routes");
 
@@ -55,9 +55,10 @@ app.use(( req, res, next) => {
 
 app.use((err, req, res, next) => {
   
-  res.status(500).json({
-    message: err,
-  });
+  // res.status(500).json({
+  //   message: err,
+  // });
+  throw err
 });
 
 module.exports = app;
