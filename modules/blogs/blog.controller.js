@@ -87,11 +87,12 @@ exports.updateBlog = async (req, res) => {
 // Update specific fields in a blog
 exports.updateSpecificFields = async (req, res) => {
   try {
-    const { oldImage, UpdatedImage, text, mainHeading, mainSubHeading } = req.body;
+    const { oldImage, UpdatedImage, text, mainHeading, mainSubHeading, header } = req.body;
     const mainImage = UpdatedImage || oldImage;
 
     const updatedData = {
       headerImg: mainImage,
+      header,
       text,
       mainHeading,
       mainSubHeading,
@@ -150,6 +151,35 @@ exports.updateContentFields = async (req, res) => {
     console.error(error);
     res.status(500).json({ message: "Internal server error", error });
   }
+};
+
+exports.deleteContentAtIndex = async (req, res) => {
+    try {
+        const {  id, contentID } = req.params; // Expect blogId and contentListIndex in URL params
+
+        // Find the blog by its ID
+        const blog = await Blog.findById(id);
+        
+        if (!blog) {
+            return res.status(404).json({ message: 'Blog not found' });
+        }
+
+        // Check if contentListIndex is valid
+        if (contentID < 0 || contentID >= blog.contentList.length) {
+            return res.status(400).json({ message: 'Invalid index' });
+        }
+
+        // Remove the item at the given index from contentList
+        blog.contentList.splice(contentID, 1);
+
+        // Save the updated blog object
+        await blog.save();
+
+        return res.status(200).json({ message: 'Content deleted successfully', blog });
+    } catch (error) {
+        console.error(error);
+        return res.status(500).json({ message: 'Something went wrong', error });
+    }
 };
 
 // Delete a blog
