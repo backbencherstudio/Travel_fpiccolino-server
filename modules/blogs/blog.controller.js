@@ -155,7 +155,7 @@ exports.updateContentFields = async (req, res) => {
 
 exports.deleteContentAtIndex = async (req, res) => {
     try {
-        const {  id, contentID } = req.params; // Expect blogId and contentListIndex in URL params
+        const {  id, contentID } = req.params;  
 
         // Find the blog by its ID
         const blog = await Blog.findById(id);
