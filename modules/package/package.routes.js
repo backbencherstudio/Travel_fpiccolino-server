@@ -20,4 +20,6 @@ router.put("/:id", upload.array("imageUrl"), updatePackage);
 
 router.delete("/:id", deletePackage);
 
+
+
 module.exports = router;
