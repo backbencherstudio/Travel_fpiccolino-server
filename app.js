@@ -41,9 +41,9 @@ app.use("/package", package);
 app.use("/blogs", blog);
 
 
-app.use((req, res, next) => {
+app.use(( req, res, next) => {
   res.status.json({
-    message: "404! Route is not found",
+    message: "404! Route is not found"
   });
 });
 
@@ -51,6 +51,7 @@ app.use((req, res, next) => {
 
 
 app.use((err, req, res, next) => {
+  
   res.status(500).json({
     message: err,
   });
