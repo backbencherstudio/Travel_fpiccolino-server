@@ -5,22 +5,28 @@ const session = require("express-session");
 const cookieParser = require("cookie-parser");
 const user = require("./modules/users/users.routes");
 const blog = require("./modules/blog/blogs.routes");
-const package = require("./modules/package/package.routes")
+const package = require("./modules/package/package.routes");
+const category = require("./modules/category/category.routes");
 
-const path = require('path');
+const path = require("path");
 
 const app = express();
 
-app.use(cors({
-  origin: ['http://localhost:5173', 'http://localhost:5174', 'http://10.0.2.2:8081'], 
-  credentials: true, 
-}));
+app.use(
+  cors({
+    origin: [
+      "http://localhost:5173",
+      "http://localhost:5174",
+      "http://10.0.2.2:8081",
+    ],
+    credentials: true,
+  })
+);
 
 app.use(express.urlencoded({ extended: true }));
 app.use(express.json());
 app.use(morgan("dev"));
 app.use("/uploads", express.static(path.join(__dirname, "uploads")));
-
 
 app.use(cookieParser());
 // app.use("/uploads", express.static("uploads"));
@@ -34,12 +40,10 @@ app.use(
   })
 );
 
-
-
 app.use("/users", user);
 app.use("/package", package);
 app.use("/blogs", blog);
-
+app.use("/category", category);
 
 app.use((req, res, next) => {
   res.status.json({
@@ -47,14 +51,10 @@ app.use((req, res, next) => {
   });
 });
 
-
-
-
 app.use((err, req, res, next) => {
   res.status(500).json({
     message: err,
   });
-  
 });
 
 module.exports = app;
