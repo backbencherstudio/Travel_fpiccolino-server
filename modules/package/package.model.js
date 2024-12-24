@@ -11,7 +11,7 @@ const packageSchema = new mongoose.Schema(
       required: true,
     },
     tourDate: {
-      type: Date,
+      type: Date ,
       required: true,
     },
     tourDuration: {
@@ -48,24 +48,22 @@ const packageSchema = new mongoose.Schema(
       {
         flightFrom: {
           type: String,
-          required: true,
         },
         flightTo: {
           type: String,
-          required: true,
         },
         departureTime: {
-          type: Date,
-          required: true,
+          type: String,
         },
         arrivalTime: {
-          type: Date,
-          required: true,
+          type: String,
         },
         breakTime: {
-          type: Date,
-          required: false,
+          type: String,
         },
+
+        flightClass: { type: String },
+
         price: {
           type: Number,
           required: true,
