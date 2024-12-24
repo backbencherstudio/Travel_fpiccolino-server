@@ -7,9 +7,8 @@ const {
 
 const router = express.Router();
 
-router.post("/", createCategory);
-
 router.get("/", getAllCategories);
+router.post("/", createCategory);
 
 // router.get("/:id", getPackageById);
 
