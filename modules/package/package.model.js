@@ -48,24 +48,22 @@ const packageSchema = new mongoose.Schema(
       {
         flightFrom: {
           type: String,
-          // required: true,
         },
         flightTo: {
           type: String,
-          // required: true,
         },
         departureTime: {
-          type: Date,
-          // required: true,
+          type: String,
         },
         arrivalTime: {
-          type: Date,
-          // required: true,
+          type: String,
         },
         breakTime: {
-          type: Date,
-          // required: false,
+          type: String,
         },
+
+        flightClass: { type: String },
+
         price: {
           type: Number,
           // required: true,
@@ -85,7 +83,8 @@ const packageSchema = new mongoose.Schema(
         // enum: ["All inclusive", "Custom", "Budget", "Luxury"],
       },
     ],
-    imageUrl: [
+
+    images: [
       {
         type: String,
       },

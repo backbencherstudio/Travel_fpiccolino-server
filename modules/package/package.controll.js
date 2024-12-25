@@ -3,28 +3,33 @@ const Package = require("./package.model");
 
 
 const createPackage = async (req, res) => {
+  // console.log(req.body)
+  // console.log(req.files)
+
   try {
     const packageData = req.body;
 
     console.log(8, packageData);  
 
     if (req.files && req.files.length > 0) {
-      packageData.imageUrl = req.files.map(
-        (file) => `/uploads/${file.filename}`
-      );
+      packageData.images = req.files.map((file) => `/uploads/${file.filename}`);
     } else {
-      packageData.imageUrl = [];
+      packageData.images = [];
     }
 
     const newPackage = new Package(packageData);
 
     await newPackage.save();
 
+    // res.send("done");
+
     res.status(201).json({
       message: "Package created successfully",
+
       package: {
         ...newPackage.toObject(),
-        imageUrl: newPackage.imageUrl.map((path) => getImageUrl(path)), //`${process.env.APP_URL}${path}`
+
+        imageUrl: newPackage.images.map((path) => getImageUrl(path)), //`${process.env.APP_URL}${path}`
       },
 
     });
@@ -108,7 +113,7 @@ const updatePackage = async (req, res) => {
       packageId,
       updatedData,
       { new: true }
-    );''
+    );
     if (!updatedPackage) {
       return res.status(404).json({ message: "Package not found" });
     }
