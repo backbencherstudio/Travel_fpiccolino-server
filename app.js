@@ -4,16 +4,13 @@ const cors = require("cors");
 const session = require("express-session");
 
 const cookieParser = require("cookie-parser");
-const user = require("./modules/users/users.routes");
 
-const package = require("./modules/package/package.routes");
+const user = require("./modules/users/users.routes");
 const blogss = require("./modules/blogs/blog.route");
 const subscriber = require("./modules/subscriber/subscriber.routes");
 const newsletter = require("./modules/newsletter/newsletter.routes");
-
 const package = require("./modules/package/package.routes");
 const category = require("./modules/category/category.routes");
-const blogss = require("./modules/blogs/blog.route");
 const contact = require("./modules/contact/contact.route");
 const path = require("path");
 
