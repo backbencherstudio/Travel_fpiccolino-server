@@ -16,9 +16,7 @@ const {
 const { upload } = require("../../config/Multer.config");
 const router = express.Router();
 
-/**
- * Swagger documentation remains unchanged.
- */
+
 
 // Blog routes
 router.post('/uploads', upload.array("images"), uploadsImage);
