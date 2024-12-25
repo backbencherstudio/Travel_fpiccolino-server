@@ -8,11 +8,11 @@ const createPackage = async (req, res) => {
 
   try {
     const packageData = req.body;
-
-    console.log(8, packageData);  
-
+   //----------
     if (req.files && req.files.length > 0) {
-      packageData.images = req.files.map((file) => `/uploads/${file.filename}`);
+      packageData.images = req.files.map(
+        (file) => `/uploads/${file.filename}`
+      );
     } else {
       packageData.images = [];
     }
