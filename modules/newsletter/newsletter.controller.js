@@ -1,5 +1,4 @@
-const { sendEmail } = require("../../util/otpUtils");
-const Subscriber = require("./newsletter.model");
+const Subscriber = require("./../subscriber/subscriber.model");
 
 const sendNewsletter = async (req, res) => {
   try {
