@@ -6,9 +6,9 @@ const session = require("express-session");
 
 const cookieParser = require("cookie-parser");
 const user = require("./modules/users/users.routes");
-
-const package = require("./modules/package/package.routes")
-const blogss = require("./modules/blogs/blog.route")
+const blog = require("./modules/blogs/blog.route");
+const package = require("./modules/package/package.routes");
+const category = require("./modules/category/category.routes");
 
 const path = require("path");
 
@@ -44,19 +44,22 @@ app.use(
 
 app.use("/users", user);
 app.use("/package", package);
-app.use("/api/blogs", blogss);
+app.use("/blogs", blog);
+app.use("/category", category);
 
 app.use(( req, res, next) => {
-  res.status.json({
+  res.status(400).json({
     message: "404! Route is not found"
   });
+ 
 });
 
 app.use((err, req, res, next) => {
   
-  res.status(500).json({
-    message: err,
-  });
+  // res.status(500).json({
+  //   message: err,
+  // });
+  throw err
 });
 
 module.exports = app;
