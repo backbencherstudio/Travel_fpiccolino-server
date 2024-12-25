@@ -2,8 +2,8 @@ const { getImageUrl } = require("../../util/image_path");
 const Package = require("./package.model");
 
 const createPackage = async (req, res) => {
-  // console.log(req.body)
-  // console.log(req.files)
+  console.log(req.body)
+  console.log(req.files)
 
   try {
     const packageData = req.body;
@@ -25,9 +25,8 @@ const createPackage = async (req, res) => {
       message: "Package created successfully",
 
       package: {
-        ...newPackage.toObject(),
-
-        imageUrl: newPackage.images.map((path) => getImageUrl(path)), //`${process.env.APP_URL}${path}`
+        ...newPackage?.toObject(),
+        imageUrl: newPackage?.images?.map((path) => getImageUrl(path)), //`${process.env.APP_URL}${path}`
       },
     });
   } catch (error) {
