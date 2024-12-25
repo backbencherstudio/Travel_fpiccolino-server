@@ -3,7 +3,7 @@ const {
   createSubscriber,
   getAllSubscriber,
   deleteSubscriber,
-} = require("./subscriber.controller");
+} = require("../subscriber/subscriber.controller");
 
 const router = express.Router();
 

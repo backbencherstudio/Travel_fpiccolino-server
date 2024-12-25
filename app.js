@@ -4,16 +4,12 @@ const cors = require("cors");
 const session = require("express-session");
 
 const cookieParser = require("cookie-parser");
-
 const user = require("./modules/users/users.routes");
-const blogss = require("./modules/blogs/blog.route");
 const subscriber = require("./modules/subscriber/subscriber.routes");
 const newsletter = require("./modules/newsletter/newsletter.routes");
-const payment = require("./modules/payment/payment.routes");
-const transaction = require("./modules/transaction/transaction.routes");
 const package = require("./modules/package/package.routes");
-
 const category = require("./modules/category/category.routes");
+const blogss = require("./modules/blogs/blog.route");
 const contact = require("./modules/contact/contact.route");
 const path = require("path");
 
@@ -26,7 +22,6 @@ app.use(
       "http://localhost:5174",
       "http://10.0.2.2:8081",
     ],
-    methods: ["GET", "POST", "DELETE", "PUT", "PATCH"],
     credentials: true,
   })
 );
@@ -50,16 +45,12 @@ app.use(
 
 app.use("/users", user);
 app.use("/package", package);
-app.use("/category", category);
 app.use("/api/blogs", blogss);
-app.use("/api/contact", contact);
 app.use("/api/subscriber", subscriber);
 app.use("/api/newsletter", newsletter);
-app.use("/api/payment", payment);
-app.use("/api/transaction", transaction);
 
 app.use((req, res, next) => {
-  res.status(400).json({
+  res.status.json({
     message: "404! Route is not found",
   });
 });
