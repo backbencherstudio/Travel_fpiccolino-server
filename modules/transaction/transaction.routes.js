@@ -7,8 +7,7 @@ const {
 
 const router = express.Router();
 
-router.get("/", getAllSubscriber);
-router.post("/", createSubscriber);
-router.delete("/:id", deleteSubscriber);
+router.get("/", getAllTransaction);
+router.delete("/:id", deleteTransaction);
 
 module.exports = router;
