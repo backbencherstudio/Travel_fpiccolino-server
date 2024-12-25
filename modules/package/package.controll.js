@@ -6,11 +6,11 @@ const createPackage = async (req, res) => {
     const packageData = req.body;
    //----------
     if (req.files && req.files.length > 0) {
-      packageData.imageUrl = req.files.map(
+      packageData.images = req.files.map(
         (file) => `/uploads/${file.filename}`
       );
     } else {
-      packageData.imageUrl = [];
+      packageData.images = [];
     }
 
     const newPackage = new Package(packageData);
@@ -21,7 +21,7 @@ const createPackage = async (req, res) => {
       package: {
         ...newPackage.toObject(),
 
-        imageUrl: newPackage.imageUrl.map((path) => getImageUrl(path)), //`${process.env.APP_URL}${path}`
+        imageUrl: newPackage.images.map((path) => getImageUrl(path)), //`${process.env.APP_URL}${path}`
       },
     });
   } catch (error) {
