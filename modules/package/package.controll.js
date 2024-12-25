@@ -3,38 +3,27 @@ const Package = require("./package.model");
 
 
 const createPackage = async (req, res) => {
-  // console.log(req.body)
-  // console.log(req.files)
-
   try {
     const packageData = req.body;
-   //----------
+    let images = [];
     if (req.files && req.files.length > 0) {
-      packageData.images = req.files.map(
-        (file) => `/uploads/${file.filename}`
-      );
-    } else {
-      packageData.images = [];
-    }
+      images = req.files.map((file) => `/uploads/${file.filename}`); // Correctly map the file paths
+    } 
 
+    packageData.images = images;
+    console.log(18,packageData);
+
+    // Create a new package instance
     const newPackage = new Package(packageData);
-
     await newPackage.save();
-
-    // res.send("done");
 
     res.status(201).json({
       message: "Package created successfully",
-
       package: {
         ...newPackage.toObject(),
-
-        imageUrl: newPackage.images.map((path) => getImageUrl(path)), //`${process.env.APP_URL}${path}`
+        imageUrl: newPackage?.images?.map((path) => getImageUrl(path)),
       },
-
     });
-
-
   } catch (error) {
     res.status(400).json({
       message: "Error creating package",
@@ -42,6 +31,10 @@ const createPackage = async (req, res) => {
     });
   }
 };
+
+
+
+
 
 // const createPackage = async (req, res) => {
 //   try {

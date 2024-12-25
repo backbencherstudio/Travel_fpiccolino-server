@@ -4,24 +4,24 @@ const packageSchema = new mongoose.Schema(
   {
     tourName: {
       type: String,
-      // required: true,
+      required: true,
     },
     tourDescription: {
       type: String,
-      // required: true,
+      required: true,
     },
     tourDate: {
       type: Date,
-      // required: true,
+      required: true,
     },
     tourDuration: {
       nights: {
         type: Number,
-        // required: true,
+        required: true,
       },
       days: {
         type: Number,
-        // required: true,
+        required: true,
       },
     },
     includeItems: [
@@ -48,30 +48,25 @@ const packageSchema = new mongoose.Schema(
       {
         flightFrom: {
           type: String,
-      
         },
         flightTo: {
           type: String,
-    
         },
         departureTime: {
-          type: Date,
-       
+          type: String,
         },
         arrivalTime: {
-          type: Date,
-     
+          type: String,
         },
         breakTime: {
-          type: Date,
-    
+          type: String,
         },
 
         flightClass: { type: String },
 
         price: {
           type: Number,
-      
+          required: true,
         },
       },
     ],
@@ -86,8 +81,10 @@ const packageSchema = new mongoose.Schema(
       {
         type: String,
         enum: ["All inclusive", "Custom", "Budget", "Luxury"],
+        default : "All inclusive"
       },
     ],
+
     images: [
       {
         type: String,
