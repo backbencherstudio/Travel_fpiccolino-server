@@ -6,11 +6,14 @@ const session = require("express-session");
 const cookieParser = require("cookie-parser");
 
 const user = require("./modules/users/users.routes");
-const blog = require("./modules/blog/blogs.routes");
+const blogs = require("./modules/blogs/blog.route");
 const package = require("./modules/package/package.routes");
-
+const subscriber = require("./modules/subscriber/subscriber.routes")
 const category = require("./modules/category/category.routes");
 const contact = require("./modules/contact/contact.route");
+const newsletter = require("./modules/newsletter/newsletter.routes")
+const payment = require("./modules/payment/payment.routes")
+const transaction = require("./modules/transaction/transaction.routes")
 const path = require("path");
 
 const app = express();
@@ -47,7 +50,7 @@ app.use(
 app.use("/users", user);
 app.use("/package", package);
 app.use("/category", category);
-app.use("/api/blogs", blogss);
+app.use("/api/blogs", blogs);
 app.use("/api/contact", contact);
 app.use("/api/subscriber", subscriber);
 app.use("/api/newsletter", newsletter);

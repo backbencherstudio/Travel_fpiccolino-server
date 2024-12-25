@@ -3,7 +3,7 @@ const { createCheckoutSession } = require("./../../util/stripeUtil");
 const { stripeWebhook } = require("./../../util/stripeUtil");
 
 const makePayment = async (req, res) => {
-  const { package_name, amount } = req.body;
+  const { package_name, amount, order_id } = req.body;
   try {
     const session = await createCheckoutSession({ name: package_name, amount });
 
