@@ -10,6 +10,10 @@ const package = require("./modules/package/package.routes");
 const blogss = require("./modules/blogs/blog.route");
 const subscriber = require("./modules/subscriber/subscriber.routes");
 
+const package = require("./modules/package/package.routes");
+const category = require("./modules/category/category.routes");
+const blogss = require("./modules/blogs/blog.route");
+const contact = require("./modules/contact/contact.route");
 const path = require("path");
 
 const app = express();
