@@ -6,15 +6,11 @@ const session = require("express-session");
 
 const cookieParser = require("cookie-parser");
 const user = require("./modules/users/users.routes");
-<<<<<<<<< Temporary merge branch 1
 
 const package = require("./modules/package/package.routes")
 const blogss = require("./modules/blogs/blog.route")
-=========
-const blog = require("./modules/blog/blogs.routes");
-const package = require("./modules/package/package.routes");
+
 const category = require("./modules/category/category.routes");
->>>>>>>>> Temporary merge branch 2
 
 const path = require("path");
 
@@ -50,12 +46,9 @@ app.use(
 
 app.use("/users", user);
 app.use("/package", package);
-<<<<<<<<< Temporary merge branch 1
 app.use("/api/blogs", blogss);
-=========
-app.use("/blogs", blog);
+
 app.use("/category", category);
->>>>>>>>> Temporary merge branch 2
 
 app.use(( req, res, next) => {
   res.status.json({
