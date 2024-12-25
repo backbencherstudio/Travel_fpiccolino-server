@@ -1,4 +1,3 @@
-
 const express = require("express");
 const morgan = require("morgan");
 const cors = require("cors");
@@ -7,8 +6,9 @@ const session = require("express-session");
 const cookieParser = require("cookie-parser");
 const user = require("./modules/users/users.routes");
 
-const package = require("./modules/package/package.routes")
-const blogss = require("./modules/blogs/blog.route")
+const package = require("./modules/package/package.routes");
+const blogss = require("./modules/blogs/blog.route");
+const subscriber = require("./modules/subscriber/subscriber.routes");
 
 const path = require("path");
 
@@ -45,15 +45,15 @@ app.use(
 app.use("/users", user);
 app.use("/package", package);
 app.use("/api/blogs", blogss);
+app.use("/api/subscriber", subscriber);
 
-app.use(( req, res, next) => {
+app.use((req, res, next) => {
   res.status.json({
-    message: "404! Route is not found"
+    message: "404! Route is not found",
   });
 });
 
 app.use((err, req, res, next) => {
-  
   res.status(500).json({
     message: err,
   });
