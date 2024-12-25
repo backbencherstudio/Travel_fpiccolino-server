@@ -261,6 +261,38 @@ exports.filterBlogsByCategory = async (req, res) => {
   }
 };
 
+exports.getAllBlogsAndCategoryCount = async (req, res) => {
+  try {
+    // Fetch category-wise count
+    const categoryCounts = await Blog.aggregate([
+      {
+        $group: {
+          _id: "$category",
+          count: { $sum: 1 },
+        },
+      },
+      { $sort: { count: -1 } }, // Optional: Sort by count descending
+    ]);
+
+    // Format the response to match the desired format
+    const categories = categoryCounts.map((item) => ({
+      [item._id]: item.count,
+    }));
+
+    // Construct the response
+    res.status(200).json({
+      Categories: categories,
+    });
+  } catch (error) {
+    console.error("Error fetching category counts:", error);
+    res.status(500).json({
+      success: false,
+      message: "Failed to fetch category counts",
+      error: error.message,
+    });
+  }
+};
+
 
 function deleteImage(imagePath) {
   const uploadsFolder = path.resolve(__dirname, "..", "..", "uploads");

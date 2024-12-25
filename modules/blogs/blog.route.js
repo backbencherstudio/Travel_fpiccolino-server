@@ -10,7 +10,8 @@ const {
   uploadsImage,
   deleteContentAtIndex,
   UpdateCategory,
-  filterBlogsByCategory
+  filterBlogsByCategory,
+  getAllBlogsAndCategoryCount
 } = require("../blogs/blog.controller");
 // const { authenticate } = require("../middlewares/authMiddleware");
 // const { uploads } = require("../config/SingleMuler.config");
@@ -30,5 +31,6 @@ router.delete('/deleteContent/:id/:contentID', deleteContentAtIndex);
 router.delete('/blogDelete/:id', deleteBlog);
 router.get('/allblogs', getAllBlogs);
 router.get('/categorywise', filterBlogsByCategory);
+router.get('/categoryCount', getAllBlogsAndCategoryCount);
 
 module.exports = router;
