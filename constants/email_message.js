@@ -61,8 +61,7 @@ const emailForgotPasswordOTP = (userName, email, OTP) => {
   `;
 };
 
-
- const resendRegistrationOTPEmail = (userName, email, OTP) => {
+const resendRegistrationOTPEmail = (userName, email, OTP) => {
   return `
     <div style="font-family: Arial, sans-serif; max-width: 600px; margin: auto; padding: 20px; border: 1px solid #ddd; border-radius: 10px; box-shadow: 0 4px 8px rgba(0,0,0,0.1);">
       <div style="text-align: center; margin-bottom: 20px;">
@@ -83,9 +82,28 @@ const emailForgotPasswordOTP = (userName, email, OTP) => {
   `;
 };
 
+// newsletter email
+const emailNewsletter = (email) => {
+  return `
+    <div style="font-family: Arial, sans-serif; max-width: 600px; margin: auto; padding: 20px; border: 1px solid #ddd; border-radius: 10px; box-shadow: 0 4px 8px rgba(0,0,0,0.1);">
+      <div style="text-align: center; margin-bottom: 20px;">
+        <img src="https://via.placeholder.com/150x50?text=TravelAgency" alt="TravelAgency Logo" style="max-width: 100%; height: auto;">
+      </div>
+      <h2 style="color: #007bff;">Welcome to TravelAgency!</h2>
+      <p style="color: #333; font-size: 18px;">Hi there,</p>
+      <p style="color: #333; font-size: 16px;">Thank you for subscribing to our newsletter. You will now receive the latest updates and offers from TravelAgency.</p>
+      <p style="color: #333; font-size: 16px;">Cheers,</p>
+      <p style="color: #333; font-size: 16px;">The TravelAgency Team</p>
+      <hr style="border: none; border-top: 1px solid #ddd; margin: 20px 0;">
+      <p style="color: #777; font-size: 12px; text-align: center;">This email was sent to ${email}. If you did not subscribe to TravelAgency, please disregard this email.</p>
+    </div>
+  `;
+};
+
 module.exports = {
   emailMessage,
   emailUpdateOTP,
   emailForgotPasswordOTP,
   resendRegistrationOTPEmail,
-}
+  emailNewsletter,
+};
