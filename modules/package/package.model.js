@@ -4,24 +4,24 @@ const packageSchema = new mongoose.Schema(
   {
     tourName: {
       type: String,
-      required: true,
+      // required: true,
     },
     tourDescription: {
       type: String,
-      required: true,
+      // required: true,
     },
     tourDate: {
       type: Date,
-      required: true,
+      // required: true,
     },
     tourDuration: {
       nights: {
         type: Number,
-        required: true,
+        // required: true,
       },
       days: {
         type: Number,
-        required: true,
+        // required: true,
       },
     },
     includeItems: [
