@@ -9,6 +9,7 @@ const user = require("./modules/users/users.routes");
 const package = require("./modules/package/package.routes");
 const blogss = require("./modules/blogs/blog.route");
 const subscriber = require("./modules/subscriber/subscriber.routes");
+const newsletter = require("./modules/newsletter/newsletter.routes");
 
 const path = require("path");
 
@@ -46,6 +47,7 @@ app.use("/users", user);
 app.use("/package", package);
 app.use("/api/blogs", blogss);
 app.use("/api/subscriber", subscriber);
+app.use("/api/newsletter", newsletter);
 
 app.use((req, res, next) => {
   res.status.json({
