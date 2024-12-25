@@ -4,7 +4,7 @@ const Package = require("./package.model");
 const createPackage = async (req, res) => {
   try {
     const packageData = req.body;
-
+   //----------
     if (req.files && req.files.length > 0) {
       packageData.imageUrl = req.files.map(
         (file) => `/uploads/${file.filename}`
