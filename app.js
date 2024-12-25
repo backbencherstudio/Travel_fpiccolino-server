@@ -6,6 +6,7 @@ const session = require("express-session");
 const cookieParser = require("cookie-parser");
 
 const user = require("./modules/users/users.routes");
+
 const blogss = require("./modules/blogs/blog.route");
 const subscriber = require("./modules/subscriber/subscriber.routes");
 const newsletter = require("./modules/newsletter/newsletter.routes");
@@ -13,6 +14,14 @@ const package = require("./modules/package/package.routes");
 
 const category = require("./modules/category/category.routes");
 const contact = require("./modules/contact/contact.route");
+
+const package = require("./modules/package/package.routes")
+const blogss = require("./modules/blogs/blog.route")
+
+const blog = require("./modules/blog/blogs.routes");
+const package = require("./modules/package/package.routes");
+const category = require("./modules/category/category.routes");
+
 const path = require("path");
 
 const app = express();
@@ -48,11 +57,17 @@ app.use(
 
 app.use("/users", user);
 app.use("/package", package);
+
 app.use("/category", category);
 app.use("/api/blogs", blogss);
 app.use("/api/contact", contact);
 app.use("/api/subscriber", subscriber);
 //app.use("/api/newsletter", newsletter);
+
+app.use("/api/blogs", blogss);
+
+app.use("/blogs", blog);
+app.use("/category", category);
 
 app.use((req, res, next) => {
   res.status(400).json({
