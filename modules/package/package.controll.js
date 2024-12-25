@@ -2,35 +2,35 @@ const { getImageUrl } = require("../../util/image_path");
 const Package = require("./package.model");
 
 
-const createPackage = async (req, res) => {
-  try {
-    const packageData = req.body;
-    let images = [];
-    if (req.files && req.files.length > 0) {
-      images = req.files.map((file) => `/uploads/${file.filename}`); // Correctly map the file paths
-    } 
+// const createPackage = async (req, res) => {
+//   try {
+//     const packageData = req.body;
+//     let images = [];
+//     if (req.files && req.files.length > 0) {
+//       images = req.files.map((file) => `/uploads/${file.filename}`); // Correctly map the file paths
+//     } 
 
-    packageData.images = images;
-    console.log(18,packageData);
+//     packageData.images = images;
+//     console.log(18,packageData);
 
-    // Create a new package instance
-    const newPackage = new Package(packageData);
-    await newPackage.save();
-
-    res.status(201).json({
-      message: "Package created successfully",
-      package: {
-        ...newPackage.toObject(),
-        imageUrl: newPackage?.images?.map((path) => getImageUrl(path)),
-      },
-    });
-  } catch (error) {
-    res.status(400).json({
-      message: "Error creating package",
-      error: error.message,
-    });
-  }
-};
+//     // Create a new package instance
+//     const newPackage = new Package(packageData);
+//     await newPackage.save();
+//   res.send("done")
+//     // res.status(201).json({
+//     //   message: "Package created successfully",
+//     //   package: {
+//     //     ...newPackage.toObject(),
+//     //     imageUrl: newPackage?.images?.map((path) => getImageUrl(path)),
+//     //   },
+//     // });
+//   } catch (error) {
+//     res.status(400).json({
+//       message: "Error creating package",
+//       error: error.message,
+//     });
+//   }
+// };
 
 
 
@@ -69,6 +69,52 @@ const createPackage = async (req, res) => {
 //     });
 //   }
 // };
+
+
+const createPackage = async (req, res) => {
+  try {
+    const packageData = req.body;
+    let images = [];
+
+    // Handle uploaded images
+    if (req.files && req.files.length > 0) {
+      images = req.files.map((file) => `/uploads/${file.filename}`);
+    }
+
+    // Parse JSON fields that are sent as strings
+    if (packageData.tourDuration) {
+      packageData.tourDuration = JSON.parse(packageData.tourDuration);
+    }
+    if (packageData.includeItems) {
+      packageData.includeItems = JSON.parse(packageData.includeItems);
+    }
+    if (packageData.notIncludeItems) {
+      packageData.notIncludeItems = JSON.parse(packageData.notIncludeItems);
+    }
+    if (packageData.bookedFlights) {
+      packageData.bookedFlights = JSON.parse(packageData.bookedFlights);
+    }
+
+    packageData.images = images;
+
+    // Create a new package instance
+    const newPackage = new Package(packageData);
+    await newPackage.save();
+
+    res.status(201).json({
+      message: "Package created successfully",
+      package: {
+        ...newPackage.toObject(),
+        imageUrl: newPackage?.images?.map((path) => getImageUrl(path)),
+      },
+    });
+  } catch (error) {
+    res.status(400).json({
+      message: "Error creating package",
+      error: error.message,
+    });
+  }
+};
 
 
 
