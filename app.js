@@ -44,8 +44,9 @@ app.use(
 
 app.use("/users", user);
 app.use("/package", package);
-
 app.use("/category", category);
+app.use("/api/blogs", blogss);
+app.use("/api/contact", contact);
 
 app.use(( req, res, next) => {
   res.status(400).json({
