@@ -66,7 +66,7 @@ const packageSchema = new mongoose.Schema(
 
         price: {
           type: Number,
-          required: true,
+          // required: true,
         },
       },
     ],

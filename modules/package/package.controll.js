@@ -1,15 +1,15 @@
 const { getImageUrl } = require("../../util/image_path");
 const Package = require("./package.model");
 
-
 const createPackage = async (req, res) => {
+  // console.log(req.body)
+  // console.log(req.files)
+
   try {
     const packageData = req.body;
-     console.log(req.file)
-    console.log(req.files)
-    if (req.file && req.files.length > 0) {
-      console.log(req.files)
-      packageData.images = req.files.map((file) => getImageUrl(`/uploads/${file.filename}`));
+
+    if (req.files && req.files.length > 0) {
+      packageData.images = req.files.map((file) => `/uploads/${file.filename}`);
     } else {
       packageData.images = [];
     }
@@ -17,17 +17,24 @@ const createPackage = async (req, res) => {
     const newPackage = new Package(packageData);
     await newPackage.save();
 
-    res
-      .status(201)
-      .json({ message: "Package created successfully", package: newPackage });
+    // res.send("done");
+
+    res.status(201).json({
+      message: "Package created successfully",
+
+      package: {
+        ...newPackage.toObject(),
+
+        imageUrl: newPackage.images.map((path) => getImageUrl(path)), //`${process.env.APP_URL}${path}`
+      },
+    });
   } catch (error) {
-    res
-      .status(400)
-      .json({ message: "Error creating package", error: error.message });
+    res.status(400).json({
+      message: "Error creating package",
+      error: error.message,
+    });
   }
 };
-
-
 
 const getAllPackages = async (req, res) => {
   try {
@@ -63,7 +70,7 @@ const updatePackage = async (req, res) => {
       packageId,
       updatedData,
       { new: true }
-    );''
+    );
     if (!updatedPackage) {
       return res.status(404).json({ message: "Package not found" });
     }
