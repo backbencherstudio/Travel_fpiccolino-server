@@ -293,6 +293,61 @@ exports.getAllBlogsAndCategoryCount = async (req, res) => {
   }
 };
 
+exports.getPopularBlogs = async (req, res) => {
+  try {
+    // Find all blogs where Populer is true
+    const popularBlogs = await Blog.find({ Populer: true });
+
+    // Check if there are any popular blogs
+    if (popularBlogs.length === 0) {
+      return res.status(404).json({ message: 'No popular blogs found' });
+    }
+
+    // Send the popular blogs in the response
+    return res.status(200).json(popularBlogs);
+  } catch (error) {
+    console.error('Error fetching popular blogs:', error);
+    return res.status(500).json({ message: 'Server error' });
+  }
+};
+exports.getBlogsGroupedByCategory = async (req, res) => {
+  try {
+    // Fetch all blogs from the database
+    const blogs = await Blog.find().lean();
+
+    // Group blogs by category
+    const groupedBlogs = blogs.reduce((result, blog) => {
+      const category = blog.category || "Uncategorized"; // Default category if none is provided
+      const heroSection = blog.heroSection[0] || ""; // Extract blog name
+      const blogDescription = blog.info || "No Description"; // Extract blog description
+      const createdAt = blog.createdAt; // Extract creation date
+      const tag = blog.tag || "No Tag"; // Extract tag or default
+      id = blog._id;
+
+      // Initialize the category array if it doesn't exist
+      if (!result[category]) {
+        result[category] = [];
+      }
+
+      // Add blog details to the category
+      result[category].push({
+        heroSection: heroSection,
+        blog_description: blogDescription,
+        created_at: createdAt,
+        tag,
+        id
+      });
+
+      return result;
+    }, {});
+
+    return res.status(200).json(groupedBlogs) ;
+  } catch (error) {
+    console.error("Error fetching blogs:", error);
+    throw error;
+  }
+};
+
 
 function deleteImage(imagePath) {
   const uploadsFolder = path.resolve(__dirname, "..", "..", "uploads");
