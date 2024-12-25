@@ -12,7 +12,7 @@ const { fileURLToPath } = require("url");
 exports.uploadsImage = async (req, res) => {
   try {
     const files = req.files.map((file) => {
-      const dynamicPath = file.path.split("uploads\\")[1]; // Extract dynamic part after "uploads\\"
+      const dynamicPath = file.path.split("uploads\\")[1]; 
       return {
         filename: file.originalname,
         path: dynamicPath,
@@ -87,11 +87,12 @@ exports.updateBlog = async (req, res) => {
 // Update specific fields in a blog
 exports.updateSpecificFields = async (req, res) => {
   try {
-    const { oldImage, UpdatedImage, text, mainHeading, mainSubHeading } = req.body;
+    const { oldImage, UpdatedImage, text, mainHeading, mainSubHeading, header } = req.body;
     const mainImage = UpdatedImage || oldImage;
 
     const updatedData = {
       headerImg: mainImage,
+      header,
       text,
       mainHeading,
       mainSubHeading,
@@ -119,7 +120,7 @@ exports.updateSpecificFields = async (req, res) => {
   }
 };
 
-// Update content fields in a blog
+
 exports.updateContentFields = async (req, res) => {
   const { id, contentID } = req.params;
   const { UpdatedImage, oldImage, headings, paragraphs } = req.body;
@@ -152,7 +153,55 @@ exports.updateContentFields = async (req, res) => {
   }
 };
 
-// Delete a blog
+exports.deleteContentAtIndex = async (req, res) => {
+    try {
+        const {  id, contentID } = req.params; // Expect blogId and contentListIndex in URL params
+
+        const blog = await Blog.findById(id);
+        
+        if (!blog) {
+            return res.status(404).json({ message: 'Blog not found' });
+        }
+        if (contentID < 0 || contentID >= blog.contentList.length) {
+            return res.status(400).json({ message: 'Invalid index' });
+        }
+
+        blog.contentList.splice(contentID, 1);
+        await blog.save();
+        return res.status(200).json({ message: 'Content deleted successfully', blog });
+    } catch (error) {
+        console.error(error);
+        return res.status(500).json({ message: 'Something went wrong', error });
+    }
+};
+
+exports.UpdateCategory = async (req, res) => {
+    const { id } = req.params;
+    const { category } = req.body;
+  
+    try {
+      if (!category) {
+        return res.status(400).json({ error: 'Category is required' });
+      }
+  
+      const updatedBlog = await Blog.findOneAndUpdate(
+        { _id: id }, 
+        { category },
+        { new: true } 
+      );
+  
+      if (!updatedBlog) {
+        return res.status(404).json({ error: 'Blog not found' });
+      }
+  
+      res.status(200).json(updatedBlog);
+    } catch (error) {
+        console.log(error);
+      res.status(500).json({ error: error.message });
+    }
+  };
+
+
 exports.deleteBlog = async (req, res) => {
   try {
     const blog = await Blog.findByIdAndDelete(req.params.id);
@@ -165,7 +214,7 @@ exports.deleteBlog = async (req, res) => {
   }
 };
 
-// Get all blogs
+
 exports.getAllBlogs = async (req, res) => {
   try {
     const blogs = await Blog.find();
@@ -175,7 +224,44 @@ exports.getAllBlogs = async (req, res) => {
   }
 };
 
-// Delete an image
+exports.filterBlogsByCategory = async (req, res) => {
+  try {
+    const { category, page = 1 } = req.query;
+
+    if (!category) {
+      return res.status(400).json({
+        message: "Category is required for filtering",
+      });
+    }
+    const filter = { category };
+
+    const limit = 20; 
+    const skip = (page - 1) * limit; 
+
+    // Fetch blogs with pagination
+    const blogs = await Blog.find(filter).skip(skip).limit(limit);
+
+    // Count total blogs matching the category filter for pagination metadata
+    const totalBlogs = await Blog.countDocuments(filter);
+
+    res.status(200).json({
+      message: "Blogs filtered by category successfully",
+      blogs,
+      pagination: {
+        currentPage: parseInt(page),
+        totalPages: Math.ceil(totalBlogs / limit),
+        totalBlogs,
+      },
+    });
+  } catch (error) {
+    res.status(500).json({
+      message: "Failed to filter blogs by category",
+      error: error.message,
+    });
+  }
+};
+
+
 function deleteImage(imagePath) {
   const uploadsFolder = path.resolve(__dirname, "..", "..", "uploads");
   const filePath = path.join(uploadsFolder, imagePath);

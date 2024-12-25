@@ -2,11 +2,14 @@ const { getImageUrl } = require("../../util/image_path");
 const Package = require("./package.model");
 
 const createPackage = async (req, res) => {
+  // console.log(req.body)
+  // console.log(req.files)
+
   try {
     const packageData = req.body;
    //----------
     if (req.files && req.files.length > 0) {
-      packageData.images = req.files.map(
+      packageData.imageUrl = req.files.map(
         (file) => `/uploads/${file.filename}`
       );
     } else {
@@ -16,8 +19,11 @@ const createPackage = async (req, res) => {
     const newPackage = new Package(packageData);
     await newPackage.save();
 
+    // res.send("done");
+
     res.status(201).json({
       message: "Package created successfully",
+
       package: {
         ...newPackage.toObject(),
 
@@ -102,8 +108,7 @@ const updatePackage = async (req, res) => {
       packageId,
       updatedData,
       { new: true }
-    );
-
+    );''
     if (!updatedPackage) {
       return res.status(404).json({ message: "Package not found" });
     }
