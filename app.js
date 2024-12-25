@@ -6,7 +6,6 @@ const session = require("express-session");
 const cookieParser = require("cookie-parser");
 
 const user = require("./modules/users/users.routes");
-const blog = require("./modules/blogs/blog.route");
 const blogss = require("./modules/blogs/blog.route");
 const subscriber = require("./modules/subscriber/subscriber.routes");
 const newsletter = require("./modules/newsletter/newsletter.routes");
