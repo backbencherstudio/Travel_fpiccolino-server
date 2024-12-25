@@ -9,7 +9,7 @@ const user = require("./modules/users/users.routes");
 
 const package = require("./modules/package/package.routes")
 const blogss = require("./modules/blogs/blog.route")
-
+const contact = require("./modules/contact/contact.route")  
 const path = require("path");
 
 const app = express();
@@ -45,6 +45,7 @@ app.use(
 app.use("/users", user);
 app.use("/package", package);
 app.use("/api/blogs", blogss);
+app.use("/api/contact", contact);
 
 app.use(( req, res, next) => {
   res.status.json({
