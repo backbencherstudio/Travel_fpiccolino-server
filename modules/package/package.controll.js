@@ -71,7 +71,7 @@ const Package = require("./package.model");
 // };
 
 
-const createPackage = async (req, res) => {
+const createPackage = async (req, res) => {  
   try {
     const packageData = req.body;
     let images = [];
@@ -80,7 +80,6 @@ const createPackage = async (req, res) => {
     if (req.files && req.files.length > 0) {
       images = req.files.map((file) => `/uploads/${file.filename}`);
     }
-
     // Parse JSON fields that are sent as strings
     if (packageData.tourDuration) {
       packageData.tourDuration = JSON.parse(packageData.tourDuration);
@@ -94,10 +93,7 @@ const createPackage = async (req, res) => {
     if (packageData.bookedFlights) {
       packageData.bookedFlights = JSON.parse(packageData.bookedFlights);
     }
-
-    packageData.images = images;
-
-    // Create a new package instance
+    packageData.images = images;    
     const newPackage = new Package(packageData);
     await newPackage.save();
 
@@ -144,6 +140,8 @@ const getPackageById = async (req, res) => {
   }
 };
 
+
+
 const updatePackage = async (req, res) => {
   try {
     const packageId = req.params.id;
@@ -166,6 +164,10 @@ const updatePackage = async (req, res) => {
       .json({ message: "Error updating package", error: error.message });
   }
 };
+
+
+
+
 
 const deletePackage = async (req, res) => {
   try {
