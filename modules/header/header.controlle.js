@@ -12,7 +12,7 @@ const getAllHeaders = async (req, res) => {
 
 const getHeader = async (req, res) => {
     try {
-      const header = await Header.findOne({ pageName: req.params.pageName }); // Query using pageName
+      const header = await Header.findOne({ pageName: req.params.pageName }); 
       if (!header) {
         return res.status(404).json({ message: "Header not found" });
       }
@@ -23,15 +23,7 @@ const getHeader = async (req, res) => {
   };
   
 
-// Create a new header
-const createHeader = async (req, res) => {
-
-  console.log("hit");
-  
-
-    console.log( 29, req.body);
-    console.log( 30, req.file);
-  
+const createHeader = async (req, res) => {  
     try {
       const headerData = req.body;  
       if (headerData?.pageName) {
@@ -42,10 +34,8 @@ const createHeader = async (req, res) => {
       } else {
         headerData.image = null; 
       }
-
       const newHeader = new Header(headerData);
       await newHeader.save();
-
       res.status(201).json({
         message: "header created successfully",
         package: {
@@ -61,28 +51,22 @@ const createHeader = async (req, res) => {
     }
   };
 
-
-
   const updateHeader = async (req, res) => {
     try {
-      const headerData = req.body;
-  
+      const headerData = req.body;  
       if (req.file) {
         headerData.image = `/uploads/${req.file.filename}`;
-      }
-  
+      }  
       const updatedHeader = await Header.findOneAndUpdate(
         { pageName: headerData.pageName }, 
         headerData, 
         { new: true, runValidators: true } 
       );
-  
       if (!updatedHeader) {
         return res.status(404).json({
           message: "Header not found for the given pageName",
         });
-      }
-  
+      }  
       res.status(200).json({
         message: "Header updated successfully",
         header: {
