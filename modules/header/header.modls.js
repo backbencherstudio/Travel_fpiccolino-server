@@ -19,7 +19,7 @@ const headerSchema = new mongoose.Schema(
     pageName: {
       type: String,
       required: [true, "Page Name is required"],
-      enum: ["home", "tour", "about"],
+      enum: ["home", "tour", "about", "blog", "contact", "faq"],
     },
     descriptionOne: {
       type: String,
