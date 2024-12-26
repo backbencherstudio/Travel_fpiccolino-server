@@ -1,12 +1,13 @@
 const express = require("express");
 const {
-  getAllTransaction,
-  deleteTransaction,
-} = require("./transaction.controller");
+  createSubscriber,
+  getAllSubscriber,
+  deleteSubscriber,
+} = require("../subscriber/subscriber.controller");
 
 const router = express.Router();
 
-router.get("/", getAllTransaction);
-router.delete("/:id", deleteTransaction);
+router.get("/", getAllSubscriber);
+router.delete("/:id", deleteSubscriber);
 
 module.exports = router;

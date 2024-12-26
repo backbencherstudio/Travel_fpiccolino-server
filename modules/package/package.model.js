@@ -84,7 +84,6 @@ const packageSchema = new mongoose.Schema(
         default : "All inclusive"
       },
     ],
-
     images: [
       {
         type: String,
