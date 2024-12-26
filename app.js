@@ -11,7 +11,6 @@ const package = require("./modules/package/package.routes");
 const category = require("./modules/category/category.routes");
 const blogss = require("./modules/blogs/blog.route");
 const contact = require("./modules/contact/contact.route");
-const newsletter = require("./modules/newsletter/newsletter.routes")
 const payment = require("./modules/payment/payment.routes")
 const transaction = require("./modules/transaction/transaction.routes")
 const header = require("./modules/header/header.routes")
@@ -49,10 +48,14 @@ app.use(
 
 app.use("/users", user);
 app.use("/package", package);
+app.use("/category", category);
 app.use("/api/blogs", blogss);
+app.use("/api/contact", contact);
 app.use("/api/subscriber", subscriber);
 app.use("/api/newsletter", newsletter);
-
+app.use("/api/payment", payment);
+app.use("/api/transaction", transaction);
+app.use("/header", header)
 app.use((req, res, next) => {
   res.status.json({
     message: "404! Route is not found",
