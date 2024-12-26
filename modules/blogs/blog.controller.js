@@ -312,19 +312,18 @@ exports.getPopularBlogs = async (req, res) => {
 };
 exports.getBlogsGroupedByCategory = async (req, res) => {
   try {
-    // Fetch all blogs from the database
+    
     const blogs = await Blog.find().lean();
 
     // Group blogs by category
     const groupedBlogs = blogs.reduce((result, blog) => {
-      const category = blog.category || "Uncategorized"; // Default category if none is provided
-      const heroSection = blog.heroSection[0] || ""; // Extract blog name
-      const blogDescription = blog.info || "No Description"; // Extract blog description
-      const createdAt = blog.createdAt; // Extract creation date
-      const tag = blog.tag || "No Tag"; // Extract tag or default
+      const category = blog.category || "Uncategorized"; 
+      const heroSection = blog.heroSection[0] || ""; 
+      const blogDescription = blog.info || "No Description"; 
+      const createdAt = blog.createdAt; 
+      const tag = blog.tag || "No Tag"; 
       id = blog._id;
 
-      // Initialize the category array if it doesn't exist
       if (!result[category]) {
         result[category] = [];
       }
