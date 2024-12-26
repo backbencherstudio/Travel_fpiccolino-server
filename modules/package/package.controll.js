@@ -1,14 +1,13 @@
 const { getImageUrl } = require("../../util/image_path");
 const Package = require("./package.model");
 
-
 // const createPackage = async (req, res) => {
 //   try {
 //     const packageData = req.body;
 //     let images = [];
 //     if (req.files && req.files.length > 0) {
 //       images = req.files.map((file) => `/uploads/${file.filename}`); // Correctly map the file paths
-//     } 
+//     }
 
 //     packageData.images = images;
 //     console.log(18,packageData);
@@ -31,10 +30,6 @@ const Package = require("./package.model");
 //     });
 //   }
 // };
-
-
-
-
 
 // const createPackage = async (req, res) => {
 //   try {
@@ -69,7 +64,6 @@ const Package = require("./package.model");
 //     });
 //   }
 // };
-
 
 const createPackage = async (req, res) => {
   try {
@@ -116,33 +110,52 @@ const createPackage = async (req, res) => {
   }
 };
 
-
-
 const getAllPackages = async (req, res) => {
   try {
     const packages = await Package.find();
-    res.status(200).json(packages);
+    
+ 
+    const formattedPackages = packages.map((packageItem) => ({
+      ...packageItem.toObject(),
+      imageUrl: packageItem?.images?.map((path) => `${process.env.APP_URL}${path}`),
+    }));
+
+    res.status(200).json({
+      message: "Packages fetched successfully",
+      packages: formattedPackages,
+    });
   } catch (error) {
-    res
-      .status(500)
-      .json({ message: "Error fetching packages", error: error.message });
+    res.status(500).json({
+      message: "Error fetching packages",
+      error: error.message,
+    });
   }
 };
+
 
 const getPackageById = async (req, res) => {
   try {
     const packageId = req.params.id;
     const package = await Package.findById(packageId);
+
     if (!package) {
       return res.status(404).json({ message: "Package not found" });
     }
-    res.status(200).json(package);
+
+    // Add image URLs to the package
+    const formattedPackage = {
+      ...package.toObject(),
+      imageUrl: package?.images?.map((path) => getImageUrl(path)),
+    };
+
+    res.status(200).json(formattedPackage);
   } catch (error) {
     res
       .status(500)
       .json({ message: "Error fetching package", error: error.message });
   }
 };
+
 
 const updatePackage = async (req, res) => {
   try {
