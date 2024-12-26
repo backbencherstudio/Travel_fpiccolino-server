@@ -25,24 +25,27 @@ const getHeader = async (req, res) => {
 
 // Create a new header
 const createHeader = async (req, res) => {
-    console.log(req.body);
-    console.log(req.file); 
+
+  console.log("hit");
+  
+
+    console.log( 29, req.body);
+    console.log( 30, req.file);
   
     try {
-      const headerData = req.body;
-  
-      await Header.findOneAndDelete(headerData?.pageName);
-    
- 
+      const headerData = req.body;  
+      if (headerData?.pageName) {
+        await Header.findOneAndDelete({ pageName: headerData.pageName });
+      }
       if (req.file) {
         headerData.image = `/uploads/${req.file.filename}`;
       } else {
         headerData.image = null; 
       }
-  
+
       const newHeader = new Header(headerData);
       await newHeader.save();
-  
+
       res.status(201).json({
         message: "header created successfully",
         package: {
@@ -57,6 +60,8 @@ const createHeader = async (req, res) => {
       });
     }
   };
+
+
 
   const updateHeader = async (req, res) => {
     try {

@@ -141,6 +141,7 @@ const getPackageById = async (req, res) => {
 };
 
 
+
 const updatePackage = async (req, res) => {
   try {
     const packageId = req.params.id;
@@ -163,6 +164,7 @@ const updatePackage = async (req, res) => {
       .json({ message: "Error updating package", error: error.message });
   }
 };
+
 
 
 
