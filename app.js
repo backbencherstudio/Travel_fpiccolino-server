@@ -46,6 +46,7 @@ app.use(
 app.use("/users", user);
 app.use("/package", package);
 app.use("/api/blogs", blogss);
+app.use("/api/contact", contact);
 app.use("/api/subscriber", subscriber);
 app.use("/api/newsletter", newsletter);
 
