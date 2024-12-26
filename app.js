@@ -6,15 +6,15 @@ const session = require("express-session");
 const cookieParser = require("cookie-parser");
 
 const user = require("./modules/users/users.routes");
-const blogss = require("./modules/blogs/blog.route");
-const subscriber = require("./modules/subscriber/subscriber.routes");
-const newsletter = require("./modules/newsletter/newsletter.routes");
-const payment = require("./modules/payment/payment.routes");
-const transaction = require("./modules/transaction/transaction.routes");
+const blogs = require("./modules/blogs/blog.route");
 const package = require("./modules/package/package.routes");
-
+const subscriber = require("./modules/subscriber/subscriber.routes")
 const category = require("./modules/category/category.routes");
 const contact = require("./modules/contact/contact.route");
+const newsletter = require("./modules/newsletter/newsletter.routes")
+const payment = require("./modules/payment/payment.routes")
+const transaction = require("./modules/transaction/transaction.routes")
+const header = require("./modules/header/header.routes")
 const path = require("path");
 
 const app = express();
@@ -51,13 +51,13 @@ app.use(
 app.use("/users", user);
 app.use("/package", package);
 app.use("/category", category);
-app.use("/api/blogs", blogss);
+app.use("/api/blogs", blogs);
 app.use("/api/contact", contact);
 app.use("/api/subscriber", subscriber);
 app.use("/api/newsletter", newsletter);
 app.use("/api/payment", payment);
 app.use("/api/transaction", transaction);
-
+app.use("/header", header)
 app.use((req, res, next) => {
   res.status(400).json({
     message: "404! Route is not found",
