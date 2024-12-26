@@ -16,6 +16,10 @@ const headerSchema = new mongoose.Schema(
       required: [true, "Title is required"],
       trim: true,
     },
+    titleTwo: {
+      type: String,
+      trim: true,
+    },
     pageName: {
       type: String,
       required: [true, "Page Name is required"],
@@ -24,6 +28,10 @@ const headerSchema = new mongoose.Schema(
     descriptionOne: {
       type: String,
       required: [true, "Description is required"],
+      trim: true,
+    },
+    descriptionTwo: {
+      type: String,
       trim: true,
     },
   },
