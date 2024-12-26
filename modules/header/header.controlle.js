@@ -33,11 +33,10 @@ const createHeader = async (req, res) => {
     if (headerData?.pageName) {
       await Header.findOneAndDelete({ pageName: headerData.pageName });
     }
-
     if (req.file) {
-      headerData.image = `/uploads/${req.file.filename}`;
+      headerData.heroImage = `/uploads/${req.file.filename}`;
     } else {
-      headerData.image = null;
+      headerData.heroImage = null;
     }
 
     const newHeader = new Header(headerData);
@@ -47,7 +46,7 @@ const createHeader = async (req, res) => {
       message: "header created successfully",
       package: {
         ...newHeader.toObject(),
-        imageUrl: getImageUrl(newHeader.image),
+        imageUrl: getImageUrl(newHeader.heroImage),
       },
     });
   } catch (error) {

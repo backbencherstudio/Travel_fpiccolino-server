@@ -7,7 +7,7 @@ const headerSchema = new mongoose.Schema(
       required: [true, "Blog Details Title is required"],
       trim: true,
     },
-    image: {
+    heroImage: {
       type: String,
       // required: [true, "Hero Image File is required"],
     },
