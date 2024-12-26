@@ -14,6 +14,7 @@ const contact = require("./modules/contact/contact.route");
 const newsletter = require("./modules/newsletter/newsletter.routes")
 const payment = require("./modules/payment/payment.routes")
 const transaction = require("./modules/transaction/transaction.routes")
+const header = require("./modules/header/header.routes")
 const path = require("path");
 
 const app = express();
@@ -56,7 +57,7 @@ app.use("/api/subscriber", subscriber);
 app.use("/api/newsletter", newsletter);
 app.use("/api/payment", payment);
 app.use("/api/transaction", transaction);
-
+app.use("/header", header)
 app.use((req, res, next) => {
   res.status(400).json({
     message: "404! Route is not found",

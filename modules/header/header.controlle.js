@@ -1,3 +1,4 @@
+const { getImageUrl } = require("../../util/image_path");
 const Header = require("./header.modls");
 
 const getAllHeaders = async (req, res) => {
@@ -10,67 +11,92 @@ const getAllHeaders = async (req, res) => {
 };
 
 const getHeader = async (req, res) => {
-  try {
-    const header = await Header.findById(req.params.id);
-    if (!header) {
-      return res.status(404).json({ message: "Header not found" });
+    try {
+      const header = await Header.findOne({ pageName: req.params.pageName }); // Query using pageName
+      if (!header) {
+        return res.status(404).json({ message: "Header not found" });
+      }
+      res.status(200).json(header);
+    } catch (error) {
+      res.status(500).json({ error: error.message });
     }
-    res.status(200).json(header);
-  } catch (error) {
-    res.status(500).json({ error: error.message });
-  }
-};
+  };
+  
 
 // Create a new header
 const createHeader = async (req, res) => {
-  try {
-    const { pageName } = req.body;
-
-    // Check if a document with the same pageName exists
-    await Header.findOneAndDelete({ pageName });
-
-
+    console.log(req.body);
+    console.log(req.file); 
   
-    const newHeader = new Header(req.body);
-    if (req.file) {
-        req.body.image = `/uploads/${req.file.filename}`;
+    try {
+      const headerData = req.body;
+  
+      await Header.findOneAndDelete(headerData?.pageName);
+    
+ 
+      if (req.file) {
+        headerData.image = `/uploads/${req.file.filename}`;
+      } else {
+        headerData.image = null; 
       }
-    const savedHeader = await newHeader.save();
-
-    res.status(201).json(savedHeader);
-  } catch (error) {
-    res.status(400).json({ error: error.message });
-  }
-};
-
-const updateHeader = async (req, res) => {
-  try {
-    const { id } = req.params;
-    const { pageName } = req.body;
-
-    const existingHeader = await Header.findOne({ pageName, _id: { $ne: id } });
-    if (existingHeader) {
-      await Header.findByIdAndDelete(existingHeader._id);
+  
+      const newHeader = new Header(headerData);
+      await newHeader.save();
+  
+      res.status(201).json({
+        message: "header created successfully",
+        package: {
+          ...newHeader.toObject(),
+          imageUrl: getImageUrl(newHeader.image) 
+        },
+      });
+    } catch (error) {
+      res.status(400).json({
+        message: "Error creating package",
+        error: error.message,
+      });
     }
+  };
 
-    const updatedHeader = await Header.findByIdAndUpdate(id, req.body, {
-      new: true,
-      runValidators: true,
-    });
-
-    if (!updatedHeader) {
-      return res.status(404).json({ message: "Header not found" });
+  const updateHeader = async (req, res) => {
+    try {
+      const headerData = req.body;
+  
+      if (req.file) {
+        headerData.image = `/uploads/${req.file.filename}`;
+      }
+  
+      const updatedHeader = await Header.findOneAndUpdate(
+        { pageName: headerData.pageName }, 
+        headerData, 
+        { new: true, runValidators: true } 
+      );
+  
+      if (!updatedHeader) {
+        return res.status(404).json({
+          message: "Header not found for the given pageName",
+        });
+      }
+  
+      res.status(200).json({
+        message: "Header updated successfully",
+        header: {
+          ...updatedHeader.toObject(),
+          imageUrl: getImageUrl(updatedHeader.image),
+        },
+      });
+    } catch (error) {
+      res.status(400).json({
+        message: "Error updating header",
+        error: error.message,
+      });
     }
-
-    res.status(200).json(updatedHeader);
-  } catch (error) {
-    res.status(400).json({ error: error.message });
-  }
-};
+  };
+  
 
 const deleteHeader = async (req, res) => {
   try {
-    const deletedHeader = await Header.findByIdAndDelete(req.params.id);
+    const deletedHeader = await Header.findOneAndDelete({ pageName: req.params.pageName }); 
     if (!deletedHeader) {
       return res.status(404).json({ message: "Header not found" });
     }

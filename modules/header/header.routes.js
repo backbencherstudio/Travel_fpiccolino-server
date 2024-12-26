@@ -1,19 +1,19 @@
-import express from "express";
-import {
+const express = require("express");
+const {
   getAllHeaders,
   getHeader,
   createHeader,
   updateHeader,
   deleteHeader,
-} from "./header.controlle";
+} = require("./header.controlle");
 const { upload } = require("../../middleware/Multer.config");
 
 const router = express.Router();
 
 router.get("/", getAllHeaders);
-router.get("/:id", getHeader);
+router.get("/:pageName", getHeader);
 router.post("/", upload.single("image"), createHeader);
-router.put("/:id", upload.single("image"), updateHeader);
-router.delete("/:id", deleteHeader);
+router.put("/", upload.single("image"), updateHeader);
+router.delete("/:pageName", deleteHeader);
 
-export default router;
+module.exports = router;

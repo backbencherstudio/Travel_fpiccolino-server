@@ -1,4 +1,4 @@
-import mongoose from "mongoose";
+const mongoose = require("mongoose");
 
 const headerSchema = new mongoose.Schema(
   {
@@ -7,9 +7,9 @@ const headerSchema = new mongoose.Schema(
       required: [true, "Blog Details Title is required"],
       trim: true,
     },
-    heroImageFile: {
+    image: {
       type: String,
-      required: [true, "Hero Image File is required"],
+      // required: [true, "Hero Image File is required"],
     },
     titleOne: {
       type: String,
