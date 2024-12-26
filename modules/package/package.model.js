@@ -11,7 +11,7 @@ const packageSchema = new mongoose.Schema(
       required: true,
     },
     tourDate: {
-      type: Date ,
+      type: Date,
       required: true,
     },
     tourDuration: {
@@ -80,10 +80,12 @@ const packageSchema = new mongoose.Schema(
     category: [
       {
         type: String,
-        // enum: ["All inclusive", "Custom", "Budget", "Luxury"],
+        enum: ["All inclusive", "Custom", "Budget", "Luxury"],
+        default : "All inclusive"
       },
     ],
-    imageUrl: [
+
+    images: [
       {
         type: String,
       },
