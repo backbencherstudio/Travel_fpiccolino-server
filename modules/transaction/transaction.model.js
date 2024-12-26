@@ -20,6 +20,9 @@ const transactionSchema = new mongoose.Schema(
       type: String,
       required: true,
     },
+    order_id:{
+      type: mongoose.Types.ObjectId
+    },
     status: {
       type: String,
       required: true,
