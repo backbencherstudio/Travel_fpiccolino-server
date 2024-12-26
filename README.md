@@ -77,3 +77,10 @@
 ## Transaction
 - **GET:** `http://localhost:3000/transactions`  
 - **DELETE:** `http://localhost:3000/transactions/:id`  
+
+## Order
+- **POST:** `http://localhost:3000/order`  
+- **GET:** `http://localhost:3000/order/:id`  
+- **GET:** `http://localhost:3000/order/user/:userId`  
+- **PUT:** `http://localhost:3000/order/:id/status`  
+- **DELETE:** `http://localhost:3000/order/:id`  
