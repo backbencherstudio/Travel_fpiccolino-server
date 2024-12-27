@@ -16,6 +16,7 @@ const transaction = require("./modules/transaction/transaction.routes");
 const country = require("./modules/country/country.routes");
 const header = require("./modules/header/header.routes");
 const order = require("./modules/order/order.routes");
+const pageData = require("./modules/getPageData/getPageData.routes");
 
 const path = require("path");
 
@@ -60,6 +61,7 @@ app.use("/api/newsletter", newsletter);
 app.use("/api/payment", payment);
 app.use("/api/transaction", transaction);
 app.use("/api/country", country);
+app.use("/api/pageData", pageData);
 app.use("/header", header);
 app.use("/order", order);
 app.use((req, res, next) => {
