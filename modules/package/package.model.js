@@ -24,6 +24,10 @@ const packageSchema = new mongoose.Schema(
         required: true,
       },
     },
+    country: {
+      type: mongoose.Schema.Types.ObjectId,
+      ref: "Country",
+    },
     includeItems: [
       {
         name: {
@@ -81,7 +85,7 @@ const packageSchema = new mongoose.Schema(
       {
         type: String,
         enum: ["All inclusive", "Custom", "Budget", "Luxury"],
-        default : "All inclusive"
+        default: "All inclusive",
       },
     ],
     images: [
