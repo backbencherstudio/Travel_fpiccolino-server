@@ -108,7 +108,7 @@ const createPackage = async (req, res) => {
 
 const getAllPackages = async (req, res) => {
   try {
-    const packages = await Package.find();
+    const packages = await Package.find().populate("country");
 
     const formattedPackages = packages.map((packageItem) => ({
       ...packageItem.toObject(),
@@ -132,7 +132,7 @@ const getAllPackages = async (req, res) => {
 const getPackageById = async (req, res) => {
   try {
     const packageId = req.params.id;
-    const package = await Package.findById(packageId);
+    const package = await Package.findById(packageId).populate("country");
 
     if (!package) {
       return res.status(404).json({ message: "Package not found" });
