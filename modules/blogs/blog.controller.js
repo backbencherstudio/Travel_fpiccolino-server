@@ -30,8 +30,18 @@ exports.uploadsImage = async (req, res) => {
 
 // Create a blog
 exports.createBlog = async (req, res) => {
+  const {
+    category,
+    heroSection,
+    contentList,
+    Populer,
+    info,
+    tag,
+    thought,
+    learn,
+  } = req.body;
+
   try {
-    const { category, heroSection, contentList, Populer, info, tag,thought,learn } = req.body;
     const newBlog = new Blog({
       category,
       heroSection,
@@ -40,7 +50,7 @@ exports.createBlog = async (req, res) => {
       info,
       tag,
       thought,
-      learn
+      learn,
     });
 
     await newBlog.save();
@@ -49,6 +59,10 @@ exports.createBlog = async (req, res) => {
       blog: newBlog,
     });
   } catch (error) {
+    deleteImage(heroSection[0].headerImg);
+    contentList.map((content) => {
+      content.image && deleteImage(content.image);
+    });
     console.error(error);
     return res.status(500).json({
       message: "Error creating the blog post",
@@ -131,7 +145,7 @@ exports.updateSpecificFields = async (req, res) => {
 
 exports.updateContentFields = async (req, res) => {
   const { id, contentID } = req.params;
-  console.log(id, contentID)
+  console.log(id, contentID);
   const { UpdatedImage, oldImage, headings, paragraphs } = req.body;
   const mainImage = UpdatedImage || oldImage;
 
@@ -152,7 +166,7 @@ exports.updateContentFields = async (req, res) => {
     if (!blog) {
       return res.status(404).json({ message: "Blog not found" });
     }
-    console.log(blog)
+    console.log(blog);
     blog.contentList[contentID] = modifyObject;
     await blog.save();
 
@@ -168,7 +182,7 @@ exports.updateContentFields = async (req, res) => {
 exports.deleteContentAtIndex = async (req, res) => {
   try {
     const { id, contentID } = req.params; // Expect blogId and contentListIndex in URL params
-    console.log(id, contentID)
+    console.log(id, contentID);
     const blog = await Blog.findById(id);
 
     if (!blog) {
@@ -177,6 +191,7 @@ exports.deleteContentAtIndex = async (req, res) => {
     if (contentID < 0 || contentID >= blog.contentList.length) {
       return res.status(400).json({ message: "Invalid index" });
     }
+    deleteImage(blog.contentList[contentID].image);
 
     blog.contentList.splice(contentID, 1);
     await blog.save();
@@ -217,6 +232,14 @@ exports.UpdateCategory = async (req, res) => {
 
 exports.deleteBlog = async (req, res) => {
   try {
+    const oneblog = await Blog.findById(req.params.id);
+    if (!oneblog) {
+      return res.status(404).json({ message: "Blog not found" });
+    }
+    deleteImage(oneblog.heroSection[0].headerImg);
+    oneblog.contentList.map((content) => {
+      content.image && deleteImage(content.image);
+    });
     const blog = await Blog.findByIdAndDelete(req.params.id);
     if (!blog) {
       return res.status(404).json({ message: "Blog not found" });
@@ -326,16 +349,15 @@ exports.getPopularBlogs = async (req, res) => {
 };
 exports.getBlogsGroupedByCategory = async (req, res) => {
   try {
-    
     const blogs = await Blog.find().lean();
 
     // Group blogs by category
     const groupedBlogs = blogs.reduce((result, blog) => {
-      const category = blog.category || "Uncategorized"; 
-      const heroSection = blog.heroSection[0] || ""; 
-      const blogDescription = blog.info || "No Description"; 
-      const createdAt = blog.createdAt; 
-      const tag = blog.tag || "No Tag"; 
+      const category = blog.category || "Uncategorized";
+      const heroSection = blog.heroSection[0] || "";
+      const blogDescription = blog.info || "No Description";
+      const createdAt = blog.createdAt;
+      const tag = blog.tag || "No Tag";
       id = blog._id;
 
       if (!result[category]) {

@@ -11,9 +11,12 @@ const package = require("./modules/package/package.routes");
 const category = require("./modules/category/category.routes");
 const blogss = require("./modules/blogs/blog.route");
 const contact = require("./modules/contact/contact.route");
-const payment = require("./modules/payment/payment.routes")
-const transaction = require("./modules/transaction/transaction.routes")
-const header = require("./modules/header/header.routes")
+const payment = require("./modules/payment/payment.routes");
+const transaction = require("./modules/transaction/transaction.routes");
+const country = require("./modules/country/country.routes");
+const header = require("./modules/header/header.routes");
+const order = require("./modules/order/order.routes");
+
 const path = require("path");
 
 const app = express();
@@ -29,8 +32,9 @@ app.use(
   })
 );
 
-app.use(express.urlencoded({ extended: true }));
 app.use(express.json());
+app.use(express.urlencoded({ extended: true }));
+
 app.use(morgan("dev"));
 app.use("/uploads", express.static(path.join(__dirname, "uploads")));
 
@@ -55,7 +59,9 @@ app.use("/api/subscriber", subscriber);
 app.use("/api/newsletter", newsletter);
 app.use("/api/payment", payment);
 app.use("/api/transaction", transaction);
-app.use("/header", header)
+app.use("/api/country", country);
+app.use("/header", header);
+app.use("/order", order);
 app.use((req, res, next) => {
   res.status.json({
     message: "404! Route is not found",
