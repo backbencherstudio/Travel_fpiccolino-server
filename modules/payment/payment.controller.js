@@ -6,10 +6,16 @@ const paymentHelper = require("../common/payment/PaymentHelper");
 const makePayment = async (req, res) => {
   const { package_name, amount, order_id } = req.body;
   try {
-    const session = paymentHelper.makePayment({
-      package_name,
-      amount,
-      order_id,
+    const session = await createCheckoutSession({ name: package_name, amount });
+
+    // save the transaction in the database
+    const transaction = new Transaction({
+      paymentIntentId: session.payment_intent,
+      checkoutSessionId: session.id,
+      order_id: order_id,
+      amount: amount,
+      currency: "usd",
+      status: "pending",
     });
 
     res.json({ url: session.url });
