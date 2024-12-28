@@ -4,7 +4,6 @@ const create = async (req, res) => {
   try {
     const {
       userId,
-      orderId,
       firstName,
       lastName,
       email,
@@ -12,6 +11,8 @@ const create = async (req, res) => {
       birthDate,
       physicalIssues,
     } = req.body;
+
+    const orderId = req.params.orderId;
 
     const orderPersonalDetails = new OrderPersonalDetails({
       userId,

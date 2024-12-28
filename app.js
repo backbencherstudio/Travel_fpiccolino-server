@@ -16,6 +16,7 @@ const transaction = require("./modules/transaction/transaction.routes");
 const country = require("./modules/country/country.routes");
 const header = require("./modules/header/header.routes");
 const order = require("./modules/order/order.routes");
+const orderPersonalDetails = require("./modules/order/orderPersonalDetails/orderPersonalDetails.routes");
 
 const path = require("path");
 
@@ -62,6 +63,7 @@ app.use("/api/transaction", transaction);
 app.use("/api/country", country);
 app.use("/header", header);
 app.use("/order", order);
+app.use("/order/:orderId/orderPersonalDetails", orderPersonalDetails);
 app.use((req, res, next) => {
   res.status.json({
     message: "404! Route is not found",
