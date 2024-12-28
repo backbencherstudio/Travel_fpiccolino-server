@@ -18,15 +18,15 @@ const getHomePage = async (req, res) => {
     // });
 
     // const response = {
-      // hero: {
-      //   title: "title",
-      //   subtitle: "subtitle",
-      // },
-    //   package: {
-    //     title: "title",
-    //     subtitle: "subtitle",
-    //     data: packagesGroupBycountries,
-    //   },
+    // hero: {
+    //   title: "title",
+    //   subtitle: "subtitle",
+    // },
+    // package: {
+    //   title: "title",
+    //   subtitle: "subtitle",
+    //   data: packagesGroupBycountries,
+    // },
     //   country: {
     //     title: "title",
     //     subtitle: "subtitle",
@@ -52,24 +52,28 @@ const getHomePage = async (req, res) => {
     // res.status(200).json(packagesGroupBycountries);
 
     const getHomeHeader = await Header.findOne({ pageName: "home" });
-    const getsectionTitle = await SectinTitle.find({ name: { $regex: /^landing/ } });
+    const getsectionTitle = await SectinTitle.find({
+      name: { $regex: /^landing/ },
+    });
     const getMostLovedAdventures = await Package.find();
     const getCountry = await Country.find();
 
     const transformedAdventures = getMostLovedAdventures
-    .map(adventure => ({
-      ...adventure.toObject(),  
-      images: adventure.images.map(image => getImageUrl(image)), 
-    }))
-    // .sort(() => Math.random() - 0.5); 
-  
-    const transformedCountry = getCountry.map(country => ({
-      ...country.toObject(),
-      image: country.image ? getImageUrl(country.image) : null,  
-    }));
-    
+      .map((adventure) => ({
+        ...adventure.toObject(),
+        images: adventure.images.map((image) => getImageUrl(image)),
+      }))
+      .sort((a, b) => b - a);
+    // .sort(() => Math.random() - 0.5);
 
-    const response ={
+    const transformedCountry = getCountry
+      .map((country) => ({
+        ...country.toObject(),
+        image: country.image ? getImageUrl(country.image) : null,
+      }))
+      .sort((a, b) => b - a);
+
+    const response = {
       hero: {
         blogDetailsTitle: getHomeHeader?.blogDetailsTitle,
         image: getImageUrl(getHomeHeader?.image),
@@ -79,14 +83,32 @@ const getHomePage = async (req, res) => {
         descriptionOne: getHomeHeader?.descriptionOne,
         descriptionTwo: getHomeHeader?.descriptionTwo,
       },
-      sectionTitle:[
-        ...getsectionTitle
-      ],
-      MostLovedAdventures: transformedAdventures,
-      countries: transformedCountry
-      
+      package: {
+        title: getsectionTitle[0]?.title,
+        subtitle: getsectionTitle[0]?.description,
+        data: transformedAdventures,
+      },
+      country: {
+        title: getsectionTitle[1]?.title,
+        subtitle: getsectionTitle[1]?.description,
+        data: transformedCountry,
+      },
+      countryWithImage: {
+        title: getsectionTitle[2]?.title,
+        subtitle: getsectionTitle[2]?.description,
+        data: transformedCountry,
+      },
+      titleWithoutContent: {
+        title: getsectionTitle[3]?.title,
+        subtitle: getsectionTitle[3]?.description,
+      }
 
-    }
+      // sectionTitle:[
+      //   ...getsectionTitle
+      // ],
+      // MostLovedAdventures: transformedAdventures,
+      // countries: transformedCountry
+    };
 
     res.status(200).json(response);
   } catch (error) {

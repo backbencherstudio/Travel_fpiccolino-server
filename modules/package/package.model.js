@@ -28,6 +28,10 @@ const packageSchema = new mongoose.Schema(
       type: mongoose.Schema.Types.ObjectId,
       ref: "Country",
     },
+    price: {
+      type: Number,
+      required: true,
+    },
     includeItems: [
       {
         name: {

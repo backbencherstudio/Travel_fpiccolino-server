@@ -19,8 +19,7 @@ const createOrder = async (req, res) => {
     if (!user || !packageData) {
       return res.status(404).json({ error: "User or Package not found" });
     }
-
-    const totalPrice = packageData.price * quantity;
+    const totalPrice = Number(packageData.price) * quantity;
 
     const newOrder = new Order({
       userId,
@@ -53,7 +52,7 @@ const getOrderById = async (req, res) => {
     const order = await Order.findById(orderId)
       .populate("userId", "name email")
       .populate("packageId", "tourName tourDescription");
-    if (!order) {
+    if (!order) {    
       return res.status(404).json({ error: "Order not found" });
     }
     res.json(order);
