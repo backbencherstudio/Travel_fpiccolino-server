@@ -2,17 +2,11 @@ const OrderPersonalDetails = require("./orderPersonalDetails.models");
 
 const create = async (req, res) => {
   try {
-    const {
-      userId,
-      firstName,
-      lastName,
-      email,
-      phone,
-      birthDate,
-      physicalIssues,
-    } = req.body;
+    const { firstName, lastName, email, phone, birthDate, physicalIssues } =
+      req.body;
 
     const orderId = req.params.orderId;
+    const userId = req.userId;
 
     const orderPersonalDetails = new OrderPersonalDetails({
       userId,
