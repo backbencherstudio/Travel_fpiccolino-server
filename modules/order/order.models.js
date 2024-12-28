@@ -13,6 +13,10 @@ const OrderSchema = new Schema(
       ref: "Package",  
       required: true,
     },
+    transactionId: {
+      type: mongoose.Types.ObjectId,
+      ref: "Transaction", 
+    },
     status: {
       type: String,
       enum: ["pending", "confirmed", "completed", "cancelled"],

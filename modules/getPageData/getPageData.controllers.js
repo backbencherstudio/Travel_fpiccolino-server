@@ -3,6 +3,8 @@ const Country = require("../country/country.model");
 const Header = require("../header/header.modls");
 const SectinTitle = require("../sectionTitle/sectionTitle.models");
 const Package = require("../package/package.model");
+
+
 const getHomePage = async (req, res) => {
   try {
     // show counries with packages
@@ -116,6 +118,10 @@ const getHomePage = async (req, res) => {
     throw error.message;
   }
 };
+
+const aboutData = async (req, res) => {
+
+}
 
 module.exports = {
   getHomePage,

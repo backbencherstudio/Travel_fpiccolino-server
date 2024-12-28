@@ -34,15 +34,17 @@ const createOrder = async (req, res) => {
     const savedOrder = await newOrder.save();
 
     // proceed to payment
-    const paymentResponse = await paymentHelper.makePayment({
-      package_name: packageData.tourName,
-      amount: totalPrice,
-      order_id: savedOrder._id,
-    });
+    // const paymentResponse = await paymentHelper.makePayment({
+    //   package_name: packageData.tourName,
+    //   amount: totalPrice,
+    //   order_id: savedOrder._id,
+    // });
 
-    res.status(201).json(paymentResponse);
+    res.status(201).json(savedOrder);
   } catch (error) {
-    res.status(500).json({ error: error.message });
+  
+    // res.status(500).json({ error: error.message });
+    throw error;
   }
 };
 
