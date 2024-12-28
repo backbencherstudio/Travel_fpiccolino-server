@@ -42,3 +42,57 @@ exports.createReview = async (req, res) => {
       });
     }
 };
+
+exports.updateReview = async (req, res) => {
+    const { reviewId } = req.params;
+    const { comment, rating } = req.body;
+  
+    try {
+      const review = await Review.findById(reviewId);       
+        if (!review) {
+            return res.status(404).json({ error: "Review not found" });
+        }   
+        review.comment = comment;
+
+
+        review.rating = rating;
+        await review.save();
+        res.status(200).json({
+            message: "Review updated successfully",
+            review,
+        });
+    }   
+    catch (error) {
+        res.status(500).json({
+            message: error.message,
+        });
+    }                                           
+
+
+
+
+}   
+exports.deleteReview = async (req, res) => {
+    const { reviewId } = req.params;
+
+    try {
+        // Find the review by ID
+        const review = await Review.findById(reviewId);
+
+        if (!review) {
+            return res.status(404).json({ error: "Review not found" });
+        }
+
+        // Delete the review
+        await Review.findByIdAndDelete(reviewId);
+
+        res.status(200).json({
+            message: "Review deleted successfully",
+        });
+    } catch (error) {
+        console.error("Error deleting review:", error);
+        res.status(500).json({
+            message: "Internal server error",
+        });
+    }
+};
