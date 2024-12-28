@@ -66,10 +66,10 @@ const Package = require("./package.model");
 // };
 
 const createPackage = async (req, res) => {
+  console.log(70, req.body);
   try {
     const packageData = req.body;
     let images = [];
-
     // Handle uploaded images
     if (req.files && req.files.length > 0) {
       images = req.files.map((file) => `/uploads/${file.filename}`);
@@ -87,6 +87,9 @@ const createPackage = async (req, res) => {
     if (packageData.bookedFlights) {
       packageData.bookedFlights = JSON.parse(packageData.bookedFlights);
     }
+    if (packageData.insurance) {
+      packageData.insurance = JSON.parse(packageData.insurance);
+    }    
     packageData.images = images;
     const newPackage = new Package(packageData);
     await newPackage.save();
@@ -99,10 +102,6 @@ const createPackage = async (req, res) => {
       },
     });
   } catch (error) {
-    // res.status(400).json({
-    //   message: "Error creating package",
-    //   error: error.message,
-    // });
     throw error;
   }
 };
@@ -153,6 +152,7 @@ const getPackageById = async (req, res) => {
   }
 };
 
+
 const updatePackage = async (req, res) => {
   try {
     const packageId = req.params.id;
@@ -175,6 +175,8 @@ const updatePackage = async (req, res) => {
       .json({ message: "Error updating package", error: error.message });
   }
 };
+
+
 
 const deletePackage = async (req, res) => {
   try {

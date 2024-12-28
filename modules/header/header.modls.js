@@ -7,13 +7,17 @@ const headerSchema = new mongoose.Schema(
       required: [true, "Blog Details Title is required"],
       trim: true,
     },
-    image: {
+    heroImage: {
       type: String,
       // required: [true, "Hero Image File is required"],
     },
     titleOne: {
       type: String,
       required: [true, "Title is required"],
+      trim: true,
+    },
+    titleTwo: {
+      type: String,
       trim: true,
     },
     pageName: {
@@ -24,6 +28,10 @@ const headerSchema = new mongoose.Schema(
     descriptionOne: {
       type: String,
       required: [true, "Description is required"],
+      trim: true,
+    },
+    descriptionTwo: {
+      type: String,
       trim: true,
     },
   },

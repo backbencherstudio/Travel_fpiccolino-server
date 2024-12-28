@@ -12,8 +12,8 @@ const router = express.Router();
 
 router.get("/", getAllHeaders);
 router.get("/:pageName", getHeader);
-router.post("/", upload.single("image"), createHeader);
-router.put("/", upload.single("image"), updateHeader);
+router.post("/", upload.single("heroImage"), createHeader);
+router.put("/", upload.single("heroImage"), updateHeader);
 router.delete("/:pageName", deleteHeader);
 
 module.exports = router;

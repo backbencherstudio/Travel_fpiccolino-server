@@ -76,18 +76,27 @@ const packageSchema = new mongoose.Schema(
     ],
     insurance: [
       {
-        insuranceName: { type: String },
-        description: { type: String },
-        price: { type: String },
+        insuranceName: {
+          type: String,
+        },
+        description: {
+          type: String,
+        },
+        price: { type: Number },
+        id: { type: Number },
       },
     ],
     category: [
       {
         type: String,
-        enum: ["All inclusive", "Custom", "Budget", "Luxury"],
-        default: "All inclusive",
       },
     ],
+    destination: {
+      type: String,
+    },
+    amount: {
+      type: Number,
+    },
     images: [
       {
         type: String,
