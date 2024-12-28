@@ -70,7 +70,6 @@ const createPackage = async (req, res) => {
   try {
     const packageData = req.body;
     let images = [];
-
     // Handle uploaded images
     if (req.files && req.files.length > 0) {
       images = req.files.map((file) => `/uploads/${file.filename}`);
@@ -103,10 +102,6 @@ const createPackage = async (req, res) => {
       },
     });
   } catch (error) {
-    // res.status(400).json({
-    //   message: "Error creating package",
-    //   error: error.message,
-    // });
     throw error;
   }
 };

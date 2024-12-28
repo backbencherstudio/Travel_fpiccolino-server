@@ -74,7 +74,6 @@ const packageSchema = new mongoose.Schema(
         },
       },
     ],
-
     insurance: [
       {
         insuranceName: {
@@ -86,13 +85,18 @@ const packageSchema = new mongoose.Schema(
         price: {type : Number},
         id : {type : Number}
       },
-    ],
-    
+    ],    
     category: [
       {
         type: String,
       },
     ],
+    destination: {
+      type: String,
+    },
+    amount:  {
+      type: Number,
+    },
     images: [
       {
         type: String,
