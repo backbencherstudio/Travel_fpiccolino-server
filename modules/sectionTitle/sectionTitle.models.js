@@ -9,7 +9,7 @@ const sectinTitle = new Schema(
         type: String,
         enum: ["landing1", "landing2", "landing3"],
       },
-    image: { type: String },
+    pageName : {type : String, enum : ["landing", "about", "tours", "contact"]  }
   },
   { timestamps: true }
 );
