@@ -119,10 +119,49 @@ const getHomePage = async (req, res) => {
   }
 };
 
-const aboutData = async (req, res) => {
+const getAboutPage = async (req, res) => {
+  try {
+    const getAboutHeader = await Header.findOne({ pageName: "about" });
+    const getAboutSectionTitle = await SectinTitle.find({
+      name: { $regex: /^about/ },
+    });
 
-}
+    const response = {
+      hero: {
+        blogDetailsTitle: getAboutHeader?.blogDetailsTitle,
+        image: getImageUrl(getAboutHeader?.image),
+        titleOne: getAboutHeader?.titleOne,
+        titleTwo: getAboutHeader?.titleTwo,
+        pageName: getAboutHeader?.pageName,
+        descriptionOne: getAboutHeader?.descriptionOne,
+        descriptionTwo: getAboutHeader?.descriptionTwo,
+      },
+      about: {
+        title: getAboutSectionTitle[0]?.title,
+        subtitle: getAboutSectionTitle[0]?.description,
+      },
+      team: {
+        title: getAboutSectionTitle[1]?.title,
+        subtitle: getAboutSectionTitle[1]?.description,
+      },
+      testimonial: {
+        title: getAboutSectionTitle[2]?.title,
+        subtitle: getAboutSectionTitle[2]?.description,
+      },
+      contact: {
+        title: getAboutSectionTitle[3]?.title,
+        subtitle: getAboutSectionTitle[3]?.description,
+      },
+    };
+
+    res.status(200).json(response);
+  } catch (error) {
+    // res.status(500).json({ error: error.message });
+    throw error.message;
+  }
+} 
 
 module.exports = {
   getHomePage,
+  getAboutPage
 };
