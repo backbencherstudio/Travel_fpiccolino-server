@@ -3,7 +3,8 @@ const Country = require("../country/country.model");
 const Header = require("../header/header.modls");
 const SectinTitle = require("../sectionTitle/sectionTitle.models");
 const Package = require("../package/package.model");
-
+const Review = require("../review/review.model");
+const Blogs = require("../blogs/blog.model");
 
 const getHomePage = async (req, res) => {
   try {
@@ -63,7 +64,7 @@ const getHomePage = async (req, res) => {
     const transformedAdventures = getMostLovedAdventures
       .map((adventure) => ({
         ...adventure.toObject(),
-        images: adventure.images.map((image) => getImageUrl(image)),
+        images: adventure?.images?.map((image) => getImageUrl(image)),
       }))
       .sort((a, b) => b - a);
     // .sort(() => Math.random() - 0.5);
@@ -71,9 +72,12 @@ const getHomePage = async (req, res) => {
     const transformedCountry = getCountry
       .map((country) => ({
         ...country.toObject(),
-        image: country.image ? getImageUrl(country.image) : null,
+        image: country?.image ? getImageUrl(country.image) : null,
       }))
       .sort((a, b) => b - a);
+
+    const getReview = await Review.find();
+    const Blog = await Blogs.find(); //.sort(() => Math.random() - 0.5);
 
     const response = {
       hero: {
@@ -103,7 +107,22 @@ const getHomePage = async (req, res) => {
       titleWithoutContent: {
         title: getsectionTitle[3]?.title,
         subtitle: getsectionTitle[3]?.description,
-      }
+      },
+      review: {
+        title: getsectionTitle[3]?.title,
+        subtitle: getsectionTitle[3]?.description,
+        data: getReview,
+      },
+      contact: {
+        title: getsectionTitle[4]?.title,
+        subtitle: getsectionTitle[4]?.description,
+        data: getReview,
+      },
+      blogSection: {
+        title: getsectionTitle[5]?.title,
+        subtitle: getsectionTitle[5]?.description,
+        data: Blog,
+      },
 
       // sectionTitle:[
       //   ...getsectionTitle
@@ -119,49 +138,84 @@ const getHomePage = async (req, res) => {
   }
 };
 
-const getAboutPage = async (req, res) => {
+// const getAboutPage = async (req, res) => {
+//   try {
+//     const getAboutHeader = await Header.findOne({ pageName: "about" });
+//     const getAboutSectionTitle = await SectinTitle.find({
+//       name: { $regex: /^about/ },
+//     });
+
+//     const response = {
+//       hero: {
+//         blogDetailsTitle: getAboutHeader?.blogDetailsTitle,
+//         image: getImageUrl(getAboutHeader?.image),
+//         titleOne: getAboutHeader?.titleOne,
+//         titleTwo: getAboutHeader?.titleTwo,
+//         pageName: getAboutHeader?.pageName,
+//         descriptionOne: getAboutHeader?.descriptionOne,
+//         descriptionTwo: getAboutHeader?.descriptionTwo,
+//       },
+//       about: {
+//         title: getAboutSectionTitle[0]?.title,
+//         subtitle: getAboutSectionTitle[0]?.description,
+//       },
+//       team: {
+//         title: getAboutSectionTitle[1]?.title,
+//         subtitle: getAboutSectionTitle[1]?.description,
+//       },
+//       testimonial: {
+//         title: getAboutSectionTitle[2]?.title,
+//         subtitle: getAboutSectionTitle[2]?.description,
+//       },
+//       contact: {
+//         title: getAboutSectionTitle[3]?.title,
+//         subtitle: getAboutSectionTitle[3]?.description,
+//         data: getReview
+//       },
+//     };
+
+//     res.status(200).json(response);
+//   } catch (error) {
+//     // res.status(500).json({ error: error.message });
+//     throw error.message;
+//   }
+// };
+
+const BlogPage = async (req, res) => {
   try {
-    const getAboutHeader = await Header.findOne({ pageName: "about" });
-    const getAboutSectionTitle = await SectinTitle.find({
-      name: { $regex: /^about/ },
+    const getBlogs = await Blogs.find();
+    res.status(200).json(getBlogs);
+
+    const categories = [...new Set(getBlogs.map((blog) => blog.category))];  
+
+    const categoryLists = categories.map((category) => {
+      return {
+        category: category,
+        blogs: getBlogs.filter((blog) => blog.category === category), 
+      };
     });
 
     const response = {
       hero: {
-        blogDetailsTitle: getAboutHeader?.blogDetailsTitle,
-        image: getImageUrl(getAboutHeader?.image),
-        titleOne: getAboutHeader?.titleOne,
-        titleTwo: getAboutHeader?.titleTwo,
-        pageName: getAboutHeader?.pageName,
-        descriptionOne: getAboutHeader?.descriptionOne,
-        descriptionTwo: getAboutHeader?.descriptionTwo,
+        blogDetailsTitle: getHomeHeader?.blogDetailsTitle,
+        image: getImageUrl(getHomeHeader?.image),
+        titleOne: getHomeHeader?.titleOne,
+        titleTwo: getHomeHeader?.titleTwo,
+        pageName: getHomeHeader?.pageName,
+        descriptionOne: getHomeHeader?.descriptionOne,
+        descriptionTwo: getHomeHeader?.descriptionTwo,
       },
-      about: {
-        title: getAboutSectionTitle[0]?.title,
-        subtitle: getAboutSectionTitle[0]?.description,
-      },
-      team: {
-        title: getAboutSectionTitle[1]?.title,
-        subtitle: getAboutSectionTitle[1]?.description,
-      },
-      testimonial: {
-        title: getAboutSectionTitle[2]?.title,
-        subtitle: getAboutSectionTitle[2]?.description,
-      },
-      contact: {
-        title: getAboutSectionTitle[3]?.title,
-        subtitle: getAboutSectionTitle[3]?.description,
-      },
-    };
+      categoryLists
+    }
 
     res.status(200).json(response);
   } catch (error) {
-    // res.status(500).json({ error: error.message });
     throw error.message;
   }
-} 
+};
 
 module.exports = {
   getHomePage,
-  getAboutPage
+
+  BlogPage,
 };
