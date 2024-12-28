@@ -31,7 +31,7 @@ exports.uploadsImage = async (req, res) => {
 // Create a blog
 exports.createBlog = async (req, res) => {
   try {
-    const { category, heroSection, contentList, Populer, info, tag } = req.body;
+    const { category, heroSection, contentList, Populer, info, tag,thought,learn } = req.body;
     const newBlog = new Blog({
       category,
       heroSection,
@@ -39,6 +39,8 @@ exports.createBlog = async (req, res) => {
       Populer,
       info,
       tag,
+      thought,
+      learn
     });
 
     await newBlog.save();
@@ -129,6 +131,7 @@ exports.updateSpecificFields = async (req, res) => {
 
 exports.updateContentFields = async (req, res) => {
   const { id, contentID } = req.params;
+  console.log(id, contentID)
   const { UpdatedImage, oldImage, headings, paragraphs } = req.body;
   const mainImage = UpdatedImage || oldImage;
 
@@ -141,6 +144,7 @@ exports.updateContentFields = async (req, res) => {
     paragraphs,
     image: mainImage,
   };
+  console.log(modifyObject);
 
   try {
     const blog = await Blog.findOne({ _id: id });
@@ -148,7 +152,7 @@ exports.updateContentFields = async (req, res) => {
     if (!blog) {
       return res.status(404).json({ message: "Blog not found" });
     }
-
+    console.log(blog)
     blog.contentList[contentID] = modifyObject;
     await blog.save();
 
@@ -164,7 +168,7 @@ exports.updateContentFields = async (req, res) => {
 exports.deleteContentAtIndex = async (req, res) => {
   try {
     const { id, contentID } = req.params; // Expect blogId and contentListIndex in URL params
-
+    console.log(id, contentID)
     const blog = await Blog.findById(id);
 
     if (!blog) {

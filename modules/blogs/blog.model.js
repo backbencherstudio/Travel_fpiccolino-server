@@ -20,7 +20,9 @@ const blogSchema = new mongoose.Schema({
       paragraphs: [{ type: String, required: true }],
     },
   ],
-
+  learn: [{ type: String }],
+  thought: [{ type: String }],
+   
   Populer: { type: Boolean, default: false },
   info: { type: String },
   tag: { type: String },
