@@ -26,7 +26,30 @@ const deleteTransaction = async (req, res) => {
   }
 };
 
+// searcg transaction by paymentIntentId and checkoutSessionId and customer
+const searchTransaction = async (req, res) => {
+  try {
+    const { paymentIntentId, checkoutSessionId, customer } = req.query;
+    let transaction = await Transaction.find();
+    if (paymentIntentId) {
+      transaction = await Transaction.find({ paymentIntentId });
+    }
+    if (checkoutSessionId) {
+      transaction = await Transaction.find({ checkoutSessionId });
+    }
+    if (customer) {
+      transaction = await Transaction.find({ customer });
+    }
+    res.status(200).json(transaction);
+  } catch (error) {
+    res
+      .status(500)
+      .json({ message: "Error fetching transactions", error: error.message });
+  }
+};
+
 module.exports = {
   getAllTransaction,
   deleteTransaction,
+  searchTransaction,
 };
