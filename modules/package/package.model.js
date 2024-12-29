@@ -65,9 +65,7 @@ const packageSchema = new mongoose.Schema(
         breakTime: {
           type: String,
         },
-
         flightClass: { type: String },
-
         price: {
           type: Number,
           required: true,
@@ -76,14 +74,9 @@ const packageSchema = new mongoose.Schema(
     ],
     insurance: [
       {
-        insuranceName: {
-          type: String,
-        },
-        description: {
-          type: String,
-        },
-        price: { type: Number },
-        id: { type: Number },
+        insuranceName: { type: String },
+        description: { type: String },
+        price: { type: String },
       },
     ],
     category: [

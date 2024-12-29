@@ -66,7 +66,6 @@ const Package = require("./package.model");
 // };
 
 const createPackage = async (req, res) => {
-  console.log(70, req.body);
   try {
     const packageData = req.body;
     let images = [];
