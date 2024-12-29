@@ -28,10 +28,6 @@ const packageSchema = new mongoose.Schema(
       type: mongoose.Schema.Types.ObjectId,
       ref: "Country",
     },
-    price: {
-      type: Number,
-      required: true,
-    },
     includeItems: [
       {
         name: {
@@ -69,9 +65,7 @@ const packageSchema = new mongoose.Schema(
         breakTime: {
           type: String,
         },
-
         flightClass: { type: String },
-
         price: {
           type: Number,
           required: true,
