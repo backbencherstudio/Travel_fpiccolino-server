@@ -1,7 +1,6 @@
 const Order = require("./order.models");
 const Package = require("./../package/package.model");
 const User = require("../users/users.models");
-const paymentHelper = require("../common/payment/PaymentHelper");
 
 const createOrder = async (req, res) => {
   try {
@@ -42,7 +41,6 @@ const createOrder = async (req, res) => {
 
     res.status(201).json(savedOrder);
   } catch (error) {
-  
     // res.status(500).json({ error: error.message });
     throw error;
   }
@@ -54,7 +52,7 @@ const getOrderById = async (req, res) => {
     const order = await Order.findById(orderId)
       .populate("userId", "name email")
       .populate("packageId", "tourName tourDescription");
-    if (!order) {    
+    if (!order) {
       return res.status(404).json({ error: "Order not found" });
     }
     res.json(order);
@@ -127,5 +125,6 @@ module.exports = {
   getOrderById,
   getUserOrders,
   updateOrderStatus,
+  updateOrder,
   cancelOrder,
 };

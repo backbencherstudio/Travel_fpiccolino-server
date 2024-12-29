@@ -466,7 +466,7 @@ const userOrderGroupedByStatus = async (req, res) => {
       const firstImage = packageData.images && packageData.images[0] ? packageData.images[0] : null;
 
       if (!acc[order.status]) {
-        acc[order.status] = { orders: [], total: 0 }; // Initialize for new status
+        acc[order.status] = { status: order.status, orders: [], total: 0 }; // Initialize for new status
       }
       acc[order.status].orders.push({
         ...order.toObject(),
@@ -478,12 +478,15 @@ const userOrderGroupedByStatus = async (req, res) => {
       return acc;
     }, {});
 
+    // Convert the groupedOrders object into an array
+    const groupedOrdersArray = Object.values(groupedOrders);
+
     // Calculate total orders for the user
     const totalOrders = orders.length;
 
     res.status(200).json({
       message: "Orders grouped by status fetched successfully",
-      data: groupedOrders,
+      data: groupedOrdersArray, // Return data as an array
       totalOrders, // Add the total number of orders to the response
     });
   } catch (error) {
@@ -491,7 +494,6 @@ const userOrderGroupedByStatus = async (req, res) => {
     res.status(500).json({ message: "Server error" });
   }
 };
-
 
 module.exports = {
   userOrderGroupedByStatus,

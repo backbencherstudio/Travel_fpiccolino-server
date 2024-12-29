@@ -20,6 +20,7 @@ const order = require("./modules/order/order.routes");
 const pageData = require("./modules/getPageData/getPageData.routes");
 const sectionTitle = require("./modules/sectionTitle/sectionTitle.routes");
 const review = require("./modules/review/review.route");
+const footer = require("./modules/footer/footer.route");
 const orderPersonalDetails = require("./modules/order/orderPersonalDetails/orderPersonalDetails.routes");
 
 const path = require("path");
@@ -71,6 +72,7 @@ app.use("/order", order);
 app.use("/section-title", sectionTitle);
 
 app.use("/api/review", review);
+app.use("/api/footer", footer);
 app.use("/order/:orderId/orderPersonalDetails", orderPersonalDetails);
 
 app.use((req, res, next) => {
