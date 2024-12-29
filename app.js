@@ -17,6 +17,7 @@ const country = require("./modules/country/country.routes");
 const header = require("./modules/header/header.routes");
 const order = require("./modules/order/order.routes");
 const review = require("./modules/review/review.route");
+const footer = require("./modules/footer/footer.route");
 const orderPersonalDetails = require("./modules/order/orderPersonalDetails/orderPersonalDetails.routes");
 
 const path = require("path");
@@ -65,6 +66,7 @@ app.use("/api/country", country);
 app.use("/header", header);
 app.use("/order", order);
 app.use("/api/review", review);
+app.use("/api/footer", footer);
 app.use("/order/:orderId/orderPersonalDetails", orderPersonalDetails);
 app.use((req, res, next) => {
   res.status.json({
