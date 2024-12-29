@@ -18,6 +18,8 @@ const header = require("./modules/header/header.routes");
 const order = require("./modules/order/order.routes");
 const pageData = require("./modules/getPageData/getPageData.routes");
 const sectionTitle = require("./modules/sectionTitle/sectionTitle.routes");
+const review = require("./modules/review/review.route");
+const orderPersonalDetails = require("./modules/order/orderPersonalDetails/orderPersonalDetails.routes");
 
 const path = require("path");
 
@@ -68,6 +70,8 @@ app.use("/order", order);
 app.use("/section-title", sectionTitle);
  
 
+app.use("/api/review", review);
+app.use("/order/:orderId/orderPersonalDetails", orderPersonalDetails);
 app.use((req, res, next) => {
   res.status.json({
     message: "404! Route is not found",
@@ -75,9 +79,10 @@ app.use((req, res, next) => {
 });
 
 app.use((err, req, res, next) => {
-  res.status(500).json({
-    message: err,
-  });
+  throw err
+  // res.status(500).json({
+  //   message: err,
+  // });
 });
 
 module.exports = app;

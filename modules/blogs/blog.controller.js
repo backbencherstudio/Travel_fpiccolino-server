@@ -229,6 +229,32 @@ exports.UpdateCategory = async (req, res) => {
     res.status(500).json({ error: error.message });
   }
 };
+exports.updateTexContent = async (req, res) => {
+  const { id } = req.params;
+  const { learn, thought } = req.body;
+  console.log(learn, thought);
+
+  try {
+    
+    const blog = await Blog.findById(req.params.id);
+    if (!blog) {
+      return res.status(404).json({ message: "Blog not found" });
+    }
+    const updatedBlog = await Blog.findOneAndUpdate(
+      { _id: id },
+      { learn, thought }, // Update object
+      { new: true }
+    );
+
+    if (!updatedBlog) {
+      return res.status(404).json({ error: "Blog not found" });
+    }
+
+    res.status(200).json(updatedBlog);
+  } catch (error) {
+    res.status(500).json({ error: error.message });
+  }
+};
 
 exports.deleteBlog = async (req, res) => {
   try {
