@@ -1,6 +1,7 @@
 const User = require("../users/users.models");
 const Order = require("../order/order.models");
 const Review = require("./review.model");
+const mongoose = require('mongoose');
 
 
 
@@ -75,7 +76,7 @@ exports.updateReview = async (req, res) => {
     try {
         const reviews = await Review.find()
             .populate("userId", "name image country") // Populating userId to get name and image
-            .populate("packageId", "packageName") // Optional: If you need package info, adjust as needed
+            .populate("packageId", "packageName images") // Optional: If you need package info, adjust as needed
             .lean(); // Converts Mongoose documents to plain JavaScript objects
 
         const formattedReviews = reviews.map((review) => ({
@@ -85,18 +86,74 @@ exports.updateReview = async (req, res) => {
             country: review.userId?.country || "Unknown Country",
             rating: review.rating,
             comment: review.comment,
+            pakageImg: review.packageId?.images?.[0] || "Unknown Package",
             createdAt: review.createdAt,
         }));
 
-       return res.status(200).json({
+        // Adding total reviews count
+        const totalReviews = reviews.length;
+
+        return res.status(200).json({
             reviews: formattedReviews,
+            totalReviews, // Adding the total count here
         });
     } catch (error) {
-       return res.status(500).json({
+        return res.status(500).json({
             message: error.message,
         });
     }
-}   
+};
+
+
+exports.getReviewsByPackage = async (req, res) => {
+    try {
+        const { pakageID } = req.params;
+
+        if (!pakageID) {
+            return res.status(400).json({ error: 'Package ID is required' });
+        }
+
+       
+
+        
+
+        // Find all reviews for the given package ID
+        const reviews = await Review.find({ packageId: pakageID });
+
+        if (!reviews || reviews.length === 0) {
+            return res.status(404).json({ message: 'No reviews found for the specified package ID' });
+        }
+
+        // Fetch user details for each review
+        const reviewsWithUserDetails = await Promise.all(reviews.map(async (review) => {
+            const user = await User.findById(review.userId);
+
+            if (!user) {
+                return res.status(404).json({ message: `User not found for review with ID ${review._id}` });
+            }
+
+            return {
+                review,
+                user: {
+                    id: user._id,
+                    name: user.name,
+                    email: user.email,
+                    userImg: user.image,
+                },
+            };
+        }));
+
+        return res.status(200).json(reviewsWithUserDetails);
+    } catch (error) {
+        console.error(error);
+        return res.status(500).json({ error: 'An error occurred while fetching the reviews and user details' });
+    }
+};
+
+
+
+
+
 exports.deleteReview = async (req, res) => {
     const { reviewId } = req.params;
 
