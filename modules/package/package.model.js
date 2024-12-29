@@ -24,6 +24,19 @@ const packageSchema = new mongoose.Schema(
         required: true,
       },
     },
+    pessenger: {
+      type: Number,
+      required: true,
+    },
+    price: {
+      type: Number,
+      required: true,
+    },
+    // cost per package, will be hidden for client side
+    cost_per_package: {
+      type: Number,
+      required: true,
+    },
     country: {
       type: mongoose.Schema.Types.ObjectId,
       ref: "Country",
@@ -72,6 +85,11 @@ const packageSchema = new mongoose.Schema(
           type: Number,
           required: true,
         },
+        // cost per package, will be hidden for client side
+        cost_per_package: {
+          type: Number,
+          required: true,
+        },
       },
     ],
     insurance: [
@@ -79,6 +97,7 @@ const packageSchema = new mongoose.Schema(
         insuranceName: String,
         description: String,
         price: Number,
+        cost_per_package: Number,
       },
     ],
     category: [
