@@ -18,6 +18,7 @@ const countrySchema = new mongoose.Schema(
         ref: "Package",
       },
     ],
+    
     image: {
       type: String,
     }
