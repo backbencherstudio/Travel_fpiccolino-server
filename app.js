@@ -16,12 +16,11 @@ const transaction = require("./modules/transaction/transaction.routes");
 const country = require("./modules/country/country.routes");
 const header = require("./modules/header/header.routes");
 const order = require("./modules/order/order.routes");
- 
-const pageData = require("./modules/getPageData/getPageData.routes");
-const sectionTitle = require("./modules/sectionTitle/sectionTitle.routes");
 const review = require("./modules/review/review.route");
 const footer = require("./modules/footer/footer.route");
+
 const orderPersonalDetails = require("./modules/order/orderPersonalDetails/orderPersonalDetails.routes");
+const dashboard = require("./modules/dashboard/dashboard.routes");
 
 const path = require("path");
 
@@ -73,8 +72,9 @@ app.use("/section-title", sectionTitle);
 
 app.use("/api/review", review);
 app.use("/api/footer", footer);
-app.use("/order/:orderId/orderPersonalDetails", orderPersonalDetails);
 
+app.use("/order/:orderId/orderPersonalDetails", orderPersonalDetails);
+app.use("/dashboard", dashboard);
 app.use((req, res, next) => {
   res.status.json({
     message: "404! Route is not found",
@@ -82,10 +82,9 @@ app.use((req, res, next) => {
 });
 
 app.use((err, req, res, next) => {
-  throw err
-  // res.status(500).json({
-  //   message: err,
-  // });
+  res.status(500).json({
+    message: err,
+  });
 });
 
 module.exports = app;
