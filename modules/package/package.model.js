@@ -24,6 +24,14 @@ const packageSchema = new mongoose.Schema(
         required: true,
       },
     },
+    pessenger: {
+      type: Number,
+      required: true,
+    },
+    price: {
+      type: Number,
+      required: true,
+    },
     country: {
       type: mongoose.Schema.Types.ObjectId,
       ref: "Country",

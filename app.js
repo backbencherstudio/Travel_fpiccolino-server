@@ -20,6 +20,7 @@ const review = require("./modules/review/review.route");
 const footer = require("./modules/footer/footer.route");
 
 const orderPersonalDetails = require("./modules/order/orderPersonalDetails/orderPersonalDetails.routes");
+const dashboard = require("./modules/dashboard/dashboard.routes");
 
 const path = require("path");
 
@@ -70,6 +71,7 @@ app.use("/api/review", review);
 app.use("/api/footer", footer);
 
 app.use("/order/:orderId/orderPersonalDetails", orderPersonalDetails);
+app.use("/dashboard", dashboard);
 app.use((req, res, next) => {
   res.status.json({
     message: "404! Route is not found",

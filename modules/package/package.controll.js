@@ -106,6 +106,35 @@ const createPackage = async (req, res) => {
   }
 };
 
+const searchPackages = async (req, res) => {
+  try {
+    const { q } = req.query;
+    const packages = await Package.find({
+      $or: [
+        { tourName: { $regex: q, $options: "i" } },
+        { tourDescription: { $regex: q, $options: "i" } },
+      ],
+    });
+
+    const formattedPackages = packages.map((packageItem) => ({
+      ...packageItem.toObject(),
+      imageUrl: packageItem?.images?.map(
+        (path) => `${process.env.APP_URL}${path}`
+      ),
+    }));
+
+    res.status(200).json({
+      message: "Packages fetched successfully",
+      packages: formattedPackages,
+    });
+  } catch (error) {
+    res.status(500).json({
+      message: "Error fetching packages",
+      error: error.message,
+    });
+  }
+};
+
 const getAllPackages = async (req, res) => {
   try {
     const packages = await Package.find().populate("country");
@@ -196,4 +225,5 @@ module.exports = {
   getAllPackages,
   updatePackage,
   deletePackage,
+  searchPackages,
 };
