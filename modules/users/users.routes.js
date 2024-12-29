@@ -4,6 +4,7 @@ const {
   checkAuthStatus,
   registerUser,
   verifyOTP,
+  getSingleUser,
   authenticateUser,
   editUserProfile,
   forgotPasswordOTPsend,
@@ -19,6 +20,8 @@ const { upload } = require("../../middleware/Multer.config");
 const route = require("express").Router();
 
 route.get("/", getAllUsers);
+route.get("/:id", getSingleUser);
+
 route.get("/check", checkAuthStatus);
 
 route.post("/register", registerUser);

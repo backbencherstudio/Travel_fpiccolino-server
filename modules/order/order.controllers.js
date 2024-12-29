@@ -1,19 +1,25 @@
 const Order = require("./order.models");
 const Package = require("./../package/package.model");
 const User = require("../users/users.models");
-
+const paymentHelper = require("../common/payment/PaymentHelper");
 
 const createOrder = async (req, res) => {
   try {
-    const { userId, packageId, quantity, paymentMethod, notes, shippingAddress } = req.body;
+    const {
+      userId,
+      packageId,
+      quantity,
+      paymentMethod,
+      notes,
+      shippingAddress,
+    } = req.body;
 
     const user = await User.findById(userId);
     const packageData = await Package.findById(packageId);
     if (!user || !packageData) {
       return res.status(404).json({ error: "User or Package not found" });
     }
-
-    const totalPrice = packageData.price * quantity;
+    const totalPrice = Number(packageData.price) * quantity;
 
     const newOrder = new Order({
       userId,
@@ -26,12 +32,21 @@ const createOrder = async (req, res) => {
     });
 
     const savedOrder = await newOrder.save();
+
+    // proceed to payment
+    // const paymentResponse = await paymentHelper.makePayment({
+    //   package_name: packageData.tourName,
+    //   amount: totalPrice,
+    //   order_id: savedOrder._id,
+    // });
+
     res.status(201).json(savedOrder);
   } catch (error) {
-    res.status(500).json({ error: error.message });
+  
+    // res.status(500).json({ error: error.message });
+    throw error;
   }
 };
-
 
 const getOrderById = async (req, res) => {
   try {
@@ -39,7 +54,7 @@ const getOrderById = async (req, res) => {
     const order = await Order.findById(orderId)
       .populate("userId", "name email")
       .populate("packageId", "tourName tourDescription");
-    if (!order) {
+    if (!order) {    
       return res.status(404).json({ error: "Order not found" });
     }
     res.json(order);
@@ -47,7 +62,6 @@ const getOrderById = async (req, res) => {
     res.status(500).json({ error: error.message });
   }
 };
-
 
 const getUserOrders = async (req, res) => {
   try {
@@ -61,7 +75,6 @@ const getUserOrders = async (req, res) => {
   }
 };
 
-
 const updateOrderStatus = async (req, res) => {
   try {
     const orderId = req.params.id;
@@ -72,7 +85,11 @@ const updateOrderStatus = async (req, res) => {
       return res.status(400).json({ error: "Invalid status" });
     }
 
-    const order = await Order.findByIdAndUpdate(orderId, { status }, { new: true });
+    const order = await Order.findByIdAndUpdate(
+      orderId,
+      { status },
+      { new: true }
+    );
     if (!order) {
       return res.status(404).json({ error: "Order not found" });
     }
@@ -82,7 +99,6 @@ const updateOrderStatus = async (req, res) => {
     res.status(500).json({ error: error.message });
   }
 };
-
 
 const cancelOrder = async (req, res) => {
   try {

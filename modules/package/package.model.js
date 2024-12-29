@@ -28,6 +28,10 @@ const packageSchema = new mongoose.Schema(
       type: mongoose.Schema.Types.ObjectId,
       ref: "Country",
     },
+    price: {
+      type: Number,
+      required: true,
+    },
     includeItems: [
       {
         name: {
@@ -76,14 +80,9 @@ const packageSchema = new mongoose.Schema(
     ],
     insurance: [
       {
-        insuranceName: {
-          type : String
-        } ,
-        description: {
-          type : String
-        },
-        price: {type : Number},
-        id : {type : Number}
+        insuranceName: { type: String },
+        description: { type: String },
+        price: { type: String },
       },
     ],    
     category: [

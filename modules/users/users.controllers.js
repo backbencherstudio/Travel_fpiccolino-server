@@ -36,12 +36,38 @@ const setTokenCookie = (res, token) => {
 // Get all users
 const getAllUsers = async (req, res) => {
   try {
-    let user = await User.find();
-    // const token = req.cookies.authToken;
-    // console.log(token);
-    res.status(200).json(user);
+    let users = await User.find();
+
+    const usersResponse = users.map(user => ({
+      ...user.toObject(),
+      image: user.image ? getImageUrl(user.image) : null,
+    }));
+
+    res.status(200).json(usersResponse);
   } catch (error) {
-    console.log(error);
+    console.error(error);
+    res.status(500).json({ message: "Error fetching users", error: error.message });
+  }
+};
+
+const getSingleUser = async (req, res) => {
+  try {
+    const userId = req.params.id; 
+
+    const user = await User.findById(userId).lean(); 
+
+    if (!user) {
+      return res.status(404).json({ message: "User not found" });
+    }
+    const userResponse = {
+      ...user,
+      image: user.image ? getImageUrl(user.image) : null, 
+    };
+
+    res.status(200).json(userResponse);
+  } catch (error) {
+    console.error("Error fetching user:", error);
+    res.status(500).json({ message: "Internal server error", error: error.message });
   }
 };
 
@@ -186,7 +212,7 @@ const verifyOTP = async (req, res) => {
     //   httpOnly: true,
     // };
 
-    console.log(savedUser)
+    console.log(savedUser);
     res
       .status(200)
       // .cookie("token", token, options)
@@ -203,7 +229,9 @@ const authenticateUser = async (req, res) => {
     const { email, password } = req.body;
 
     if (!email || !password) {
-      return res.status(400).json({ message: "Please fill all required fields" });
+      return res
+        .status(400)
+        .json({ message: "Please fill all required fields" });
     }
 
     const user = await User.findOne({ email }).lean(); // Use `lean()` for a plain object
@@ -239,9 +267,7 @@ const authenticateUser = async (req, res) => {
   }
 };
 
-
 const editUserProfile = async (req, res) => {
-
   try {
     if (!req.userId) {
       return res.status(401).json({ message: "Unauthorized user" });
@@ -258,8 +284,6 @@ const editUserProfile = async (req, res) => {
     const updatedUser = await User.findByIdAndUpdate(req.userId, req.body, {
       new: true,
     });
-
-     
 
     if (!updatedUser) {
       return res.status(404).json({ message: "User not found" });
@@ -416,6 +440,7 @@ const logout = (req, res) => {
 
 module.exports = {
   checkAuthStatus,
+  getSingleUser,
   logout,
   resetPasssword,
   matchForgotPasswordOTP,
