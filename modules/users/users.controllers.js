@@ -5,6 +5,7 @@ const { sign, verify } = require("jsonwebtoken");
 const path = require("path");
 
 const User = require("./users.models");
+const Order = require("../order/order.models");
 
 const {
   generateOTP,
@@ -414,6 +415,65 @@ const logout = (req, res) => {
   }
 };
 
+
+
+// done By Tohidul
+const userOrderGroupedByStatus = async (req, res) => {
+  const { userId } = req.params;
+
+  try {
+    // Check if user exists
+    const user = await User.findById(userId);
+    if (!user) {
+      return res.status(404).json({ message: "User not found" });
+    }
+
+    // Fetch all orders for the user and populate packageId to access package details
+    const orders = await Order.find({ userId })
+      .populate({
+        path: "packageId", // Populate packageId
+        select: "images tourName price", // Select only the required fields
+      })
+      .exec();
+
+    // Group orders by their status and include the first image from package
+    const groupedOrders = orders.reduce((acc, order) => {
+      const packageData = order.packageId || {};
+      const firstImage = packageData.images && packageData.images[0] ? packageData.images[0] : null;
+
+      if (!acc[order.status]) {
+        acc[order.status] = { orders: [], total: 0 }; // Initialize for new status
+      }
+      acc[order.status].orders.push({
+        ...order.toObject(),
+        packageImage: firstImage, // Add the first image of the package
+        packageName: packageData.tourName || "Unknown", // Add the tour name
+        packagePrice: packageData.price || "Unknown", // Add the price
+      });
+      acc[order.status].total += 1; // Increment the count for this status
+      return acc;
+    }, {});
+
+    // Calculate total orders for the user
+    const totalOrders = orders.length;
+
+    res.status(200).json({
+      message: "Orders grouped by status fetched successfully",
+      data: groupedOrders,
+      totalOrders, // Add the total number of orders to the response
+    });
+  } catch (error) {
+    console.error(error);
+    res.status(500).json({ message: "Server error" });
+  }
+};
+
+
+module.exports = {
+  userOrderGroupedByStatus,
+};
+
+
 module.exports = {
   checkAuthStatus,
   logout,
@@ -426,4 +486,5 @@ module.exports = {
   resendOtp,
   registerUser,
   getAllUsers,
+  userOrderGroupedByStatus
 };
