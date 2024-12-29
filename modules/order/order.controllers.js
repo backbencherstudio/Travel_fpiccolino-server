@@ -134,6 +134,26 @@ const cancelOrder = async (req, res) => {
   }
 };
 
+const searchOrders = async (req, res) => {
+  try {
+    const { q, status } = req.query;
+    const query = {};
+    if (q) {
+      query.$text = { $search: q };
+    }
+    if (status) {
+      query.status = status;
+    }
+
+    const orders = await Order.find(query)
+      .populate("userId", "name email")
+      .populate("packageId", "tourName price");
+    res.json(orders);
+  } catch (error) {
+    res.status(500).json({ error: error.message });
+  }
+};
+
 module.exports = {
   createOrder,
   getOrderById,
@@ -141,4 +161,5 @@ module.exports = {
   updateOrderStatus,
   updateOrder,
   cancelOrder,
+  searchOrders,
 };
