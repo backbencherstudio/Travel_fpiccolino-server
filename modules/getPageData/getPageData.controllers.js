@@ -216,6 +216,5 @@ const BlogPage = async (req, res) => {
 
 module.exports = {
   getHomePage,
-
   BlogPage,
 };
