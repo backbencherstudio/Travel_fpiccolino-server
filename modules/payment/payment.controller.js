@@ -11,6 +11,7 @@ const makePayment = async (req, res) => {
     const transaction = new Transaction({
       paymentIntentId: session.payment_intent,
       checkoutSessionId: session.id,
+      order_id: order_id,
       amount: amount,
       currency: "usd",
       status: "pending",
