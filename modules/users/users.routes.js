@@ -12,7 +12,6 @@ const {
   matchForgotPasswordOTP,
   resendOtp,
   logout,
-  userOrderGroupedByStatus
 } = require("./users.controllers");
 
 const { verifyUser } = require("../../middleware/verifyUser");
@@ -38,6 +37,5 @@ route.post("/logout", logout);
 route.post("/request-forgot-password-otp", verifyUser, forgotPasswordOTPsend);
 route.post("/match-password-otp", verifyUser, matchForgotPasswordOTP);
 route.patch("/reset-forgot-password", verifyUser, resetPasssword);
-route.get("/userOrderGroupedByStatus/:userId", userOrderGroupedByStatus);
 
 module.exports = route;
