@@ -68,9 +68,34 @@ exports.updateReview = async (req, res) => {
         });
     }                                           
 
+   
+  };
 
+  exports.getReviewall = async (req, res) => {
+    try {
+        const reviews = await Review.find()
+            .populate("userId", "name image country") // Populating userId to get name and image
+            .populate("packageId", "packageName") // Optional: If you need package info, adjust as needed
+            .lean(); // Converts Mongoose documents to plain JavaScript objects
 
+        const formattedReviews = reviews.map((review) => ({
+            _id: review._id,
+            name: review.userId?.name || "Unknown User",
+            image: review.userId?.image || "default-image-url.jpg", // Fallback in case image is missing
+            country: review.userId?.country || "Unknown Country",
+            rating: review.rating,
+            comment: review.comment,
+            createdAt: review.createdAt,
+        }));
 
+       return res.status(200).json({
+            reviews: formattedReviews,
+        });
+    } catch (error) {
+       return res.status(500).json({
+            message: error.message,
+        });
+    }
 }   
 exports.deleteReview = async (req, res) => {
     const { reviewId } = req.params;
