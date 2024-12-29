@@ -7,9 +7,9 @@ const sectinTitle = new Schema(
     description: { type: String },
     name: {
         type: String,
-        enum: ["landing1", "landing2", "landing3", "landing4", "landing5", "about1", "about2", ],
+        enum: ["landing1", "landing2", "landing3", "landing4", "landing5", "landing6", "about1", "about2", ],
       },
-    pageName : {type : String, enum : ["landing", "about", "tours", "contact"]  }
+    pageName : {type : String, enum : ["landing", "about", "tours", "contact"]}
   },
   { timestamps: true }
 );

@@ -116,7 +116,7 @@ const getHomePage = async (req, res) => {
       contact: {
         title: getsectionTitle[4]?.title,
         subtitle: getsectionTitle[4]?.description,
-        data: getReview,
+        // data: getReview,
       },
       blogSection: {
         title: getsectionTitle[5]?.title,
