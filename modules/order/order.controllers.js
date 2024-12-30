@@ -98,7 +98,23 @@ const updateOrderStatus = async (req, res) => {
   }
 };
 
-const 
+const updateOrder = async (req, res) => {
+  try {
+    const orderId = req.params.id;
+    const data = req.body;
+
+    const order = await Order.findByIdAndUpdate(orderId, data, { new: true });
+    if (!order) {
+      return res.status(404).json({ error: "Order not found" });
+    }
+
+    res.json(order);
+  } catch (error) {
+    res.status(500).json({ error: error.message });
+  }
+};
+
+ 
 const cancelOrder = async (req, res) => {
   try {
     const orderId = req.params.id;
