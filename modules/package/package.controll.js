@@ -247,26 +247,85 @@ const getPackageById = async (req, res) => {
 };
 
 
+// const updatePackage = async (req, res) => {
+//   try {
+//     const packageId = req.params.id;
+//     const updatedData = req.body;
+//     const updatedPackage = await Package.findByIdAndUpdate(
+//       packageId,
+//       updatedData,
+//       { new: true }
+//     );
+//     if (!updatedPackage) {
+//       return res.status(404).json({ message: "Package not found" });
+//     }
+//     res.status(200).json({
+//       message: "Package updated successfully",
+//       package: updatedPackage,
+//     });
+//   } catch (error) {
+//     res
+//       .status(400)
+//       .json({ message: "Error updating package", error: error.message });
+//   }
+// };
+
+
 const updatePackage = async (req, res) => {
   try {
     const packageId = req.params.id;
     const updatedData = req.body;
-    const updatedPackage = await Package.findByIdAndUpdate(
-      packageId,
-      updatedData,
-      { new: true }
-    );
+    let images = [];
+    let hotelImages = [];
+
+    if (req.files) {
+      if (req.files.images) {
+        images = req.files.images.map((file) => `/uploads/${file.filename}`);
+      }
+
+      if (req.files.hotelImages) {
+        hotelImages = req.files.hotelImages.map((file) => `/uploads/${file.filename}`);
+      }
+    }
+
+    if (updatedData.tourDuration) {
+      updatedData.tourDuration = JSON.parse(updatedData.tourDuration);
+    }
+    if (updatedData.includeItems) {
+      updatedData.includeItems = JSON.parse(updatedData.includeItems);
+    }
+    if (updatedData.notIncludeItems) {
+      updatedData.notIncludeItems = JSON.parse(updatedData.notIncludeItems);
+    }
+    if (updatedData.bookedFlights) {
+      updatedData.bookedFlights = JSON.parse(updatedData.bookedFlights);
+    }
+    if (updatedData.insurance) {
+      updatedData.insurance = JSON.parse(updatedData.insurance);
+    }
+
+    if (images.length > 0) {
+      updatedData.images = images;
+    }
+    if (hotelImages.length > 0) {
+      updatedData.hotelImages = hotelImages;
+    }
+
+    const updatedPackage = await Package.findByIdAndUpdate(packageId, updatedData, { new: true });
     if (!updatedPackage) {
       return res.status(404).json({ message: "Package not found" });
     }
+
     res.status(200).json({
       message: "Package updated successfully",
-      package: updatedPackage,
+      package: {
+        ...updatedPackage.toObject(),
+        imageUrl: updatedPackage?.images?.map((path) => getImageUrl(path)),
+        hotelImageUrls: updatedPackage?.hotelImages?.map((path) => getImageUrl(path)),
+      },
     });
   } catch (error) {
-    res
-      .status(400)
-      .json({ message: "Error updating package", error: error.message });
+    res.status(400).json({ message: "Error updating package", error: error.message });
   }
 };
 
