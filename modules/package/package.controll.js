@@ -1,39 +1,70 @@
 const { getImageUrl } = require("../../util/image_path");
 const Package = require("./package.model");
 
-const createPackage = async (req, res) => {
-  // console.log(req.body)
-  // console.log(req.files);
 
+const createPackage = async (req, res) => {
+  console.log(req.body);
+  console.log(req.files);
   try {
     const packageData = req.body;
+    let images = [];
+    let hotelImages = [];
 
-    if (req.files && req.files.length > 0) {
-      packageData.images = req.files.map((file) => `/uploads/${file.filename}`);
-    } else {
-      packageData.images = [];
+    if (req.files) {
+      // Extract images from the `images` field
+      if (req.files.images) {
+        images = req.files.images.map((file) => `/uploads/${file.filename}`);
+      }
+
+      // Extract hotel images from the `hotelImages` field
+      if (req.files.hotelImages) {
+        hotelImages = req.files.hotelImages.map((file) => `/uploads/${file.filename}`);
+      }
     }
 
-    console.log(packageData);
+    // Parse JSON fields that are sent as strings
+    if (packageData.tourDuration) {
+      packageData.tourDuration = JSON.parse(packageData.tourDuration);
+    }
+    if (packageData.includeItems) {
+      packageData.includeItems = JSON.parse(packageData.includeItems);
+    }
+    if (packageData.notIncludeItems) {
+      packageData.notIncludeItems = JSON.parse(packageData.notIncludeItems);
+    }
+    if (packageData.bookedFlights) {
+      packageData.bookedFlights = JSON.parse(packageData.bookedFlights);
+    }
+    if (packageData.insurance) {
+      packageData.insurance = JSON.parse(packageData.insurance);
+    }
+
+    // Assign processed images to package data
+    packageData.hotelImages = hotelImages;
+    packageData.images = images;
+
     const newPackage = new Package(packageData);
     await newPackage.save();
-
-    // res.send(newPackage);
 
     res.status(201).json({
       message: "Package created successfully",
       package: {
         ...newPackage.toObject(),
-        imageUrl: newPackage.images.map((path) => getImageUrl(path)),
+        imageUrl: newPackage?.images?.map((path) => getImageUrl(path)),
+        hotelImageUrls: newPackage?.hotelImages?.map((path) =>
+          getImageUrl(path)
+        ),
       },
     });
   } catch (error) {
+    console.error(error);
     res.status(500).json({
-      message: "Error fetching packages",
-      error: error.message,
+      message: "Failed to create package",
+      error,
     });
   }
 };
+
 
 const getAllPackages = async (req, res) => {
   try {
