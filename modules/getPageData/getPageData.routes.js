@@ -8,4 +8,4 @@ router.get("/home", getHomePage);
 router.get("/BlogPage", BlogPage);
 router.get("/policyPage", getPolicy)
 
-module.exports = router;
+module.exports = router;               
