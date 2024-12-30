@@ -98,6 +98,7 @@ const updateOrderStatus = async (req, res) => {
   }
 };
 
+const 
 const cancelOrder = async (req, res) => {
   try {
     const orderId = req.params.id;
@@ -145,7 +146,7 @@ module.exports = {
   getOrderById,
   getUserOrders,
   updateOrderStatus,
-  updateOrder,
+  updateOrder, 
   cancelOrder,
   searchOrders,
 };
