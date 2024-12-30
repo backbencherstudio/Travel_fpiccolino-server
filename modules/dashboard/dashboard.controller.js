@@ -1,5 +1,6 @@
 const orderModels = require("../order/order.models");
 const Order = require("../order/order.models");
+const Package = require("../package/package.model");
 
 const getAll = async (req, res) => {
   try {
@@ -23,6 +24,29 @@ const getAll = async (req, res) => {
         totalPassengers += order.packageId.pessenger;
       }
     });
+
+    // all Country-----------------------------------------------------
+    // const ordersWithCountryNames = await Promise.all(
+    //   orderss.map(async (order) => {
+    //     if (!order.packageId) {
+    //       return { ...order.toObject(), countries: [] }; // If packageId is missing, attach empty countries
+    //     }
+
+    //     const packageData = await Package.findById(order.packageId).populate({
+    //       path: "country",
+    //       select: "name -_id", // Only select the 'name' field from Country
+    //     });
+
+    //     // Extract the country names
+    //     const countries = packageData?.country
+    //       ? Array.isArray(packageData.country)
+    //         ? packageData.country.map((country) => country.name)
+    //         : [packageData.country.name]
+    //       : [];
+
+    //     return { ...order.toObject(), countries };
+    //   })
+    // );
 
 
 
@@ -54,6 +78,7 @@ const getAll = async (req, res) => {
       totalProfit: totalProfit,
       totalOrders: totalOrders,
       totalOrdersByCountry: totalOrdersByCountry,
+     
       orders: orders,
     });
   } catch (error) {
@@ -63,6 +88,200 @@ const getAll = async (req, res) => {
   }
 };
 
+
+const getRadarData = async (req, res) => {
+  try {
+    // Aggregate data from orders and join with package data
+   
+    const totalOrders = await Order.countDocuments();
+
+    // If there are no orders, return 0% for both
+    if (totalOrders === 0) {
+      console.log("No orders found.");
+      return;
+    }
+
+    // Get the count of 'completed' orders
+    const completedOrders = await Order.countDocuments({ status: "completed" });
+
+    // Get the count of 'pending' orders
+    const pendingOrders = await Order.countDocuments({ status: "pending" });
+
+    // Calculate percentages
+    const completedPercentage = ((completedOrders / totalOrders) * 100).toFixed(2);
+    const pendingPercentage = ((pendingOrders / totalOrders) * 100).toFixed(2);
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+    const orders = await Order.aggregate([
+      {
+        $lookup: {
+          from: "packages",
+          localField: "packageId",
+          foreignField: "_id",
+          as: "package",
+        },
+      },
+      { $unwind: "$package" },
+      {
+        $group: {
+          _id: {
+            destination: "$package.destination",
+            status: "$status",
+          },
+          count: { $sum: 1 },
+        },
+      },
+    ]);
+
+    // Process aggregated data to radar chart format
+    const radarData = {
+      destination: [],
+      completed: [],
+      pending: [],
+    };
+
+    const destinationMap = new Map();
+
+    orders.forEach((order) => {
+      const { destination, status } = order._id;
+      const count = order.count;
+
+      if (!destinationMap.has(destination)) {
+        destinationMap.set(destination, { completed: 0, pending: 0 });
+        radarData.destination.push(destination);
+      }
+
+      if (status === "completed") {
+        destinationMap.get(destination).completed += count;
+      } else if (status === "pending") {
+        destinationMap.get(destination).pending += count;
+      }
+    });
+
+    // Populate radarData
+    radarData.completed = radarData.destination.map(
+      (destination) => destinationMap.get(destination).completed || 0
+    );
+    radarData.pending = radarData.destination.map(
+      (destination) => destinationMap.get(destination).pending || 0
+    );
+
+    // Send response
+    res.status(200).json({radarData,completedPercentage,pendingPercentage});
+  } catch (error) {
+    console.error("Error fetching radar data:", error);
+    res.status(500).json({ error: "Failed to fetch radar data" });
+  }
+};
+
+
+
+
+// Controller function for getting total revenue by month and week
+const getRevenueData = async (req, res) => {
+  try {
+    // Query for monthly revenue
+    const monthlyRevenue = await Order.aggregate([
+      {
+        $project: {
+          month: { $month: "$orderDate" },
+          year: { $year: "$orderDate" },
+          totalPrice: 1,
+        },
+      },
+      {
+        $group: {
+          _id: { month: "$month", year: "$year" },
+          totalRevenue: { $sum: "$totalPrice" },
+        },
+      },
+      {
+        $sort: { "_id.year": 1, "_id.month": 1 },
+      },
+      {
+        $project: {
+          x: {
+            $concat: [
+              { 
+                $arrayElemAt: [
+                  ["Jan", "Feb", "Mar", "Apr", "May", "Jun", "Jul", "Aug", "Sep", "Oct", "Nov", "Dec"],
+                  { $subtract: ["$_id.month", 1] }
+                ] 
+              },
+              " ",
+              { $toString: "$_id.year" },
+            ],
+          },
+          y: "$totalRevenue",
+          _id: 0,  // Remove the _id field from the response
+        },
+      },
+    ]);
+
+    // Query for weekly revenue
+    const weeklyRevenue = await Order.aggregate([
+      {
+        $project: {
+          week: { $isoWeek: "$orderDate" },
+          year: { $year: "$orderDate" },
+          totalPrice: 1,
+        },
+      },
+      {
+        $group: {
+          _id: { week: "$week", year: "$year" },
+          totalRevenue: { $sum: "$totalPrice" },
+        },
+      },
+      {
+        $sort: { "_id.year": 1, "_id.week": 1 },
+      },
+      {
+        $project: {
+          x: { $concat: ["Week ", { $toString: "$_id.week" }] },
+          y: "$totalRevenue",
+          _id: 0,  // Remove the _id field from the response
+        },
+      },
+    ]);
+
+    // Return both monthly and weekly revenue data
+    return res.status(200).json({
+      success: true,
+      revenueData: {
+        monthly: monthlyRevenue,
+        weekly: weeklyRevenue,
+      },
+    });
+  } catch (err) {
+    console.error(err);
+    return res.status(500).json({
+      success: false,
+      message: "Server Error",
+    });
+  }
+};
+
+
 module.exports = {
   getAll,
+  getRadarData,
+  getRevenueData
 };
