@@ -11,7 +11,14 @@ const { upload } = require("../../middleware/Multer.config");
 
 const router = express.Router();
 
-router.post("/", upload.array("images"), createPackage);
+router.post(
+  "/",
+  upload.fields([
+    { name: "images"},  
+    { name: "hotelImages"},
+  ]),
+  createPackage
+);
 router.get("/", getAllPackages);
 router.get("/:id", getPackageById);
 router.put("/:id", upload.array("images"), updatePackage);

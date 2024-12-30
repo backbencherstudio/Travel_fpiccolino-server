@@ -107,19 +107,23 @@ const Package = require("./package.model");
 
 
 const createPackage = async (req, res) => {
+  console.log(req.body);
+  console.log(req.files);
   try {
     const packageData = req.body;
     let images = [];
     let hotelImages = [];
 
-    if (req.files && req.files.length > 0) {
-      images = req.files.map((file) =>
-        file.fieldname === "hotelImages" ? `/uploads/${file.filename}` : null
-      ).filter(Boolean);
+    if (req.files) {
+      // Extract images from the `images` field
+      if (req.files.images) {
+        images = req.files.images.map((file) => `/uploads/${file.filename}`);
+      }
 
-      hotelImages = req.files.map((file) =>
-        file.fieldname === "images" ? `/uploads/${file.filename}` : null
-      ).filter(Boolean);
+      // Extract hotel images from the `hotelImages` field
+      if (req.files.hotelImages) {
+        hotelImages = req.files.hotelImages.map((file) => `/uploads/${file.filename}`);
+      }
     }
 
     // Parse JSON fields that are sent as strings
@@ -139,13 +143,7 @@ const createPackage = async (req, res) => {
       packageData.insurance = JSON.parse(packageData.insurance);
     }
 
-    //hotel data
-    if (packageData.hotelName) {
-      packageData.hotelName = packageData.hotelName;
-    }
-    if (packageData.hotelAbout) {
-      packageData.hotelAbout = packageData.hotelAbout;
-    }
+    // Assign processed images to package data
     packageData.hotelImages = hotelImages;
     packageData.images = images;
 
@@ -170,6 +168,7 @@ const createPackage = async (req, res) => {
     });
   }
 };
+
 
 
 const searchPackages = async (req, res) => {
