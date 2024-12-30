@@ -1,4 +1,4 @@
-import mongoose from "mongoose";
+const mongoose = require("mongoose");
 
 const headerSchema = new mongoose.Schema(
   {
@@ -7,23 +7,31 @@ const headerSchema = new mongoose.Schema(
       required: [true, "Blog Details Title is required"],
       trim: true,
     },
-    heroImageFile: {
+    heroImage: {
       type: String,
-      required: [true, "Hero Image File is required"],
+      // required: [true, "Hero Image File is required"],
     },
     titleOne: {
       type: String,
       required: [true, "Title is required"],
       trim: true,
     },
+    titleTwo: {
+      type: String,
+      trim: true,
+    },
     pageName: {
       type: String,
       required: [true, "Page Name is required"],
-      enum: ["home", "tour", "about"],
+      enum: ["home", "tour", "about", "blog", "contact", "faq"],
     },
     descriptionOne: {
       type: String,
       required: [true, "Description is required"],
+      trim: true,
+    },
+    descriptionTwo: {
+      type: String,
       trim: true,
     },
   },

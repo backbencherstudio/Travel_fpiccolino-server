@@ -4,25 +4,37 @@ const packageSchema = new mongoose.Schema(
   {
     tourName: {
       type: String,
-      // required: true,
+      required: true,
     },
     tourDescription: {
       type: String,
-      // required: true,
+      required: true,
     },
     tourDate: {
       type: Date,
-      // required: true,
+      required: true,
     },
     tourDuration: {
       nights: {
         type: Number,
-        // required: true,
+        required: true,
       },
       days: {
         type: Number,
-        // required: true,
+        required: true,
       },
+    },
+    pessenger: {
+      type: Number,
+      required: true,
+    },
+    price: {
+      type: Number,
+      required: true,
+    },
+    country: {
+      type: mongoose.Schema.Types.ObjectId,
+      ref: "Country",
     },
     includeItems: [
       {
@@ -61,29 +73,31 @@ const packageSchema = new mongoose.Schema(
         breakTime: {
           type: String,
         },
-
         flightClass: { type: String },
-
         price: {
           type: Number,
-          // required: true,
+          required: true,
         },
       },
     ],
     insurance: [
       {
-        insuranceName: String,
-        description: String,
-        price: Number,
+        insuranceName: { type: String },
+        description: { type: String },
+        price: { type: String },
       },
     ],
     category: [
       {
         type: String,
-        // enum: ["All inclusive", "Custom", "Budget", "Luxury"],
       },
     ],
-
+    destination: {
+      type: String,
+    },
+    amount: {
+      type: Number,
+    },
     images: [
       {
         type: String,
