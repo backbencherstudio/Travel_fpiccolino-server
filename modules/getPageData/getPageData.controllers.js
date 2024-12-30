@@ -150,12 +150,12 @@ const getTourPage = async (req, res) => {
       {
         $facet: {
           allInclusive: [
-            { $match: { category: "all inclusive" } }, 
-            { $limit: 10 }, 
+            { $match: { category: "all inclusive" } },
+            { $limit: 10 },
           ],
           others: [
-            { $match: { category: { $ne: "all inclusive" } } }, 
-            { $limit: 10 }, 
+            { $match: { category: { $ne: "all inclusive" } } },
+            { $limit: 10 },
           ],
         },
       },
@@ -194,7 +194,6 @@ const getTourPage = async (req, res) => {
       contact: {
         title: getsectionTitle[3]?.title,
         subtitle: getsectionTitle[3]?.description,
-        
       },
     };
 
@@ -203,7 +202,6 @@ const getTourPage = async (req, res) => {
     throw error.message;
   }
 };
-
 
 const BlogPage = async (req, res) => {
   try {
@@ -241,7 +239,7 @@ const BlogPage = async (req, res) => {
 const getPolicy = async (req, res) => {
   try {
     const getHomeHeader = await Header.findOne({ pageName: "policy" });
-    // const footer = await 
+    // const footer = await
     const getsectionTitle = await SectinTitle.find({
       name: { $regex: /^policy/ },
     });
@@ -254,8 +252,8 @@ const getPolicy = async (req, res) => {
         pageName: getHomeHeader?.pageName,
         descriptionOne: getHomeHeader?.descriptionOne,
         descriptionTwo: getHomeHeader?.descriptionTwo,
-      } 
-    }
+      },
+    };
 
     res.status(200).json(response);
   } catch (error) {
