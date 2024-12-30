@@ -69,7 +69,6 @@ const createPackage = async (req, res) => {
   try {
     const packageData = req.body;
     let images = [];
-
     // Handle uploaded images
     if (req.files && req.files.length > 0) {
       images = req.files.map((file) => `/uploads/${file.filename}`);
@@ -87,6 +86,9 @@ const createPackage = async (req, res) => {
     if (packageData.bookedFlights) {
       packageData.bookedFlights = JSON.parse(packageData.bookedFlights);
     }
+    if (packageData.insurance) {
+      packageData.insurance = JSON.parse(packageData.insurance);
+    }    
     packageData.images = images;
     const newPackage = new Package(packageData);
     await newPackage.save();
@@ -99,11 +101,36 @@ const createPackage = async (req, res) => {
       },
     });
   } catch (error) {
-    // res.status(400).json({
-    //   message: "Error creating package",
-    //   error: error.message,
-    // });
     throw error;
+  }
+};
+
+const searchPackages = async (req, res) => {
+  try {
+    const { q } = req.query;
+    const packages = await Package.find({
+      $or: [
+        { tourName: { $regex: q, $options: "i" } },
+        { tourDescription: { $regex: q, $options: "i" } },
+      ],
+    });
+
+    const formattedPackages = packages.map((packageItem) => ({
+      ...packageItem.toObject(),
+      imageUrl: packageItem?.images?.map(
+        (path) => `${process.env.APP_URL}${path}`
+      ),
+    }));
+
+    res.status(200).json({
+      message: "Packages fetched successfully",
+      packages: formattedPackages,
+    });
+  } catch (error) {
+    res.status(500).json({
+      message: "Error fetching packages",
+      error: error.message,
+    });
   }
 };
 
@@ -153,6 +180,7 @@ const getPackageById = async (req, res) => {
   }
 };
 
+
 const updatePackage = async (req, res) => {
   try {
     const packageId = req.params.id;
@@ -176,6 +204,8 @@ const updatePackage = async (req, res) => {
   }
 };
 
+
+
 const deletePackage = async (req, res) => {
   try {
     const packageId = req.params.id;
@@ -197,4 +227,5 @@ module.exports = {
   getAllPackages,
   updatePackage,
   deletePackage,
+  searchPackages,
 };

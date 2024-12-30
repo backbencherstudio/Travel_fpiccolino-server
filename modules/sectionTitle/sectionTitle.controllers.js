@@ -3,13 +3,11 @@ const SectinTitle = require("../sectionTitle/sectionTitle.models");
 // Create or override
 const createSectinTitle = async (req, res) => {
   try {
-    const { name, title, description } = req.body;
-
-    console.log(name, title, description);
+    const { name, title, description, pageName } = req.body;
 
     await SectinTitle.findOneAndDelete({ name });
 
-    const newSectinTitle = new SectinTitle({ name, title, description });
+    const newSectinTitle = new SectinTitle({ name, title, description, pageName });
     await newSectinTitle.save();
 
     res.status(201).json({

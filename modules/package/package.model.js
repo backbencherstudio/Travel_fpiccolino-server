@@ -24,13 +24,17 @@ const packageSchema = new mongoose.Schema(
         required: true,
       },
     },
-    country: {
-      type: mongoose.Schema.Types.ObjectId,
-      ref: "Country",
+    pessenger: {
+      type: Number,
+      required: true,
     },
     price: {
       type: Number,
       required: true,
+    },
+    country: {
+      type: mongoose.Schema.Types.ObjectId,
+      ref: "Country",
     },
     includeItems: [
       {
@@ -69,9 +73,7 @@ const packageSchema = new mongoose.Schema(
         breakTime: {
           type: String,
         },
-
         flightClass: { type: String },
-
         price: {
           type: Number,
           required: true,
@@ -88,10 +90,14 @@ const packageSchema = new mongoose.Schema(
     category: [
       {
         type: String,
-        enum: ["All inclusive", "Custom", "Budget", "Luxury"],
-        default: "All inclusive",
       },
     ],
+    destination: {
+      type: String,
+    },
+    amount: {
+      type: Number,
+    },
     images: [
       {
         type: String,
