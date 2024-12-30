@@ -21,6 +21,11 @@ router.get("/:id", getPackageById);
 
 router.put("/:id", upload.array("images"), updatePackage);
 
+router.put(
+  "/:id",
+  upload.fields([{ name: "images" }, { name: "hotelImages" }]),
+  updatePackage
+);
 router.delete("/:id", deletePackage);
 router.get("/search", searchPackages);
 

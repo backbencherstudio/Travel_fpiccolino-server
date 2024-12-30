@@ -7,7 +7,7 @@ const {
   getUserOrders,
   updateOrderStatus,
   cancelOrder,
-  // updateOrder,
+  updateOrder,
   searchOrders,
 } = require("./order.controllers");
 
@@ -20,8 +20,7 @@ router.get("/:id", getOrderById);
 router.get("/user/:userId", getUserOrders);
 
 router.put("/:id/status", updateOrderStatus);
-// router.put("/:id", updateOrder);
-
+router.put("/:id", updateOrder);
 router.delete("/:id", cancelOrder);
 
 module.exports = router;
