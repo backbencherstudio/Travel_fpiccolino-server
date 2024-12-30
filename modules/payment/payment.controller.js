@@ -1,6 +1,7 @@
 const Transaction = require("./../transaction/transaction.model");
-const { createCheckoutSession } = require("./../../util/stripeUtil");
+
 const { stripeWebhook } = require("./../../util/stripeUtil");
+const paymentHelper = require("../common/payment/PaymentHelper");
 
 const makePayment = async (req, res) => {
   const { package_name, amount, order_id } = req.body;
@@ -16,7 +17,6 @@ const makePayment = async (req, res) => {
       currency: "usd",
       status: "pending",
     });
-    await transaction.save();
 
     res.json({ url: session.url });
   } catch (error) {

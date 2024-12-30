@@ -5,7 +5,6 @@ const { sign, verify } = require("jsonwebtoken");
 const path = require("path");
 
 const User = require("./users.models");
-const Order = require("../order/order.models");
 
 const {
   generateOTP,
@@ -37,12 +36,38 @@ const setTokenCookie = (res, token) => {
 // Get all users
 const getAllUsers = async (req, res) => {
   try {
-    let user = await User.find();
-    // const token = req.cookies.authToken;
-    // console.log(token);
-    res.status(200).json(user);
+    let users = await User.find();
+
+    const usersResponse = users.map(user => ({
+      ...user.toObject(),
+      image: user.image ? getImageUrl(user.image) : null,
+    }));
+
+    res.status(200).json(usersResponse);
   } catch (error) {
-    console.log(error);
+    console.error(error);
+    res.status(500).json({ message: "Error fetching users", error: error.message });
+  }
+};
+
+const getSingleUser = async (req, res) => {
+  try {
+    const userId = req.params.id; 
+
+    const user = await User.findById(userId).lean(); 
+
+    if (!user) {
+      return res.status(404).json({ message: "User not found" });
+    }
+    const userResponse = {
+      ...user,
+      image: user.image ? getImageUrl(user.image) : null, 
+    };
+
+    res.status(200).json(userResponse);
+  } catch (error) {
+    console.error("Error fetching user:", error);
+    res.status(500).json({ message: "Internal server error", error: error.message });
   }
 };
 
@@ -187,7 +212,7 @@ const verifyOTP = async (req, res) => {
     //   httpOnly: true,
     // };
 
-    console.log(savedUser)
+    console.log(savedUser);
     res
       .status(200)
       // .cookie("token", token, options)
@@ -204,7 +229,9 @@ const authenticateUser = async (req, res) => {
     const { email, password } = req.body;
 
     if (!email || !password) {
-      return res.status(400).json({ message: "Please fill all required fields" });
+      return res
+        .status(400)
+        .json({ message: "Please fill all required fields" });
     }
 
     const user = await User.findOne({ email }).lean(); // Use `lean()` for a plain object
@@ -240,9 +267,7 @@ const authenticateUser = async (req, res) => {
   }
 };
 
-
 const editUserProfile = async (req, res) => {
-
   try {
     if (!req.userId) {
       return res.status(401).json({ message: "Unauthorized user" });
@@ -259,8 +284,6 @@ const editUserProfile = async (req, res) => {
     const updatedUser = await User.findByIdAndUpdate(req.userId, req.body, {
       new: true,
     });
-
-     
 
     if (!updatedUser) {
       return res.status(404).json({ message: "User not found" });
@@ -415,69 +438,9 @@ const logout = (req, res) => {
   }
 };
 
-
-
-// done By Tohidul
-const userOrderGroupedByStatus = async (req, res) => {
-  const { userId } = req.params;
-
-  try {
-    // Check if user exists
-    const user = await User.findById(userId);
-    if (!user) {
-      return res.status(404).json({ message: "User not found" });
-    }
-
-    // Fetch all orders for the user and populate packageId to access package details
-    const orders = await Order.find({ userId })
-      .populate({
-        path: "packageId", // Populate packageId
-        select: "images tourName price", // Select only the required fields
-      })
-      .exec();
-
-    // Group orders by their status and include the first image from package
-    const groupedOrders = orders.reduce((acc, order) => {
-      const packageData = order.packageId || {};
-      const firstImage = packageData.images && packageData.images[0] ? packageData.images[0] : null;
-
-      if (!acc[order.status]) {
-        acc[order.status] = { status: order.status, orders: [], total: 0 }; // Initialize for new status
-      }
-      acc[order.status].orders.push({
-        ...order.toObject(),
-        packageImage: firstImage, // Add the first image of the package
-        packageName: packageData.tourName || "Unknown", // Add the tour name
-        packagePrice: packageData.price || "Unknown", // Add the price
-      });
-      acc[order.status].total += 1; // Increment the count for this status
-      return acc;
-    }, {});
-
-    // Convert the groupedOrders object into an array
-    const groupedOrdersArray = Object.values(groupedOrders);
-
-    // Calculate total orders for the user
-    const totalOrders = orders.length;
-
-    res.status(200).json({
-      message: "Orders grouped by status fetched successfully",
-      data: groupedOrdersArray, // Return data as an array
-      totalOrders, // Add the total number of orders to the response
-    });
-  } catch (error) {
-    console.error(error);
-    res.status(500).json({ message: "Server error" });
-  }
-};
-
-module.exports = {
-  userOrderGroupedByStatus,
-};
-
-
 module.exports = {
   checkAuthStatus,
+  getSingleUser,
   logout,
   resetPasssword,
   matchForgotPasswordOTP,
@@ -488,5 +451,4 @@ module.exports = {
   resendOtp,
   registerUser,
   getAllUsers,
-  userOrderGroupedByStatus
 };

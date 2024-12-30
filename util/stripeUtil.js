@@ -27,7 +27,7 @@ const createCheckoutSession = async ({ name, amount }) => {
               name: name,
             },
             // amount is in dollars, stripe requires amount in cents
-            unit_amount: amount * 100,
+            unit_amount: Number(amount) * 100,
           },
           quantity: 1,
         },

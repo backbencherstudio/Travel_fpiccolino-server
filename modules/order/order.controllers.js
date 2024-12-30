@@ -18,8 +18,7 @@ const createOrder = async (req, res) => {
     if (!user || !packageData) {
       return res.status(404).json({ error: "User or Package not found" });
     }
-
-    const totalPrice = packageData.price * quantity;
+    const totalPrice = Number(packageData.price) * quantity;
 
     const newOrder = new Order({
       userId,
@@ -32,9 +31,18 @@ const createOrder = async (req, res) => {
     });
 
     const savedOrder = await newOrder.save();
+
+    // proceed to payment
+    // const paymentResponse = await paymentHelper.makePayment({
+    //   package_name: packageData.tourName,
+    //   amount: totalPrice,
+    //   order_id: savedOrder._id,
+    // });
+
     res.status(201).json(savedOrder);
   } catch (error) {
-    res.status(500).json({ error: error.message });
+    // res.status(500).json({ error: error.message });
+    throw error;
   }
 };
 
@@ -87,28 +95,6 @@ const updateOrderStatus = async (req, res) => {
     res.json(order);
   } catch (error) {
     res.status(500).json({ error: error.message });
-  }
-};
-
-const updateOrder = async (req, res) => {
-  try {
-    const orderId = req.params.id;
-    const updatedData = req.body;
-    const updatedOrder = await Order.findByIdAndUpdate(orderId, updatedData, {
-      new: true,
-    });
-    if (!updatedOrder) {
-      return res.status(404).json({ message: "Order not found" });
-    }
-    res.status(200).json({
-      message: "Updated successfully",
-      order: updatedOrder,
-    });
-  } catch (error) {
-    res.status(400).json({
-      message: "Error updating order",
-      error: error.message,
-    });
   }
 };
 

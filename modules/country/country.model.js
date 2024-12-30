@@ -12,6 +12,15 @@ const countrySchema = new mongoose.Schema(
     contentDescription: {
       type: String,
     },
+    packages: [
+      {
+        type: mongoose.Schema.Types.ObjectId,
+        ref: "Package",
+      },
+    ],
+    image: {
+      type: String,
+    }
   },
   {
     timestamps: true,
