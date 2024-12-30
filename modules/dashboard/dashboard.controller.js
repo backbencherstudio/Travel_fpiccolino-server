@@ -70,7 +70,7 @@ const getAll = async (req, res) => {
     ]);
 
     // show 8 most recent orders
-    const orders = await orderModels.find().sort({ orderDate: -1 }).limit(8);
+    //const orders = await orderModels.find().sort({ orderDate: -1 }).limit(8);
 
     res.status(200).json({
       totalRevenue: totalRevenue,
@@ -79,7 +79,7 @@ const getAll = async (req, res) => {
       totalOrders: totalOrders,
       totalOrdersByCountry: totalOrdersByCountry,
      
-      orders: orders,
+      // orders: orders,
     });
   } catch (error) {
     res
@@ -277,11 +277,34 @@ const getRevenueData = async (req, res) => {
       message: "Server Error",
     });
   }
-};
+};   
+
+
+
+const bookingData = async (req, res) => {
+  const orders = await Order.find().populate("packageId").populate("userId");
+  let data = []
+  orders.map((order) => {
+    const userInfo = order.userId;
+    
+   const onedata = {
+      bookingId: order._id,
+      customerName: userInfo?.name,
+      customerImg:   userInfo?.image,
+      destination: order.packageId.destination,
+      amount: order.totalPrice,
+      status: order?.status,
+      date: order.orderDate
+    }
+    data.push(onedata);
+  });
+  return res.status(200).json({ success: true, data });
+}
 
 
 module.exports = {
   getAll,
   getRadarData,
-  getRevenueData
+  getRevenueData,
+  bookingData
 };
