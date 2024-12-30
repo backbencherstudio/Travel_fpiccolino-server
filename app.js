@@ -65,10 +65,10 @@ app.use("/api/newsletter", newsletter);
 app.use("/api/payment", payment);
 app.use("/api/transaction", transaction);
 app.use("/api/country", country);
-app.use("/api/pageData", pageData);
+// app.use("/api/pageData", pageData);
 app.use("/header", header);
 app.use("/order", order);
-app.use("/section-title", sectionTitle);
+// app.use("/section-title", sectionTitle);
 
 app.use("/api/review", review);
 app.use("/api/footer", footer);

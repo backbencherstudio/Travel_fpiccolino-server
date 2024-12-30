@@ -1,4 +1,5 @@
 const orderModels = require("../order/order.models");
+const Order = require("../order/order.models");
 
 const getAll = async (req, res) => {
   try {
@@ -7,10 +8,23 @@ const getAll = async (req, res) => {
       { $group: { _id: null, total: { $sum: "$totalPrice" } } },
     ]);
 
-    // get total travellers using order passenger field 
-    const totalTravellers = await Order.aggregate([
-      { $group: { _id: null, total: { $sum: "$passenger" } } },
-    ]);
+    // get total travellers using order passenger field
+    // const totalTravellers = await Order.aggregate([
+    //   { $group: { _id: null, total: { $sum: "$passenger" } } },
+    // ]);
+    const orderss = await Order.find().populate("packageId");
+
+    // Initialize passenger sum
+    let totalPassengers = 0;
+
+    // Iterate through orders and sum passengers
+    orderss.forEach((order) => {
+      if (order.packageId && order.packageId.pessenger) {
+        totalPassengers += order.packageId.pessenger;
+      }
+    });
+
+
 
     // get total profit using order totalPrice field and cost_per_package field, profit is totalPrice - cost_per_package
     const totalCostPerPackage = await Order.aggregate([
@@ -36,7 +50,7 @@ const getAll = async (req, res) => {
 
     res.status(200).json({
       totalRevenue: totalRevenue,
-      totalTravellers: totalTravellers,
+      totalTravellers: totalPassengers,
       totalProfit: totalProfit,
       totalOrders: totalOrders,
       totalOrdersByCountry: totalOrdersByCountry,
