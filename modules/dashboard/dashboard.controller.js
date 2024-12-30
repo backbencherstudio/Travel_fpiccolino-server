@@ -7,7 +7,7 @@ const getAll = async (req, res) => {
       { $group: { _id: null, total: { $sum: "$totalPrice" } } },
     ]);
 
-    // get total travellers using order passenger field
+    // get total travellers using order passenger field 
     const totalTravellers = await Order.aggregate([
       { $group: { _id: null, total: { $sum: "$passenger" } } },
     ]);
