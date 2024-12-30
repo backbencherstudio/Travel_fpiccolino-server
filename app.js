@@ -23,7 +23,6 @@ const review = require("./modules/review/review.route");
 const footer = require("./modules/footer/footer.route");
 
 const orderPersonalDetails = require("./modules/order/orderPersonalDetails/orderPersonalDetails.routes");
-const dashboard = require("./modules/dashboard/dashboard.routes");
 
 const blogs = require("./modules/blogs/blog.route");
 const path = require("path");

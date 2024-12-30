@@ -5,17 +5,17 @@ const OrderSchema = new Schema(
   {
     userId: {
       type: mongoose.Types.ObjectId,
-      ref: "User",
+      ref: "User", 
       required: true,
     },
     packageId: {
       type: mongoose.Types.ObjectId,
-      ref: "Package",
+      ref: "Package",  
       required: true,
     },
     transactionId: {
       type: mongoose.Types.ObjectId,
-      ref: "Transaction",
+      ref: "Transaction", 
     },
     status: {
       type: String,
@@ -29,11 +29,7 @@ const OrderSchema = new Schema(
     },
     totalPrice: {
       type: Number,
-      required: true,
-    },
-    // cost per package, will be hidden for client side
-    cost_per_package: {
-      type: Number,
+      required: true,  
     },
     paymentMethod: {
       type: String,
@@ -41,7 +37,7 @@ const OrderSchema = new Schema(
       required: true,
     },
     notes: {
-      type: String,
+      type: String,  
     },
     shippingAddress: {
       street: { type: String },
@@ -55,7 +51,7 @@ const OrderSchema = new Schema(
       default: Date.now,
     },
     completionDate: {
-      type: Date,
+      type: Date, 
     },
   },
   {
