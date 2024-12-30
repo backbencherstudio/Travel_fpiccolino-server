@@ -193,6 +193,95 @@ const getRadarData = async (req, res) => {
 
 
 
+
+// Controller function for getting total revenue by month and week
+const getRevenueData = async (req, res) => {
+  try {
+    // Query for monthly revenue
+    const monthlyRevenue = await Order.aggregate([
+      {
+        $project: {
+          month: { $month: "$orderDate" },
+          year: { $year: "$orderDate" },
+          totalPrice: 1,
+        },
+      },
+      {
+        $group: {
+          _id: { month: "$month", year: "$year" },
+          totalRevenue: { $sum: "$totalPrice" },
+        },
+      },
+      {
+        $sort: { "_id.year": 1, "_id.month": 1 },
+      },
+      {
+        $project: {
+          x: {
+            $concat: [
+              { 
+                $arrayElemAt: [
+                  ["Jan", "Feb", "Mar", "Apr", "May", "Jun", "Jul", "Aug", "Sep", "Oct", "Nov", "Dec"],
+                  { $subtract: ["$_id.month", 1] }
+                ] 
+              },
+              " ",
+              { $toString: "$_id.year" },
+            ],
+          },
+          y: "$totalRevenue",
+          _id: 0,  // Remove the _id field from the response
+        },
+      },
+    ]);
+
+    // Query for weekly revenue
+    const weeklyRevenue = await Order.aggregate([
+      {
+        $project: {
+          week: { $isoWeek: "$orderDate" },
+          year: { $year: "$orderDate" },
+          totalPrice: 1,
+        },
+      },
+      {
+        $group: {
+          _id: { week: "$week", year: "$year" },
+          totalRevenue: { $sum: "$totalPrice" },
+        },
+      },
+      {
+        $sort: { "_id.year": 1, "_id.week": 1 },
+      },
+      {
+        $project: {
+          x: { $concat: ["Week ", { $toString: "$_id.week" }] },
+          y: "$totalRevenue",
+          _id: 0,  // Remove the _id field from the response
+        },
+      },
+    ]);
+
+    // Return both monthly and weekly revenue data
+    return res.status(200).json({
+      success: true,
+      revenueData: {
+        monthly: monthlyRevenue,
+        weekly: weeklyRevenue,
+      },
+    });
+  } catch (err) {
+    console.error(err);
+    return res.status(500).json({
+      success: false,
+      message: "Server Error",
+    });
+  }
+};
+
+
 module.exports = {
-  getAll,getRadarData
+  getAll,
+  getRadarData,
+  getRevenueData
 };
