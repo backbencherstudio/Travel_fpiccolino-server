@@ -4,15 +4,11 @@ const Package = require("../package/package.model");
 
 const getAll = async (req, res) => {
   try {
-    // get total revenue using order totalPrice field
+   
     const totalRevenue = await Order.aggregate([
       { $group: { _id: null, total: { $sum: "$totalPrice" } } },
     ]);
 
-    // get total travellers using order passenger field
-    // const totalTravellers = await Order.aggregate([
-    //   { $group: { _id: null, total: { $sum: "$passenger" } } },
-    // ]);
     const orderss = await Order.find().populate("packageId");
 
     // Initialize passenger sum
@@ -24,33 +20,19 @@ const getAll = async (req, res) => {
         totalPassengers += order.packageId.pessenger;
       }
     });
+    let completedOrders = 0;
+    let pendingOrders = 0;
+    orderss.map((order) => {
+      if (order.status === "completed") {
+        completedOrders += 1;
+      }
+      else if(order.status === "pending") {
+        pendingOrders += 1;
+      }
+    });
 
-    // all Country-----------------------------------------------------
-    // const ordersWithCountryNames = await Promise.all(
-    //   orderss.map(async (order) => {
-    //     if (!order.packageId) {
-    //       return { ...order.toObject(), countries: [] }; // If packageId is missing, attach empty countries
-    //     }
-
-    //     const packageData = await Package.findById(order.packageId).populate({
-    //       path: "country",
-    //       select: "name -_id", // Only select the 'name' field from Country
-    //     });
-
-    //     // Extract the country names
-    //     const countries = packageData?.country
-    //       ? Array.isArray(packageData.country)
-    //         ? packageData.country.map((country) => country.name)
-    //         : [packageData.country.name]
-    //       : [];
-
-    //     return { ...order.toObject(), countries };
-    //   })
-    // );
-
-
-
-    // get total profit using order totalPrice field and cost_per_package field, profit is totalPrice - cost_per_package
+   
+    
     const totalCostPerPackage = await Order.aggregate([
       { $group: { _id: null, total: { $sum: "$cost_per_package" } } },
     ]);
@@ -78,6 +60,8 @@ const getAll = async (req, res) => {
       totalProfit: totalProfit,
       totalOrders: totalOrders,
       totalOrdersByCountry: totalOrdersByCountry,
+      completedOrders,
+      pendingOrders
      
       // orders: orders,
     });
