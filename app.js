@@ -21,6 +21,7 @@ const order = require("./modules/order/order.routes");
 const sectionTitle = require("./modules/sectionTitle/sectionTitle.routes");
 const review = require("./modules/review/review.route");
 const footer = require("./modules/footer/footer.route");
+const dashboard = require("./modules/dashboard/dashboard.routes");
 
 const orderPersonalDetails = require("./modules/order/orderPersonalDetails/orderPersonalDetails.routes");
 
