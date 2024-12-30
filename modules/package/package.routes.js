@@ -13,15 +13,14 @@ const router = express.Router();
 
 router.post(
   "/",
-  upload.fields([
-    { name: "images"},  
-    { name: "hotelImages"},
-  ]),
+  upload.fields([{ name: "images" }, { name: "hotelImages" }]),
   createPackage
 );
 router.get("/", getAllPackages);
 router.get("/:id", getPackageById);
+
 router.put("/:id", upload.array("images"), updatePackage);
+
 router.delete("/:id", deletePackage);
 router.get("/search", searchPackages);
 

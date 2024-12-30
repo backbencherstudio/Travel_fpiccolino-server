@@ -1,196 +1,31 @@
 const { getImageUrl } = require("../../util/image_path");
 const Package = require("./package.model");
 
-// const createPackage = async (req, res) => {
-//   try {
-//     const packageData = req.body;
-//     let images = [];
-//     if (req.files && req.files.length > 0) {
-//       images = req.files.map((file) => `/uploads/${file.filename}`); // Correctly map the file paths
-//     }
-
-//     packageData.images = images;
-//     console.log(18,packageData);
-
-//     // Create a new package instance
-//     const newPackage = new Package(packageData);
-//     await newPackage.save();
-//   res.send("done")
-//     // res.status(201).json({
-//     //   message: "Package created successfully",
-//     //   package: {
-//     //     ...newPackage.toObject(),
-//     //     imageUrl: newPackage?.images?.map((path) => getImageUrl(path)),
-//     //   },
-//     // });
-//   } catch (error) {
-//     res.status(400).json({
-//       message: "Error creating package",
-//       error: error.message,
-//     });
-//   }
-// };
-
-// const createPackage = async (req, res) => {
-//   try {
-//     const packageData = req.body;
-
-//     console.log(8, packageData);
-
-//     // // Handle images
-//     // if (req.files && req.files.length > 0) {
-//     //   packageData.imageUrl = req.files.map(
-//     //     (file) => `/uploads/${file.filename}`
-//     //   );
-//     // } else {
-//     //   packageData.imageUrl = [];
-//     // }
-
-//     // Save the package to the database
-//     // const newPackage = new Package(packageData);
-//     // await newPackage.save();
-
-//     // res.status(201).json({
-//     //   message: "Package created successfully",
-//     //   package: {
-//     //     ...newPackage.toObject(),
-//     //     imageUrl: newPackage.imageUrl.map((path) => `${process.env.APP_URL}${path}`),
-//     //   },
-//     // });
-//   } catch (error) {
-//     res.status(400).json({
-//       message: "Error creating package",
-//       error: error.message,
-//     });
-//   }
-// };
-
-// const createPackage = async (req, res) => {
-//   try {
-//     const packageData = req.body;
-//     let images = [];
-//     // Handle uploaded images
-//     if (req.files && req.files.length > 0) {
-//       images = req.files.map((file) => `/uploads/${file.filename}`);
-//     }
-//     // Parse JSON fields that are sent as strings
-//     if (packageData.tourDuration) {
-//       packageData.tourDuration = JSON.parse(packageData.tourDuration);
-//     }
-//     if (packageData.includeItems) {
-//       packageData.includeItems = JSON.parse(packageData.includeItems);
-//     }
-//     if (packageData.notIncludeItems) {
-//       packageData.notIncludeItems = JSON.parse(packageData.notIncludeItems);
-//     }
-//     if (packageData.bookedFlights) {
-//       packageData.bookedFlights = JSON.parse(packageData.bookedFlights);
-//     }
-//     if (packageData.insurance) {
-//       packageData.insurance = JSON.parse(packageData.insurance);
-//     }    
-//     packageData.images = images;
-//     const newPackage = new Package(packageData);
-//     await newPackage.save();
-
-//     res.status(201).json({
-//       message: "Package created successfully",
-//       package: {
-//         ...newPackage.toObject(),
-//         imageUrl: newPackage?.images?.map((path) => getImageUrl(path)),
-//       },
-//     });
-//   } catch (error) {
-//     throw error;
-//   }
-// };
-
-
 const createPackage = async (req, res) => {
-  console.log(req.body);
-  console.log(req.files);
+  // console.log(req.body)
+  // console.log(req.files);
+
   try {
     const packageData = req.body;
-    let images = [];
-    let hotelImages = [];
 
-    if (req.files) {
-      // Extract images from the `images` field
-      if (req.files.images) {
-        images = req.files.images.map((file) => `/uploads/${file.filename}`);
-      }
-
-      // Extract hotel images from the `hotelImages` field
-      if (req.files.hotelImages) {
-        hotelImages = req.files.hotelImages.map((file) => `/uploads/${file.filename}`);
-      }
+    if (req.files && req.files.length > 0) {
+      packageData.images = req.files.map((file) => `/uploads/${file.filename}`);
+    } else {
+      packageData.images = [];
     }
 
-    // Parse JSON fields that are sent as strings
-    if (packageData.tourDuration) {
-      packageData.tourDuration = JSON.parse(packageData.tourDuration);
-    }
-    if (packageData.includeItems) {
-      packageData.includeItems = JSON.parse(packageData.includeItems);
-    }
-    if (packageData.notIncludeItems) {
-      packageData.notIncludeItems = JSON.parse(packageData.notIncludeItems);
-    }
-    if (packageData.bookedFlights) {
-      packageData.bookedFlights = JSON.parse(packageData.bookedFlights);
-    }
-    if (packageData.insurance) {
-      packageData.insurance = JSON.parse(packageData.insurance);
-    }
-
-    // Assign processed images to package data
-    packageData.hotelImages = hotelImages;
-    packageData.images = images;
-
+    console.log(packageData);
     const newPackage = new Package(packageData);
     await newPackage.save();
+
+    // res.send(newPackage);
 
     res.status(201).json({
       message: "Package created successfully",
       package: {
         ...newPackage.toObject(),
-        imageUrl: newPackage?.images?.map((path) => getImageUrl(path)),
-        hotelImageUrls: newPackage?.hotelImages?.map((path) =>
-          getImageUrl(path)
-        ),
+        imageUrl: newPackage.images.map((path) => getImageUrl(path)),
       },
-    });
-  } catch (error) {
-    console.error(error);
-    res.status(500).json({
-      message: "Failed to create package",
-      error,
-    });
-  }
-};
-
-
-
-const searchPackages = async (req, res) => {
-  try {
-    const { q } = req.query;
-    const packages = await Package.find({
-      $or: [
-        { tourName: { $regex: q, $options: "i" } },
-        { tourDescription: { $regex: q, $options: "i" } },
-      ],
-    });
-
-    const formattedPackages = packages.map((packageItem) => ({
-      ...packageItem.toObject(),
-      imageUrl: packageItem?.images?.map(
-        (path) => `${process.env.APP_URL}${path}`
-      ),
-    }));
-
-    res.status(200).json({
-      message: "Packages fetched successfully",
-      packages: formattedPackages,
     });
   } catch (error) {
     res.status(500).json({
@@ -246,7 +81,6 @@ const getPackageById = async (req, res) => {
   }
 };
 
-
 const updatePackage = async (req, res) => {
   try {
     const packageId = req.params.id;
@@ -270,8 +104,6 @@ const updatePackage = async (req, res) => {
   }
 };
 
-
-
 const deletePackage = async (req, res) => {
   try {
     const packageId = req.params.id;
@@ -284,6 +116,35 @@ const deletePackage = async (req, res) => {
     res
       .status(500)
       .json({ message: "Error deleting package", error: error.message });
+  }
+};
+
+const searchPackages = async (req, res) => {
+  try {
+    const { q } = req.query;
+    const packages = await Package.find({
+      $or: [
+        { tourName: { $regex: q, $options: "i" } },
+        { tourDescription: { $regex: q, $options: "i" } },
+      ],
+    });
+
+    const formattedPackages = packages.map((packageItem) => ({
+      ...packageItem.toObject(),
+      imageUrl: packageItem?.images?.map(
+        (path) => `${process.env.APP_URL}${path}`
+      ),
+    }));
+
+    res.status(200).json({
+      message: "Packages fetched successfully",
+      packages: formattedPackages,
+    });
+  } catch (error) {
+    res.status(500).json({
+      message: "Error fetching packages",
+      error: error.message,
+    });
   }
 };
 
