@@ -7,7 +7,7 @@ const cookieParser = require("cookie-parser");
 const user = require("./modules/users/users.routes");
 
 const subscriber = require("./modules/subscriber/subscriber.routes");
-
+const newsletter = require("./modules/newsletter/newsletter.routes");
 const package = require("./modules/package/package.routes");
 const category = require("./modules/category/category.routes");
 const blogss = require("./modules/blogs/blog.route");
@@ -15,8 +15,10 @@ const contact = require("./modules/contact/contact.route");
 const payment = require("./modules/payment/payment.routes");
 const transaction = require("./modules/transaction/transaction.routes");
 const country = require("./modules/country/country.routes");
+const pageData = require("./modules/getPageData/getPageData.routes");
 const header = require("./modules/header/header.routes");
 const order = require("./modules/order/order.routes");
+const sectionTitle = require("./modules/sectionTitle/sectionTitle.routes");
 const review = require("./modules/review/review.route");
 const footer = require("./modules/footer/footer.route");
 
@@ -70,17 +72,17 @@ app.use("/api/newsletter", newsletter);
 app.use("/api/payment", payment);
 app.use("/api/transaction", transaction);
 app.use("/api/country", country);
-// app.use("/api/pageData", pageData);
+app.use("/api/pageData", pageData);
 app.use("/header", header);
 app.use("/order", order);
-// app.use("/section-title", sectionTitle);
+app.use("/section-title", sectionTitle);
 
 app.use("/api/review", review);
 app.use("/api/footer", footer);
 
 app.use("/order/:orderId/orderPersonalDetails", orderPersonalDetails);
 app.use("/dashboard", dashboard);
-//app.use("/api/newsletter", newsletter);
+// app.use("/api/newsletter", newsletter);
 
 app.use("/category", category);
 
