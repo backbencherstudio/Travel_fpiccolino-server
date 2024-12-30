@@ -138,23 +138,46 @@ const getHomePage = async (req, res) => {
   }
 };
 
-const turePage = async (req, res) => {
+const getTourPage = async (req, res) => {
   try {
-    const getHomeHeader = await Header.findOne({ pageName: "tour" });
+    const getTourHeader = await Header.findOne({ pageName: "tour" });
 
     const getsectionTitle = await SectinTitle.find({
       name: { $regex: /^tour/ },
     });
 
+    const packages = await Package.aggregate([
+      {
+        $facet: {
+          allInclusive: [
+            { $match: { category: "all inclusive" } }, 
+            { $limit: 10 }, 
+          ],
+          others: [
+            { $match: { category: { $ne: "all inclusive" } } }, 
+            { $limit: 10 }, 
+          ],
+        },
+      },
+    ]);
+    // const getCountry = await Country.find();
+
+    // const transformedTour = getTourPackage
+    //   .map((adventure) => ({
+    //     ...adventure.toObject(),
+    //     images: adventure?.images?.map((image) => getImageUrl(image)),
+    //   }))
+    //   .sort((a, b) => b - a);
+
     const response = {
       hero: {
-        blogDetailsTitle: getAboutHeader?.blogDetailsTitle,
-        image: getImageUrl(getAboutHeader?.image),
-        titleOne: getAboutHeader?.titleOne,
-        titleTwo: getAboutHeader?.titleTwo,
-        pageName: getAboutHeader?.pageName,
-        descriptionOne: getAboutHeader?.descriptionOne,
-        descriptionTwo: getAboutHeader?.descriptionTwo,
+        blogDetailsTitle: getTourHeader?.blogDetailsTitle,
+        image: getImageUrl(getTourHeader?.image),
+        titleOne: getTourHeader?.titleOne,
+        titleTwo: getTourHeader?.titleTwo,
+        pageName: getTourHeader?.pageName,
+        descriptionOne: getTourHeader?.descriptionOne,
+        descriptionTwo: getTourHeader?.descriptionTwo,
       },
       about: {
         title: getsectionTitle[0]?.title,
@@ -171,13 +194,17 @@ const turePage = async (req, res) => {
       contact: {
         title: getsectionTitle[3]?.title,
         subtitle: getsectionTitle[3]?.description,
-        data: getReview,
+        
       },
     };
+
+    res.status(200).json(packages);
   } catch (error) {
     throw error.message;
   }
 };
+
+
 const BlogPage = async (req, res) => {
   try {
     const getBlogs = await Blogs.find();
@@ -238,6 +265,7 @@ const getPolicy = async (req, res) => {
 // const
 module.exports = {
   getHomePage,
+  getTourPage,
   BlogPage,
   getPolicy,
 };

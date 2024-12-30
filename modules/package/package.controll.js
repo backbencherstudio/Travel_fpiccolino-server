@@ -65,14 +65,63 @@ const Package = require("./package.model");
 //   }
 // };
 
+// const createPackage = async (req, res) => {
+//   try {
+//     const packageData = req.body;
+//     let images = [];
+//     // Handle uploaded images
+//     if (req.files && req.files.length > 0) {
+//       images = req.files.map((file) => `/uploads/${file.filename}`);
+//     }
+//     // Parse JSON fields that are sent as strings
+//     if (packageData.tourDuration) {
+//       packageData.tourDuration = JSON.parse(packageData.tourDuration);
+//     }
+//     if (packageData.includeItems) {
+//       packageData.includeItems = JSON.parse(packageData.includeItems);
+//     }
+//     if (packageData.notIncludeItems) {
+//       packageData.notIncludeItems = JSON.parse(packageData.notIncludeItems);
+//     }
+//     if (packageData.bookedFlights) {
+//       packageData.bookedFlights = JSON.parse(packageData.bookedFlights);
+//     }
+//     if (packageData.insurance) {
+//       packageData.insurance = JSON.parse(packageData.insurance);
+//     }    
+//     packageData.images = images;
+//     const newPackage = new Package(packageData);
+//     await newPackage.save();
+
+//     res.status(201).json({
+//       message: "Package created successfully",
+//       package: {
+//         ...newPackage.toObject(),
+//         imageUrl: newPackage?.images?.map((path) => getImageUrl(path)),
+//       },
+//     });
+//   } catch (error) {
+//     throw error;
+//   }
+// };
+
+
 const createPackage = async (req, res) => {
   try {
     const packageData = req.body;
     let images = [];
-    // Handle uploaded images
+    let hotelImages = [];
+
     if (req.files && req.files.length > 0) {
-      images = req.files.map((file) => `/uploads/${file.filename}`);
+      images = req.files.map((file) =>
+        file.fieldname === "hotelImages" ? `/uploads/${file.filename}` : null
+      ).filter(Boolean);
+
+      hotelImages = req.files.map((file) =>
+        file.fieldname === "images" ? `/uploads/${file.filename}` : null
+      ).filter(Boolean);
     }
+
     // Parse JSON fields that are sent as strings
     if (packageData.tourDuration) {
       packageData.tourDuration = JSON.parse(packageData.tourDuration);
@@ -88,8 +137,18 @@ const createPackage = async (req, res) => {
     }
     if (packageData.insurance) {
       packageData.insurance = JSON.parse(packageData.insurance);
-    }    
+    }
+
+    //hotel data
+    if (packageData.hotelName) {
+      packageData.hotelName = packageData.hotelName;
+    }
+    if (packageData.hotelAbout) {
+      packageData.hotelAbout = packageData.hotelAbout;
+    }
+    packageData.hotelImages = hotelImages;
     packageData.images = images;
+
     const newPackage = new Package(packageData);
     await newPackage.save();
 
@@ -98,12 +157,20 @@ const createPackage = async (req, res) => {
       package: {
         ...newPackage.toObject(),
         imageUrl: newPackage?.images?.map((path) => getImageUrl(path)),
+        hotelImageUrls: newPackage?.hotelImages?.map((path) =>
+          getImageUrl(path)
+        ),
       },
     });
   } catch (error) {
-    throw error;
+    console.error(error);
+    res.status(500).json({
+      message: "Failed to create package",
+      error,
+    });
   }
 };
+
 
 const searchPackages = async (req, res) => {
   try {
