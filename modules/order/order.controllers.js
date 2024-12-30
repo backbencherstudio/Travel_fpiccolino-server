@@ -145,7 +145,7 @@ module.exports = {
   getOrderById,
   getUserOrders,
   updateOrderStatus,
-  updateOrder,
+  // updateOrder,
   cancelOrder,
   searchOrders,
 };
