@@ -89,10 +89,8 @@ const getHomePage = async (req, res) => {
       blogSection: {
         ...getSectionData("landing6"),
         data: blogSection,
-      },
-      
-        footer: footer,
-      
+      },      
+        footer: footer,      
     };
 
     res.status(200).json(response);
