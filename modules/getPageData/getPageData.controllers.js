@@ -1,5 +1,4 @@
 const { getImageUrl, baseUrl } = require("../../util/image_path");
-const { getImageUrl, baseUrl } = require("../../util/image_path");
 const Country = require("../country/country.model");
 const Header = require("../header/header.modls");
 const SectinTitle = require("../sectionTitle/sectionTitle.models");
