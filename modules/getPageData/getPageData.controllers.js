@@ -7,6 +7,7 @@ const Review = require("../review/review.model");
 const Blogs = require("../blogs/blog.model");
 const Footer = require("../footer/footer.model");
 
+
 // const getHomePage = async (req, res) => {
 //   try {
 //     const [
@@ -120,14 +121,14 @@ const getHomePage = async (req, res) => {
         images: adventure?.images?.map((image) => getImageUrl(image)),
         hotelImages: adventure?.images?.map((image) => getImageUrl(image)),
       }))
-      .sort((a, b) => b - a);
+      //.sort((a, b) => b - a);
 
     const transformedCountry = getCountry
       .map((country) => ({
         ...country,
         image: country?.image ? getImageUrl(country.image) : null,
       }))
-      .sort((a, b) => b - a);
+     // .sort((a, b) => b - a);
 
     const getSectionData = (name) => {
       const section = getsectionTitle.find((item) => item.name === name);

@@ -33,9 +33,9 @@ const packageSchema = new mongoose.Schema(
       // required: true,
     },
     country: {
-      // type: mongoose.Schema.Types.ObjectId,
-      // ref: "Country",
-      type: String,
+      type: mongoose.Schema.Types.ObjectId,
+      ref: "Country",
+      // type: String,
     },
     includeItems: [
       {

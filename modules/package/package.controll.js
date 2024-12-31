@@ -1,7 +1,6 @@
 const { getImageUrl } = require("../../util/image_path");
 const Package = require("./package.model");
 
-
 const createPackage = async (req, res) => {
   console.log(req.body);
   console.log(req.files);
@@ -18,7 +17,9 @@ const createPackage = async (req, res) => {
 
       // Extract hotel images from the `hotelImages` field
       if (req.files.hotelImages) {
-        hotelImages = req.files.hotelImages.map((file) => `/uploads/${file.filename}`);
+        hotelImages = req.files.hotelImages.map(
+          (file) => `/uploads/${file.filename}`
+        );
       }
     }
 
@@ -65,14 +66,16 @@ const createPackage = async (req, res) => {
   }
 };
 
-
 const getAllPackages = async (req, res) => {
   try {
     const packages = await Package.find().populate("country");
 
     const formattedPackages = packages.map((packageItem) => ({
       ...packageItem.toObject(),
-      imageUrl: packageItem?.images?.map(
+      images: packageItem?.images?.map(
+        (path) => `${process.env.APP_URL}${path}`
+      ),
+      hotelImages: packageItem?.hotelImages?.map(
         (path) => `${process.env.APP_URL}${path}`
       ),
     }));
@@ -101,7 +104,8 @@ const getPackageById = async (req, res) => {
     // Add image URLs to the package
     const formattedPackage = {
       ...package.toObject(),
-      imageUrl: package?.images?.map((path) => getImageUrl(path)),
+      images: package?.images?.map((path) => getImageUrl(path)),
+      hotelImages: package?.hotelImages.map((path) => getImageUrl(path)),
     };
 
     res.status(200).json(formattedPackage);
@@ -113,6 +117,9 @@ const getPackageById = async (req, res) => {
 };
 
 const updatePackage = async (req, res) => {
+  console.log(req.body);
+  console.log(req.files);
+
   try {
     const packageId = req.params.id;
     const updatedData = req.body;
