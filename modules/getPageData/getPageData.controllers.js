@@ -24,7 +24,7 @@ const getHomePage = async (req, res) => {
       Package.find().lean(),
       Country.find().select("name image").lean(),
       Review.find().lean(),
-      Blogs.find().select("title content").lean(),
+      Blogs.find().lean(),
       Footer.find().lean(),
     ]);
 
@@ -50,6 +50,13 @@ const getHomePage = async (req, res) => {
         description: section?.description || "",
       };
     };
+
+    const blogSection = Blog
+    .map((blog) => ({
+      ...blog,
+      images: blog?.heroSection[0]?.image?.map((image) =>`/uploads${getImageUrl(image)}`),
+    }))
+    .sort((a, b) => b - a);
 
     const response = {
       hero: {
@@ -78,15 +85,14 @@ const getHomePage = async (req, res) => {
         ...getSectionData("landing5"),
         data: getReview,
       },
-      contact: getSectionData("landing6"),
+      // contact: getSectionData("landing6"),
       blogSection: {
-        ...getSectionData("landing5"),
-        data: Blog,
-      },
-      footer: {
         ...getSectionData("landing6"),
-        footer: footer,
+        data: blogSection,
       },
+      
+        footer: footer,
+      
     };
 
     res.status(200).json(response);
