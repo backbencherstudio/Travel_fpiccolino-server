@@ -1,7 +1,6 @@
 const Order = require("./order.models");
 const Package = require("./../package/package.model");
 const User = require("../users/users.models");
-const paymentHelper = require("../common/payment/PaymentHelper");
 
 const createOrder = async (req, res) => {
   try {
@@ -42,7 +41,6 @@ const createOrder = async (req, res) => {
 
     res.status(201).json(savedOrder);
   } catch (error) {
-  
     // res.status(500).json({ error: error.message });
     throw error;
   }
@@ -54,7 +52,7 @@ const getOrderById = async (req, res) => {
     const order = await Order.findById(orderId)
       .populate("userId", "name email")
       .populate("packageId", "tourName tourDescription");
-    if (!order) {    
+    if (!order) {
       return res.status(404).json({ error: "Order not found" });
     }
     res.json(order);
@@ -100,6 +98,22 @@ const updateOrderStatus = async (req, res) => {
   }
 };
 
+const updateOrder = async (req, res) => {
+  try {
+    const orderId = req.params.id;
+    const data = req.body;
+
+    const order = await Order.findByIdAndUpdate(orderId, data, { new: true });
+    if (!order) {
+      return res.status(404).json({ error: "Order not found" });
+    }
+
+    res.json(order);
+  } catch (error) {
+    res.status(500).json({ error: error.message });
+  }
+};
+
 const cancelOrder = async (req, res) => {
   try {
     const orderId = req.params.id;
@@ -122,10 +136,32 @@ const cancelOrder = async (req, res) => {
   }
 };
 
+const searchOrders = async (req, res) => {
+  try {
+    const { q, status } = req.query;
+    const query = {};
+    if (q) {
+      query.$text = { $search: q };
+    }
+    if (status) {
+      query.status = status;
+    }
+
+    const orders = await Order.find(query)
+      .populate("userId", "name email")
+      .populate("packageId", "tourName price");
+    res.json(orders);
+  } catch (error) {
+    res.status(500).json({ error: error.message });
+  }
+};
+
 module.exports = {
   createOrder,
   getOrderById,
   getUserOrders,
   updateOrderStatus,
+  updateOrder,
   cancelOrder,
+  searchOrders,
 };

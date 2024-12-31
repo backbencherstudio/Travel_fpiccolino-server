@@ -4,37 +4,38 @@ const packageSchema = new mongoose.Schema(
   {
     tourName: {
       type: String,
-      required: true,
+      // required: true,
     },
     tourDescription: {
       type: String,
-      required: true,
+      // required: true,
     },
     tourDate: {
       type: Date,
-      required: true,
+      // required: true,
     },
     tourDuration: {
       nights: {
         type: Number,
-        required: true,
+        // required: true,
       },
       days: {
         type: Number,
-        required: true,
+        // required: true,
       },
     },
     pessenger: {
       type: Number,
-      required: true,
+      // required: true,
     },
     price: {
       type: Number,
-      required: true,
+      // required: true,
     },
     country: {
-      type: mongoose.Schema.Types.ObjectId,
-      ref: "Country",
+      // type: mongoose.Schema.Types.ObjectId,
+      // ref: "Country",
+      type: String,
     },
     includeItems: [
       {
@@ -76,7 +77,7 @@ const packageSchema = new mongoose.Schema(
         flightClass: { type: String },
         price: {
           type: Number,
-          required: true,
+          // required: true,
         },
       },
     ],
@@ -86,7 +87,7 @@ const packageSchema = new mongoose.Schema(
         description: { type: String },
         price: { type: String },
       },
-    ],    
+    ],
     category: [
       {
         type: String,
@@ -95,7 +96,7 @@ const packageSchema = new mongoose.Schema(
     destination: {
       type: String,
     },
-    amount:  {
+    amount: {
       type: Number,
     },
     images: [
@@ -103,7 +104,16 @@ const packageSchema = new mongoose.Schema(
         type: String,
       },
     ],
+
+    hotelName: { type: String },
+    hotelAbout: { type: String },
+    hotelImages: [
+      {
+        type: String,
+      },
+    ],
   },
+
   {
     timestamps: true,
   }

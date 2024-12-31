@@ -138,60 +138,82 @@ const getHomePage = async (req, res) => {
   }
 };
 
-// const getAboutPage = async (req, res) => {
-//   try {
-//     const getAboutHeader = await Header.findOne({ pageName: "about" });
-//     const getAboutSectionTitle = await SectinTitle.find({
-//       name: { $regex: /^about/ },
-//     });
+const getTourPage = async (req, res) => {
+  try {
+    const getTourHeader = await Header.findOne({ pageName: "tour" });
 
-//     const response = {
-//       hero: {
-//         blogDetailsTitle: getAboutHeader?.blogDetailsTitle,
-//         image: getImageUrl(getAboutHeader?.image),
-//         titleOne: getAboutHeader?.titleOne,
-//         titleTwo: getAboutHeader?.titleTwo,
-//         pageName: getAboutHeader?.pageName,
-//         descriptionOne: getAboutHeader?.descriptionOne,
-//         descriptionTwo: getAboutHeader?.descriptionTwo,
-//       },
-//       about: {
-//         title: getAboutSectionTitle[0]?.title,
-//         subtitle: getAboutSectionTitle[0]?.description,
-//       },
-//       team: {
-//         title: getAboutSectionTitle[1]?.title,
-//         subtitle: getAboutSectionTitle[1]?.description,
-//       },
-//       testimonial: {
-//         title: getAboutSectionTitle[2]?.title,
-//         subtitle: getAboutSectionTitle[2]?.description,
-//       },
-//       contact: {
-//         title: getAboutSectionTitle[3]?.title,
-//         subtitle: getAboutSectionTitle[3]?.description,
-//         data: getReview
-//       },
-//     };
+    const getsectionTitle = await SectinTitle.find({
+      name: { $regex: /^tour/ },
+    });
 
-//     res.status(200).json(response);
-//   } catch (error) {
-//     // res.status(500).json({ error: error.message });
-//     throw error.message;
-//   }
-// };
+    const packages = await Package.aggregate([
+      {
+        $facet: {
+          allInclusive: [
+            { $match: { category: "all inclusive" } },
+            { $limit: 10 },
+          ],
+          others: [
+            { $match: { category: { $ne: "all inclusive" } } },
+            { $limit: 10 },
+          ],
+        },
+      },
+    ]);
+    // const getCountry = await Country.find();
+
+    // const transformedTour = getTourPackage
+    //   .map((adventure) => ({
+    //     ...adventure.toObject(),
+    //     images: adventure?.images?.map((image) => getImageUrl(image)),
+    //   }))
+    //   .sort((a, b) => b - a);
+
+    const response = {
+      hero: {
+        blogDetailsTitle: getTourHeader?.blogDetailsTitle,
+        image: getImageUrl(getTourHeader?.image),
+        titleOne: getTourHeader?.titleOne,
+        titleTwo: getTourHeader?.titleTwo,
+        pageName: getTourHeader?.pageName,
+        descriptionOne: getTourHeader?.descriptionOne,
+        descriptionTwo: getTourHeader?.descriptionTwo,
+      },
+      about: {
+        title: getsectionTitle[0]?.title,
+        subtitle: getsectionTitle[0]?.description,
+      },
+      team: {
+        title: getsectionTitle[1]?.title,
+        subtitle: getsectionTitle[1]?.description,
+      },
+      testimonial: {
+        title: getsectionTitle[2]?.title,
+        subtitle: getsectionTitle[2]?.description,
+      },
+      contact: {
+        title: getsectionTitle[3]?.title,
+        subtitle: getsectionTitle[3]?.description,
+      },
+    };
+
+    res.status(200).json(packages);
+  } catch (error) {
+    throw error.message;
+  }
+};
 
 const BlogPage = async (req, res) => {
   try {
     const getBlogs = await Blogs.find();
     res.status(200).json(getBlogs);
 
-    const categories = [...new Set(getBlogs.map((blog) => blog.category))];  
+    const categories = [...new Set(getBlogs.map((blog) => blog.category))];
 
     const categoryLists = categories.map((category) => {
       return {
         category: category,
-        blogs: getBlogs.filter((blog) => blog.category === category), 
+        blogs: getBlogs.filter((blog) => blog.category === category),
       };
     });
 
@@ -205,8 +227,8 @@ const BlogPage = async (req, res) => {
         descriptionOne: getHomeHeader?.descriptionOne,
         descriptionTwo: getHomeHeader?.descriptionTwo,
       },
-      categoryLists
-    }
+      categoryLists,
+    };
 
     res.status(200).json(response);
   } catch (error) {
@@ -214,8 +236,34 @@ const BlogPage = async (req, res) => {
   }
 };
 
+const getPolicy = async (req, res) => {
+  try {
+    const getHomeHeader = await Header.findOne({ pageName: "policy" });
+    // const footer = await
+    const getsectionTitle = await SectinTitle.find({
+      name: { $regex: /^policy/ },
+    });
+    const response = {
+      hero: {
+        blogDetailsTitle: getHomeHeader?.blogDetailsTitle,
+        image: getImageUrl(getHomeHeader?.image),
+        titleOne: getHomeHeader?.titleOne,
+        titleTwo: getHomeHeader?.titleTwo,
+        pageName: getHomeHeader?.pageName,
+        descriptionOne: getHomeHeader?.descriptionOne,
+        descriptionTwo: getHomeHeader?.descriptionTwo,
+      },
+    };
+
+    res.status(200).json(response);
+  } catch (error) {
+    res.status(500).json(error);
+  }
+};
+// const
 module.exports = {
   getHomePage,
-
+  getTourPage,
   BlogPage,
+  getPolicy,
 };
