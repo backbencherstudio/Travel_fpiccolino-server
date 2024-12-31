@@ -2,4 +2,6 @@ const getImageUrl = (imagePath) => {
   return `${process.env.APP_URL}${imagePath}`;
 };
 
-module.exports = { getImageUrl };
+const baseUrl = process.env.APP_URL;
+
+module.exports = { getImageUrl, baseUrl };

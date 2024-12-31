@@ -1,4 +1,4 @@
-const { getImageUrl } = require("../../util/image_path");
+const { getImageUrl, baseUrl } = require("../../util/image_path");
 const Country = require("../country/country.model");
 const Header = require("../header/header.modls");
 const SectinTitle = require("../sectionTitle/sectionTitle.models");
@@ -7,6 +7,92 @@ const Review = require("../review/review.model");
 const Blogs = require("../blogs/blog.model");
 const Footer = require("../footer/footer.model");
 
+// const getHomePage = async (req, res) => {
+//   try {
+//     const [
+//       getHomeHeader,
+//       getsectionTitle,
+//       getMostLovedAdventures,
+//       getCountry,
+//       getReview,
+//       Blog,
+//       footer,
+//     ] = await Promise.all([
+//       Header.findOne({ pageName: "home" }).lean(),
+//       SectinTitle.find({ name: { $regex: /^landing/ } }).lean(),
+//       Package.find().lean(),
+//       Country.find().lean(),
+//       Review.find().lean(),
+//       Blogs.find().lean(),
+//       Footer.find().lean(),
+//     ]);
+
+//     const transformedAdventures = getMostLovedAdventures
+//       .map((adventure) => ({
+//         ...adventure,
+//         images: adventure?.images?.map((image) => getImageUrl(image)),
+//         hotelImages: adventure?.images?.map((image) => getImageUrl(image)),
+//       }))
+//       .sort((a, b) => b - a);
+
+//     const transformedCountry = getCountry
+//       .map((country) => ({
+//         ...country,
+//         image: country?.image ? getImageUrl(country.image) : null,
+//       }))
+//       .sort((a, b) => b - a);
+
+//     const getSectionData = (name) => {
+//       const section = getsectionTitle.find((item) => item.name === name);
+//       return {
+//         title: section?.title || "",
+//         description: section?.description || "",
+//       };
+//     };
+
+//     const response = {
+//       hero: {
+//         blogDetailsTitle: getHomeHeader?.blogDetailsTitle,
+//         image: getImageUrl(getHomeHeader?.image),
+//         titleOne: getHomeHeader?.titleOne,
+//         titleTwo: getHomeHeader?.titleTwo,
+//         pageName: getHomeHeader?.pageName,
+//         descriptionOne: getHomeHeader?.descriptionOne,
+//         descriptionTwo: getHomeHeader?.descriptionTwo,
+//       },
+//       package: {
+//         ...getSectionData("landing1"),
+//         data: transformedAdventures,
+//       },
+//       country: {
+//         ...getSectionData("landing2"),
+//         data: transformedCountry,
+//       },
+//       countryWithImage: {
+//         ...getSectionData("landing3"),
+//         data: transformedCountry,
+//       },
+//       titleWithoutContent: getSectionData("landing4"),
+//       review: {
+//         ...getSectionData("landing5"),
+//         data: getReview,
+//       },
+//       contact: getSectionData("landing6"),
+//       blogSection: {
+//         ...getSectionData("landing5"),
+//         data: Blog,
+//       },
+//       footer: {
+//         ...getSectionData("landing6"),
+//         footer: footer,
+//       },
+//     };
+
+//     res.status(200).json(response);
+//   } catch (error) {
+//     res.status(500).json({ error: error.message });
+//   }
+// };
 
 const getHomePage = async (req, res) => {
   try {
@@ -24,7 +110,7 @@ const getHomePage = async (req, res) => {
       Package.find().lean(),
       Country.find().select("name image").lean(),
       Review.find().lean(),
-      Blogs.find().select("title content").lean(),
+      Blogs.find().select("_id category heroSection").lean(),
       Footer.find().lean(),
     ]);
 
@@ -51,10 +137,17 @@ const getHomePage = async (req, res) => {
       };
     };
 
+    const blogSection = Blog.map((blog) => ({
+      ...blog,
+      headerImg: blog?.heroSection?.length
+        ? `${baseUrl}/uploads/${blog.heroSection[0].headerImg}`
+        : null,
+    })).sort((a, b) => b - a);
+
     const response = {
       hero: {
         blogDetailsTitle: getHomeHeader?.blogDetailsTitle,
-        image: getImageUrl(getHomeHeader?.image),
+        image: getImageUrl(getHomeHeader?.heroImage),
         titleOne: getHomeHeader?.titleOne,
         titleTwo: getHomeHeader?.titleTwo,
         pageName: getHomeHeader?.pageName,
@@ -78,15 +171,12 @@ const getHomePage = async (req, res) => {
         ...getSectionData("landing5"),
         data: getReview,
       },
-      contact: getSectionData("landing6"),
+      // contact: getSectionData("landing6"),
       blogSection: {
-        ...getSectionData("landing5"),
-        data: Blog,
-      },
-      footer: {
         ...getSectionData("landing6"),
-        footer: footer,
+        data: blogSection,
       },
+      footer: footer,
     };
 
     res.status(200).json(response);
@@ -95,10 +185,46 @@ const getHomePage = async (req, res) => {
   }
 };
 
+const getAboutPage = async (req, res) => {
+  try {
+    const [getHomeHeader, getsectionTitle, footer] = await Promise.all([
+      Header.findOne({ pageName: "about" }).lean(),
+      SectinTitle.find({ name: { $regex: /^about/ } }).lean(),
+      Footer.find().lean(),
+    ]);
 
+    const getSectionData = (name) => {
+      const section = getsectionTitle.find((item) => item.name === name);
+      return {
+        title: section?.title || "",
+        description: section?.description || "",
+      };
+    };
 
+    const response = {
+      hero: {
+        blogDetailsTitle: getHomeHeader?.blogDetailsTitle,
+        image: getImageUrl(getHomeHeader?.heroImage),
+        titleOne: getHomeHeader?.titleOne,
+        titleTwo: getHomeHeader?.titleTwo,
+        pageName: getHomeHeader?.pageName,
+        descriptionOne: getHomeHeader?.descriptionOne,
+        descriptionTwo: getHomeHeader?.descriptionTwo,
+      },
+      aboutWithoutContent: {
+        ...getSectionData("about1"),
+      },
+      footer_3: {
+        ...getSectionData("about2"),
+      },
+      footer: footer,
+    };
 
-
+    res.status(200).json(response);
+  } catch (error) {
+    res.status(500).json(error);
+  }
+};
 
 const getTourPage = async (req, res) => {
   try {
@@ -228,4 +354,5 @@ module.exports = {
   getTourPage,
   BlogPage,
   getPolicy,
+  getAboutPage,
 };
