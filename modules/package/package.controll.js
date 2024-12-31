@@ -101,7 +101,8 @@ const getPackageById = async (req, res) => {
     // Add image URLs to the package
     const formattedPackage = {
       ...package.toObject(),
-      imageUrl: package?.images?.map((path) => getImageUrl(path)),
+      images: package?.images?.map((path) => getImageUrl(path)),
+      hotelImages: package?.hotelImages.map((path) => getImageUrl(path)),
     };
 
     res.status(200).json(formattedPackage);
