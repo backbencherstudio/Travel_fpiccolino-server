@@ -72,7 +72,10 @@ const getAllPackages = async (req, res) => {
 
     const formattedPackages = packages.map((packageItem) => ({
       ...packageItem.toObject(),
-      imageUrl: packageItem?.images?.map(
+      images: packageItem?.images?.map(
+        (path) => `${process.env.APP_URL}${path}`
+      ),
+      hotelImages: packageItem?.hotelImages?.map(
         (path) => `${process.env.APP_URL}${path}`
       ),
     }));
