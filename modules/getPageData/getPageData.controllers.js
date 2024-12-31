@@ -7,95 +7,6 @@ const Review = require("../review/review.model");
 const Blogs = require("../blogs/blog.model");
 const Footer = require("../footer/footer.model");
 
-// const getHomePage = async (req, res) => {
-//   try {
-//     const getHomeHeader = await Header.findOne({ pageName: "home" });
-//     const getsectionTitle = await SectinTitle.find({
-//       name: { $regex: /^landing/ },
-//     });
-//     const getMostLovedAdventures = await Package.find();
-//     const getCountry = await Country.find();
-
-//     const transformedAdventures = getMostLovedAdventures
-//       .map((adventure) => ({
-//         ...adventure.toObject(),
-//         images: adventure?.images?.map((image) => getImageUrl(image)),
-//       }))
-//       .sort((a, b) => b - a);
-//     // .sort(() => Math.random() - 0.5);
-//     const transformedCountry = getCountry
-//       .map((country) => ({
-//         ...country.toObject(),
-//         image: country?.image ? getImageUrl(country.image) : null,
-//       }))
-//       .sort((a, b) => b - a);
-//     const getReview = await Review.find();
-//     const Blog = await Blogs.find();
-//     const footer = await Footer.find();
-
-//     const response = {
-//       hero: {
-//         blogDetailsTitle: getHomeHeader?.blogDetailsTitle,
-//         image: getImageUrl(getHomeHeader?.image),
-//         titleOne: getHomeHeader?.titleOne,
-//         titleTwo: getHomeHeader?.titleTwo,
-//         pageName: getHomeHeader?.pageName,
-//         descriptionOne: getHomeHeader?.descriptionOne,
-//         descriptionTwo: getHomeHeader?.descriptionTwo,
-//       },
-//       package: {
-//         title: getsectionTitle[0]?.title,
-//         subtitle: getsectionTitle[0]?.description,
-//         data: transformedAdventures,
-//       },
-//       country: {
-//         title: getsectionTitle[1]?.title,
-//         subtitle: getsectionTitle[1]?.description,
-//         data: transformedCountry,
-//       },
-//       countryWithImage: {
-//         title: getsectionTitle[2]?.title,
-//         subtitle: getsectionTitle[2]?.description,
-//         data: transformedCountry,
-//       },
-//       titleWithoutContent: {
-//         title: getsectionTitle[3]?.title,
-//         subtitle: getsectionTitle[3]?.description,
-//       },
-//       review: {
-//         title: getsectionTitle[3]?.title,
-//         subtitle: getsectionTitle[3]?.description,
-//         data: getReview,
-//       },
-//       contact: {
-//         title: getsectionTitle[4]?.title,
-//         subtitle: getsectionTitle[4]?.description,
-//         // data: getReview,
-//       },
-//       blogSection: {
-//         title: getsectionTitle[5]?.title,
-//         subtitle: getsectionTitle[5]?.description,
-//         data: Blog,
-//       },
-//       footer: {
-//         title: getsectionTitle[6]?.title,
-//         subtitle: getsectionTitle[6]?.description,
-//         footer: footer,
-//       },
-
-//       // sectionTitle:[
-//       //   ...getsectionTitle
-//       // ],
-//       // MostLovedAdventures: transformedAdventures,
-//       // countries: transformedCountry
-//     };
-
-//     res.status(200).json(response);
-//   } catch (error) {
-//     res.status(500).json({ error: error.message });
-//   }
-// };
-
 
 const getHomePage = async (req, res) => {
   try {
@@ -122,7 +33,6 @@ const getHomePage = async (req, res) => {
         ...adventure,
         images: adventure?.images?.map((image) => getImageUrl(image)),
         hotelImages: adventure?.images?.map((image) => getImageUrl(image)),
-
       }))
       .sort((a, b) => b - a);
 
@@ -132,6 +42,14 @@ const getHomePage = async (req, res) => {
         image: country?.image ? getImageUrl(country.image) : null,
       }))
       .sort((a, b) => b - a);
+
+    const getSectionData = (name) => {
+      const section = getsectionTitle.find((item) => item.name === name);
+      return {
+        title: section?.title || "",
+        description: section?.description || "",
+      };
+    };
 
     const response = {
       hero: {
@@ -144,41 +62,29 @@ const getHomePage = async (req, res) => {
         descriptionTwo: getHomeHeader?.descriptionTwo,
       },
       package: {
-        title: getsectionTitle[0]?.title,
-        subtitle: getsectionTitle[0]?.description,
+        ...getSectionData("landing1"),
         data: transformedAdventures,
       },
       country: {
-        title: getsectionTitle[1]?.title,
-        subtitle: getsectionTitle[1]?.description,
+        ...getSectionData("landing2"),
         data: transformedCountry,
       },
       countryWithImage: {
-        title: getsectionTitle[2]?.title,
-        subtitle: getsectionTitle[2]?.description,
+        ...getSectionData("landing3"),
         data: transformedCountry,
       },
-      titleWithoutContent: {
-        title: getsectionTitle[3]?.title,
-        subtitle: getsectionTitle[3]?.description,
-      },
+      titleWithoutContent: getSectionData("landing4"),
       review: {
-        title: getsectionTitle[3]?.title,
-        subtitle: getsectionTitle[3]?.description,
+        ...getSectionData("landing5"),
         data: getReview,
       },
-      contact: {
-        title: getsectionTitle[4]?.title,
-        subtitle: getsectionTitle[4]?.description,
-      },
+      contact: getSectionData("landing6"),
       blogSection: {
-        title: getsectionTitle[5]?.title,
-        subtitle: getsectionTitle[5]?.description,
+        ...getSectionData("landing5"),
         data: Blog,
       },
       footer: {
-        title: getsectionTitle[6]?.title,
-        subtitle: getsectionTitle[6]?.description,
+        ...getSectionData("landing6"),
         footer: footer,
       },
     };
@@ -191,83 +97,6 @@ const getHomePage = async (req, res) => {
 
 
 
-// const getHomePage = async (req, res) => {
-//   try {
-//     const cacheKey = "homePageData";
-//     const cachedData = await redisClient.get(cacheKey);
-//     if (cachedData) {
-//       return res.status(200).json(JSON.parse(cachedData));
-//     }
-
-//     const [
-//       getHomeHeader,
-//       getsectionTitle,
-//       getMostLovedAdventures,
-//       getCountry,
-//       getReview,
-//       Blog,
-//       footer,
-//     ] = await Promise.all([
-//       Header.findOne({ pageName: "home" }).select("image titleOne titleTwo descriptionOne descriptionTwo").lean(),
-//       SectinTitle.find({ name: { $regex: /^landing/ } }).select("title description").lean(),
-//       Package.find({ loved: true }).select("name images hotelImages").lean(),
-//       Country.find().select("name image").lean(),
-//       Review.find().limit(10).lean(),
-//       Blogs.find().select("title content").lean(),
-//       Footer.find().lean(),
-//     ]);
-
-//     const transformedAdventures = getMostLovedAdventures.map((adventure) => ({
-//       ...adventure,
-//       images: adventure.images?.map(getImageUrl),
-//       hotelImages: adventure.hotelImages?.map(getImageUrl),
-//     }));
-
-//     const transformedCountry = getCountry.map((country) => ({
-//       ...country,
-//       image: country.image ? getImageUrl(country.image) : null,
-//     }));
-
-//     const response = {
-//       hero: {
-//         titleOne: getHomeHeader?.titleOne,
-//         titleTwo: getHomeHeader?.titleTwo,
-//         image: getImageUrl(getHomeHeader?.image),
-//         descriptionOne: getHomeHeader?.descriptionOne,
-//         descriptionTwo: getHomeHeader?.descriptionTwo,
-//       },
-//       package: {
-//         title: getsectionTitle[0]?.title,
-//         subtitle: getsectionTitle[0]?.description,
-//         data: transformedAdventures,
-//       },
-//       country: {
-//         title: getsectionTitle[1]?.title,
-//         subtitle: getsectionTitle[1]?.description,
-//         data: transformedCountry,
-//       },
-//       review: {
-//         title: getsectionTitle[3]?.title,
-//         subtitle: getsectionTitle[3]?.description,
-//         data: getReview,
-//       },
-//       blogSection: {
-//         title: getsectionTitle[5]?.title,
-//         subtitle: getsectionTitle[5]?.description,
-//         data: Blog,
-//       },
-//       footer: {
-//         data: footer,
-//       },
-//     };
-
-//     // Cache the response
-//     redisClient.set(cacheKey, JSON.stringify(response), "EX", 3600); // Cache for 1 hour
-//     res.status(200).json(response);
-//   } catch (error) {
-//     res.status(500).json({ error: error.message });
-//   }
-// };
 
 
 
