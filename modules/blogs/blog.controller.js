@@ -181,7 +181,7 @@ exports.updateContentFields = async (req, res) => {
 
 exports.deleteContentAtIndex = async (req, res) => {
   try {
-    const { id, contentID } = req.params; // Expect blogId and contentListIndex in URL params
+    const { id, contentID } = req.params;
     console.log(id, contentID);
     const blog = await Blog.findById(id);
 
@@ -242,7 +242,7 @@ exports.updateTexContent = async (req, res) => {
     }
     const updatedBlog = await Blog.findOneAndUpdate(
       { _id: id },
-      { learn, thought }, // Update object
+      { learn, thought },
       { new: true }
     );
 
@@ -301,10 +301,10 @@ exports.filterBlogsByCategory = async (req, res) => {
     const limit = 20;
     const skip = (page - 1) * limit;
 
-    // Fetch blogs with pagination
+   
     const blogs = await Blog.find(filter).skip(skip).limit(limit);
 
-    // Count total blogs matching the category filter for pagination metadata
+    
     const totalBlogs = await Blog.countDocuments(filter);
 
     res.status(200).json({
@@ -326,7 +326,7 @@ exports.filterBlogsByCategory = async (req, res) => {
 
 exports.getAllBlogsAndCategoryCount = async (req, res) => {
   try {
-    // Fetch category-wise count
+    
     const categoryCounts = await Blog.aggregate([
       {
         $group: {
@@ -334,15 +334,13 @@ exports.getAllBlogsAndCategoryCount = async (req, res) => {
           count: { $sum: 1 },
         },
       },
-      { $sort: { count: -1 } }, // Optional: Sort by count descending
+      { $sort: { count: -1 } },
     ]);
 
-    // Format the response to match the desired format
     const categories = categoryCounts.map((item) => ({
       [item._id]: item.count,
     }));
 
-    // Construct the response
     res.status(200).json({
       Categories: categories,
     });
@@ -358,15 +356,11 @@ exports.getAllBlogsAndCategoryCount = async (req, res) => {
 
 exports.getPopularBlogs = async (req, res) => {
   try {
-    // Find all blogs where Populer is true
+    
     const popularBlogs = await Blog.find({ Populer: true });
-
-    // Check if there are any popular blogs
     if (popularBlogs.length === 0) {
       return res.status(404).json({ message: "No popular blogs found" });
     }
-
-    // Send the popular blogs in the response
     return res.status(200).json(popularBlogs);
   } catch (error) {
     console.error("Error fetching popular blogs:", error);
@@ -377,7 +371,6 @@ exports.getBlogsGroupedByCategory = async (req, res) => {
   try {
     const blogs = await Blog.find().lean();
 
-    // Group blogs by category
     const groupedBlogs = blogs.reduce((result, blog) => {
       const category = blog.category || "Uncategorized";
       const heroSection = blog.heroSection[0] || "";
@@ -390,7 +383,6 @@ exports.getBlogsGroupedByCategory = async (req, res) => {
         result[category] = [];
       }
 
-      // Add blog details to the category
       result[category].push({
         heroSection: heroSection,
         blog_description: blogDescription,
