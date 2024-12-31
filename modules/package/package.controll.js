@@ -131,21 +131,21 @@ const updatePackage = async (req, res) => {
       }
     }
 
-    if (updatedData.tourDuration) {
-      updatedData.tourDuration = JSON.parse(updatedData.tourDuration);
-    }
-    if (updatedData.includeItems) {
-      updatedData.includeItems = JSON.parse(updatedData.includeItems);
-    }
-    if (updatedData.notIncludeItems) {
-      updatedData.notIncludeItems = JSON.parse(updatedData.notIncludeItems);
-    }
-    if (updatedData.bookedFlights) {
-      updatedData.bookedFlights = JSON.parse(updatedData.bookedFlights);
-    }
-    if (updatedData.insurance) {
-      updatedData.insurance = JSON.parse(updatedData.insurance);
-    }
+    // if (updatedData.tourDuration) {
+    //   updatedData.tourDuration = JSON.parse(updatedData.tourDuration);
+    // }
+    // if (updatedData.includeItems) {
+    //   updatedData.includeItems = JSON.parse(updatedData.includeItems);
+    // }
+    // if (updatedData.notIncludeItems) {
+    //   updatedData.notIncludeItems = JSON.parse(updatedData.notIncludeItems);
+    // }
+    // if (updatedData.bookedFlights) {
+    //   updatedData.bookedFlights = JSON.parse(updatedData.bookedFlights);
+    // }
+    // if (updatedData.insurance) {
+    //   updatedData.insurance = JSON.parse(updatedData.insurance);
+    // }
 
     if (images.length > 0) {
       updatedData.images = images;
@@ -167,8 +167,8 @@ const updatePackage = async (req, res) => {
       message: "Package updated successfully",
       package: {
         ...updatedPackage.toObject(),
-        imageUrl: updatedPackage?.images?.map((path) => getImageUrl(path)),
-        hotelImageUrls: updatedPackage?.hotelImages?.map((path) =>
+        images: updatedPackage?.images?.map((path) => getImageUrl(path)),
+        hotelImages: updatedPackage?.hotelImages?.map((path) =>
           getImageUrl(path)
         ),
       },
