@@ -1,4 +1,4 @@
-const { getImageUrl } = require("../../util/image_path");
+const { getImageUrl, baseUrl } = require("../../util/image_path");
 const Country = require("../country/country.model");
 const Header = require("../header/header.modls");
 const SectinTitle = require("../sectionTitle/sectionTitle.models");
@@ -6,6 +6,7 @@ const Package = require("../package/package.model");
 const Review = require("../review/review.model");
 const Blogs = require("../blogs/blog.model");
 const Footer = require("../footer/footer.model");
+
 
 
 const getHomePage = async (req, res) => {
@@ -24,7 +25,7 @@ const getHomePage = async (req, res) => {
       Package.find().lean(),
       Country.find().select("name image").lean(),
       Review.find().lean(),
-      Blogs.find().lean(),
+      Blogs.find().select(" category heroSection").lean(),
       Footer.find().lean(),
     ]);
 
@@ -34,14 +35,14 @@ const getHomePage = async (req, res) => {
         images: adventure?.images?.map((image) => getImageUrl(image)),
         hotelImages: adventure?.images?.map((image) => getImageUrl(image)),
       }))
-      .sort((a, b) => b - a);
+      //.sort((a, b) => b - a);
 
     const transformedCountry = getCountry
       .map((country) => ({
         ...country,
         image: country?.image ? getImageUrl(country.image) : null,
       }))
-      .sort((a, b) => b - a);
+     // .sort((a, b) => b - a);
 
     const getSectionData = (name) => {
       const section = getsectionTitle.find((item) => item.name === name);
@@ -51,17 +52,17 @@ const getHomePage = async (req, res) => {
       };
     };
 
-    const blogSection = Blog
-    .map((blog) => ({
+    const blogSection = Blog.map((blog) => ({
       ...blog,
-      images: blog?.heroSection[0]?.image?.map((image) =>`/uploads${getImageUrl(image)}`),
-    }))
-    .sort((a, b) => b - a);
+      headerImg: blog?.heroSection?.length
+        ? `${baseUrl}/uploads/${blog.heroSection[0].headerImg}`
+        : null,
+    })) //.sort((a, b) => b - a);
 
     const response = {
       hero: {
         blogDetailsTitle: getHomeHeader?.blogDetailsTitle,
-        image: getImageUrl(getHomeHeader?.image),
+        image: getImageUrl(getHomeHeader?.heroImage),
         titleOne: getHomeHeader?.titleOne,
         titleTwo: getHomeHeader?.titleTwo,
         pageName: getHomeHeader?.pageName,
@@ -89,8 +90,8 @@ const getHomePage = async (req, res) => {
       blogSection: {
         ...getSectionData("landing6"),
         data: blogSection,
-      },      
-        footer: footer,      
+      },
+      footer: footer,
     };
 
     res.status(200).json(response);
