@@ -107,7 +107,6 @@ const packageSchema = new mongoose.Schema(
         type: String,
       },
     ],
-
     hotelName: { type: String },
     hotelAbout: { type: String },
     hotelImages: [
