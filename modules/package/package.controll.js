@@ -131,9 +131,6 @@ const updatePackage = async (req, res) => {
 
     let images = [];
     let hotelImages = [];
-
-    console.log(req.files);
-
     if (req.files) {
       if (req.files.images) {
         req.files.images.forEach((file) => {
@@ -146,15 +143,12 @@ const updatePackage = async (req, res) => {
         });
       }
     }
-
-    // Combine existing and new images
     const existingImages = updatedData.existingImages || [];
     const existingHotelImages = updatedData.existingHotelImages || [];
 
-    updatedData.images = [...existingImages, ...images]; // Merge existing and new images
-    updatedData.hotelImages = [...existingHotelImages, ...hotelImages]; // Merge existing and new hotel images
+    updatedData.images = [...existingImages, ...images];
+    updatedData.hotelImages = [...existingHotelImages, ...hotelImages];
 
-    // Parse JSON fields
     const parseJsonField = (field) => {
       try {
         if (typeof field === "string") {
@@ -162,18 +156,33 @@ const updatePackage = async (req, res) => {
         }
         return field;
       } catch (error) {
-        return field; // Return as is if parsing fails
+        return field;
       }
+    };
+
+    const filterItems = (items) => {
+      const seenTexts = new Set();
+      return items.filter((item) => {
+        if (!item.name || seenTexts.has(item.text)) {
+          return false;
+        }
+        seenTexts.add(item.text);
+        return true;
+      });
     };
 
     if (updatedData.tourDuration) {
       updatedData.tourDuration = parseJsonField(updatedData.tourDuration);
     }
     if (updatedData.includeItems) {
-      updatedData.includeItems = parseJsonField(updatedData.includeItems);
+      console.log(updatedData.includeItems);
+      const parsedIncludeItems = parseJsonField(updatedData.includeItems);
+      updatedData.includeItems = filterItems(parsedIncludeItems); // Filter items
     }
     if (updatedData.notIncludeItems) {
-      updatedData.notIncludeItems = parseJsonField(updatedData.notIncludeItems);
+      console.log(updatedData.notIncludeItems);
+      const parsedNotIncludeItems = parseJsonField(updatedData.notIncludeItems);
+      updatedData.notIncludeItems = filterItems(parsedNotIncludeItems); // Filter items
     }
     if (updatedData.bookedFlights) {
       updatedData.bookedFlights = parseJsonField(updatedData.bookedFlights);
@@ -181,8 +190,6 @@ const updatePackage = async (req, res) => {
     if (updatedData.insurance) {
       updatedData.insurance = parseJsonField(updatedData.insurance);
     }
-
-    // Update the package in the database
     const updatedPackage = await Package.findByIdAndUpdate(
       packageId,
       updatedData,
@@ -193,7 +200,6 @@ const updatePackage = async (req, res) => {
       return res.status(404).json({ message: "Package not found" });
     }
 
-    // Respond with updated package
     res.status(200).json({
       message: "Package updated successfully",
       package: {
