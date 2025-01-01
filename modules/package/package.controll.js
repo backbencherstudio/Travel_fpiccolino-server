@@ -1,4 +1,8 @@
-const { getImageUrl } = require("../../util/image_path");
+const {
+  getImageUrl,
+  updateImageUrl,
+  baseUrl,
+} = require("../../util/image_path");
 const Package = require("./package.model");
 
 const createPackage = async (req, res) => {
@@ -104,8 +108,12 @@ const getPackageById = async (req, res) => {
     // Add image URLs to the package
     const formattedPackage = {
       ...package.toObject(),
-      images: package?.images?.map((path) => getImageUrl(path)),
-      hotelImages: package?.hotelImages.map((path) => getImageUrl(path)),
+      images: package?.images?.map((path) => {
+        return path;
+      }),
+      hotelImages: package?.hotelImages.map((path) => {
+        return path;
+      }),
     };
 
     res.status(200).json(formattedPackage);
@@ -120,7 +128,6 @@ const updatePackage = async (req, res) => {
   try {
     const packageId = req.params.id;
     const updatedData = req.body;
-    console.log(updatedData);
 
     let images = [];
     let hotelImages = [];
@@ -167,13 +174,11 @@ const updatePackage = async (req, res) => {
 
     // Ensure images and hotelImages fields are updated if new files are uploaded
     if (images.length > 0) {
-      // Avoid adding duplicates to the images array
       updatedData.images = [
         ...new Set([...updatedData.images, ...images]), // Combine and remove duplicates
       ];
     }
     if (hotelImages.length > 0) {
-      // Avoid adding duplicates to the hotelImages array
       updatedData.hotelImages = [
         ...new Set([...updatedData.hotelImages, ...hotelImages]), // Combine and remove duplicates
       ];
@@ -195,19 +200,21 @@ const updatePackage = async (req, res) => {
       return res.status(404).json({ message: "Package not found" });
     }
 
-    // Send the updated package response with image URLs
+    // Respond with updated package, cleaning up the image URLs
     res.status(200).json({
       message: "Package updated successfully",
       package: {
         ...updatedPackage.toObject(),
-        imageUrl: updatedPackage?.images?.map((path) => getImageUrl(path)),
-        hotelImageUrls: updatedPackage?.hotelImages?.map((path) =>
-          getImageUrl(path)
-        ),
+        imageUrl: updatedPackage?.images?.map((path) => {
+          return path;
+        }),
+        hotelImageUrls: updatedPackage?.hotelImages?.map((path) => {
+          return path;
+        }),
       },
     });
   } catch (error) {
-    console.error(error); // Log error for debugging
+    console.error(error);
     res
       .status(400)
       .json({ message: "Error updating package", error: error.message });
