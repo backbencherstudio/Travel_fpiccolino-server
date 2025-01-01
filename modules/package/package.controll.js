@@ -1,4 +1,8 @@
-const { getImageUrl } = require("../../util/image_path");
+const {
+  getImageUrl,
+  updateImageUrl,
+  baseUrl,
+} = require("../../util/image_path");
 const Package = require("./package.model");
 
 const createPackage = async (req, res) => {
@@ -68,7 +72,9 @@ const createPackage = async (req, res) => {
 
 const getAllPackages = async (req, res) => {
   try {
-    const packages = await Package.find().populate("country");
+    const packages = await Package.find()
+      .populate("country")
+      .sort({ createdAt: -1 });
 
     const formattedPackages = packages.map((packageItem) => ({
       ...packageItem.toObject(),
@@ -104,8 +110,12 @@ const getPackageById = async (req, res) => {
     // Add image URLs to the package
     const formattedPackage = {
       ...package.toObject(),
-      images: package?.images?.map((path) => getImageUrl(path)),
-      hotelImages: package?.hotelImages.map((path) => getImageUrl(path)),
+      images: package?.images?.map((path) => {
+        return path;
+      }),
+      hotelImages: package?.hotelImages.map((path) => {
+        return path;
+      }),
     };
 
     res.status(200).json(formattedPackage);
@@ -117,20 +127,18 @@ const getPackageById = async (req, res) => {
 };
 
 const updatePackage = async (req, res) => {
-  console.log(req.body);
-  console.log(req.files);
-
   try {
     const packageId = req.params.id;
     const updatedData = req.body;
+
     let images = [];
     let hotelImages = [];
 
+    // Handle file uploads if any
     if (req.files) {
       if (req.files.images) {
         images = req.files.images.map((file) => `/uploads/${file.filename}`);
       }
-
       if (req.files.hotelImages) {
         hotelImages = req.files.hotelImages.map(
           (file) => `/uploads/${file.filename}`
@@ -138,49 +146,77 @@ const updatePackage = async (req, res) => {
       }
     }
 
+    // Safely parse JSON fields that are expected to be objects/arrays
+    const parseJsonField = (field) => {
+      try {
+        if (typeof field === "string") {
+          return JSON.parse(field);
+        }
+        return field;
+      } catch (error) {
+        return field; // Return as is if parsing fails
+      }
+    };
+
     if (updatedData.tourDuration) {
-      updatedData.tourDuration = JSON.parse(updatedData.tourDuration);
+      updatedData.tourDuration = parseJsonField(updatedData.tourDuration);
     }
     if (updatedData.includeItems) {
-      updatedData.includeItems = JSON.parse(updatedData.includeItems);
+      updatedData.includeItems = parseJsonField(updatedData.includeItems);
     }
     if (updatedData.notIncludeItems) {
-      updatedData.notIncludeItems = JSON.parse(updatedData.notIncludeItems);
+      updatedData.notIncludeItems = parseJsonField(updatedData.notIncludeItems);
     }
     if (updatedData.bookedFlights) {
-      updatedData.bookedFlights = JSON.parse(updatedData.bookedFlights);
+      updatedData.bookedFlights = parseJsonField(updatedData.bookedFlights);
     }
     if (updatedData.insurance) {
-      updatedData.insurance = JSON.parse(updatedData.insurance);
+      updatedData.insurance = parseJsonField(updatedData.insurance);
     }
 
+    // Ensure images and hotelImages fields are updated if new files are uploaded
     if (images.length > 0) {
-      updatedData.images = images;
+      updatedData.images = [
+        ...new Set([...updatedData.images, ...images]), // Combine and remove duplicates
+      ];
     }
     if (hotelImages.length > 0) {
-      updatedData.hotelImages = hotelImages;
+      updatedData.hotelImages = [
+        ...new Set([...updatedData.hotelImages, ...hotelImages]), // Combine and remove duplicates
+      ];
     }
 
+    // If the category field is provided as an array, ensure it is an array of strings
+    if (updatedData.category && !Array.isArray(updatedData.category)) {
+      updatedData.category = [updatedData.category];
+    }
+
+    // Update the package in the database
     const updatedPackage = await Package.findByIdAndUpdate(
       packageId,
       updatedData,
       { new: true }
     );
+
     if (!updatedPackage) {
       return res.status(404).json({ message: "Package not found" });
     }
 
+    // Respond with updated package, cleaning up the image URLs
     res.status(200).json({
       message: "Package updated successfully",
       package: {
         ...updatedPackage.toObject(),
-        imageUrl: updatedPackage?.images?.map((path) => getImageUrl(path)),
-        hotelImageUrls: updatedPackage?.hotelImages?.map((path) =>
-          getImageUrl(path)
-        ),
+        imageUrl: updatedPackage?.images?.map((path) => {
+          return path;
+        }),
+        hotelImageUrls: updatedPackage?.hotelImages?.map((path) => {
+          return path;
+        }),
       },
     });
   } catch (error) {
+    console.error(error);
     res
       .status(400)
       .json({ message: "Error updating package", error: error.message });
