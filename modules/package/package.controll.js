@@ -72,7 +72,9 @@ const createPackage = async (req, res) => {
 
 const getAllPackages = async (req, res) => {
   try {
-    const packages = await Package.find().populate("country");
+    const packages = await Package.find()
+      .populate("country")
+      .sort({ createdAt: -1 });
 
     const formattedPackages = packages.map((packageItem) => ({
       ...packageItem.toObject(),
