@@ -6,8 +6,6 @@ const {
 const Package = require("./package.model");
 
 const createPackage = async (req, res) => {
-  console.log(req.body);
-  console.log(req.files);
   try {
     const packageData = req.body;
     let images = [];
@@ -134,19 +132,29 @@ const updatePackage = async (req, res) => {
     let images = [];
     let hotelImages = [];
 
-    // Handle file uploads if any
+    console.log(req.files);
+
     if (req.files) {
       if (req.files.images) {
-        images = req.files.images.map((file) => `/uploads/${file.filename}`);
+        req.files.images.forEach((file) => {
+          images.push(`/uploads/${file.filename}`);
+        });
       }
       if (req.files.hotelImages) {
-        hotelImages = req.files.hotelImages.map(
-          (file) => `/uploads/${file.filename}`
-        );
+        req.files.hotelImages.forEach((file) => {
+          hotelImages.push(`/uploads/${file.filename}`);
+        });
       }
     }
 
-    // Safely parse JSON fields that are expected to be objects/arrays
+    // Combine existing and new images
+    const existingImages = updatedData.existingImages || [];
+    const existingHotelImages = updatedData.existingHotelImages || [];
+
+    updatedData.images = [...existingImages, ...images]; // Merge existing and new images
+    updatedData.hotelImages = [...existingHotelImages, ...hotelImages]; // Merge existing and new hotel images
+
+    // Parse JSON fields
     const parseJsonField = (field) => {
       try {
         if (typeof field === "string") {
@@ -174,23 +182,6 @@ const updatePackage = async (req, res) => {
       updatedData.insurance = parseJsonField(updatedData.insurance);
     }
 
-    // Ensure images and hotelImages fields are updated if new files are uploaded
-    if (images.length > 0) {
-      updatedData.images = [
-        ...new Set([...updatedData.images, ...images]), // Combine and remove duplicates
-      ];
-    }
-    if (hotelImages.length > 0) {
-      updatedData.hotelImages = [
-        ...new Set([...updatedData.hotelImages, ...hotelImages]), // Combine and remove duplicates
-      ];
-    }
-
-    // If the category field is provided as an array, ensure it is an array of strings
-    if (updatedData.category && !Array.isArray(updatedData.category)) {
-      updatedData.category = [updatedData.category];
-    }
-
     // Update the package in the database
     const updatedPackage = await Package.findByIdAndUpdate(
       packageId,
@@ -202,17 +193,13 @@ const updatePackage = async (req, res) => {
       return res.status(404).json({ message: "Package not found" });
     }
 
-    // Respond with updated package, cleaning up the image URLs
+    // Respond with updated package
     res.status(200).json({
       message: "Package updated successfully",
       package: {
         ...updatedPackage.toObject(),
-        imageUrl: updatedPackage?.images?.map((path) => {
-          return path;
-        }),
-        hotelImageUrls: updatedPackage?.hotelImages?.map((path) => {
-          return path;
-        }),
+        imageUrl: updatedPackage?.images?.map((path) => path),
+        hotelImageUrls: updatedPackage?.hotelImages?.map((path) => path),
       },
     });
   } catch (error) {
