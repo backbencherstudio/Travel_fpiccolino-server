@@ -75,20 +75,17 @@ const getAll = async (req, res) => {
 
 const getRadarData = async (req, res) => {
   try {
-    // Aggregate data from orders and join with package data
+    
    
     const totalOrders = await Order.countDocuments();
 
-    // If there are no orders, return 0% for both
     if (totalOrders === 0) {
       console.log("No orders found.");
       return;
     }
 
-    // Get the count of 'completed' orders
     const completedOrders = await Order.countDocuments({ status: "completed" });
 
-    // Get the count of 'pending' orders
     const pendingOrders = await Order.countDocuments({ status: "pending" });
 
     // Calculate percentages
@@ -142,22 +139,28 @@ const getRadarData = async (req, res) => {
     };
 
     const destinationMap = new Map();
-
+    let incrementStep = 10; // Define the increment step
+    let currentIncrement = incrementStep; // Start with the first increment
+    
     orders.forEach((order) => {
       const { destination, status } = order._id;
       const count = order.count;
-
+    
       if (!destinationMap.has(destination)) {
         destinationMap.set(destination, { completed: 0, pending: 0 });
         radarData.destination.push(destination);
       }
-
+    
+      // Apply the count increment logic
       if (status === "completed") {
-        destinationMap.get(destination).completed += count;
+        destinationMap.get(destination).completed += currentIncrement;
+        currentIncrement += incrementStep; // Increment for the next iteration
       } else if (status === "pending") {
-        destinationMap.get(destination).pending += count;
+        destinationMap.get(destination).pending += currentIncrement;
+        currentIncrement += incrementStep; // Increment for the next iteration
       }
     });
+    
 
     // Populate radarData
     radarData.completed = radarData.destination.map(
