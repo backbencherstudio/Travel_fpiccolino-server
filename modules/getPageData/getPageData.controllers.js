@@ -7,94 +7,6 @@ const Review = require("../review/review.model");
 const Blogs = require("../blogs/blog.model");
 const Footer = require("../footer/footer.model");
 
-
-// const getHomePage = async (req, res) => {
-//   try {
-//     const [
-//       getHomeHeader,
-//       getsectionTitle,
-//       getMostLovedAdventures,
-//       getCountry,
-//       getReview,
-//       Blog,
-//       footer,
-//     ] = await Promise.all([
-//       Header.findOne({ pageName: "home" }).lean(),
-//       SectinTitle.find({ name: { $regex: /^landing/ } }).lean(),
-//       Package.find().lean(),
-//       Country.find().lean(),
-//       Review.find().lean(),
-//       Blogs.find().lean(),
-//       Footer.find().lean(),
-//     ]);
-
-//     const transformedAdventures = getMostLovedAdventures
-//       .map((adventure) => ({
-//         ...adventure,
-//         images: adventure?.images?.map((image) => getImageUrl(image)),
-//         hotelImages: adventure?.images?.map((image) => getImageUrl(image)),
-//       }))
-//       .sort((a, b) => b - a);
-
-//     const transformedCountry = getCountry
-//       .map((country) => ({
-//         ...country,
-//         image: country?.image ? getImageUrl(country.image) : null,
-//       }))
-//       .sort((a, b) => b - a);
-
-//     const getSectionData = (name) => {
-//       const section = getsectionTitle.find((item) => item.name === name);
-//       return {
-//         title: section?.title || "",
-//         description: section?.description || "",
-//       };
-//     };
-
-//     const response = {
-//       hero: {
-//         blogDetailsTitle: getHomeHeader?.blogDetailsTitle,
-//         image: getImageUrl(getHomeHeader?.image),
-//         titleOne: getHomeHeader?.titleOne,
-//         titleTwo: getHomeHeader?.titleTwo,
-//         pageName: getHomeHeader?.pageName,
-//         descriptionOne: getHomeHeader?.descriptionOne,
-//         descriptionTwo: getHomeHeader?.descriptionTwo,
-//       },
-//       package: {
-//         ...getSectionData("landing1"),
-//         data: transformedAdventures,
-//       },
-//       country: {
-//         ...getSectionData("landing2"),
-//         data: transformedCountry,
-//       },
-//       countryWithImage: {
-//         ...getSectionData("landing3"),
-//         data: transformedCountry,
-//       },
-//       titleWithoutContent: getSectionData("landing4"),
-//       review: {
-//         ...getSectionData("landing5"),
-//         data: getReview,
-//       },
-//       contact: getSectionData("landing6"),
-//       blogSection: {
-//         ...getSectionData("landing5"),
-//         data: Blog,
-//       },
-//       footer: {
-//         ...getSectionData("landing6"),
-//         footer: footer,
-//       },
-//     };
-
-//     res.status(200).json(response);
-//   } catch (error) {
-//     res.status(500).json({ error: error.message });
-//   }
-// };
-
 const getHomePage = async (req, res) => {
   try {
     const [
@@ -115,20 +27,18 @@ const getHomePage = async (req, res) => {
       Footer.find().lean(),
     ]);
 
-    const transformedAdventures = getMostLovedAdventures
-      .map((adventure) => ({
-        ...adventure,
-        images: adventure?.images?.map((image) => getImageUrl(image)),
-        hotelImages: adventure?.images?.map((image) => getImageUrl(image)),
-      }))
-      //.sort((a, b) => b - a);
+    const transformedAdventures = getMostLovedAdventures.map((adventure) => ({
+      ...adventure,
+      images: adventure?.images?.map((image) => getImageUrl(image)),
+      hotelImages: adventure?.images?.map((image) => getImageUrl(image)),
+    }));
+    //.sort((a, b) => b - a);
 
-    const transformedCountry = getCountry
-      .map((country) => ({
-        ...country,
-        image: country?.image ? getImageUrl(country.image) : null,
-      }))
-     // .sort((a, b) => b - a);
+    const transformedCountry = getCountry.map((country) => ({
+      ...country,
+      image: country?.image ? getImageUrl(country.image) : null,
+    }));
+    // .sort((a, b) => b - a);
 
     const getSectionData = (name) => {
       const section = getsectionTitle.find((item) => item.name === name);
@@ -227,12 +137,12 @@ const getAboutPage = async (req, res) => {
   }
 };
 
-const getTourPage = async (req, res) => {
+const get_all_inclusive_TourPage = async (req, res) => {
   try {
-    const getTourHeader = await Header.findOne({ pageName: "tour" });
+    const getTourHeader = await Header.findOne({ pageName: "tour" }); //for all inclucive
 
     const getsectionTitle = await SectinTitle.find({
-      name: { $regex: /^tour/ },
+      name: { $regex: /^all_inclusive_tour/ },
     });
 
     const packages = await Package.aggregate([
@@ -286,11 +196,45 @@ const getTourPage = async (req, res) => {
       },
     };
 
-    res.status(200).json(packages);
+    res.status(200).json({ getTourHeader, getsectionTitle });
   } catch (error) {
     throw error.message;
   }
 };
+const country_wise = async (req, res) => {
+  try {
+    const countryId = req.params.id;
+
+    const [country, sectionTitle] = await Promise.all([
+      Country.findOne({ _id: countryId }),
+      SectinTitle.find({ name: { $regex: /^country_wise/ } }),
+    ]);
+
+    const packages = country ? await Package.find({ country: country.name }) : [];
+
+
+    const response = {
+      hero: {
+        image: getImageUrl(country?.image),
+        titleOne: country?.contentTitle,
+        descriptionOne: country?.contentDescription,
+        countryName: country?.name,
+      },
+      package: {
+        title: sectionTitle[0]?.title,
+        subtitle: sectionTitle[0]?.description,
+        data: packages,
+      },
+    };
+
+    res.status(200).json(response);
+  } catch (error) {
+    console.error(error); 
+    res.status(500).json({ message: error.message });
+  }
+};
+
+
 
 const BlogPage = async (req, res) => {
   try {
@@ -349,11 +293,13 @@ const getPolicy = async (req, res) => {
     res.status(500).json(error);
   }
 };
+
 // const
 module.exports = {
   getHomePage,
-  getTourPage,
+  get_all_inclusive_TourPage,
   BlogPage,
   getPolicy,
   getAboutPage,
+  country_wise,
 };
