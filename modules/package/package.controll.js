@@ -101,6 +101,9 @@ const updatePackage = async (req, res) => {
     const packageId = req.params.id;
     const updatedData = req.body;
 
+    // const imageUpdate = req.body.imageUrl;
+
+
     // Get existing package
     const existingPackage = await Package.findById(packageId);
     if (!existingPackage) {
