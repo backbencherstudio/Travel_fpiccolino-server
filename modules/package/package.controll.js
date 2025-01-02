@@ -1,9 +1,11 @@
-const { getImageUrl } = require("../../util/image_path");
+const {
+  getImageUrl,
+  updateImageUrl,
+  baseUrl,
+} = require("../../util/image_path");
 const Package = require("./package.model");
 
 const createPackage = async (req, res) => {
-  console.log(req.body);
-  console.log(req.files);
   try {
     const packageData = req.body;
     let images = [];
@@ -68,7 +70,9 @@ const createPackage = async (req, res) => {
 
 const getAllPackages = async (req, res) => {
   try {
-    const packages = await Package.find().populate("country");
+    const packages = await Package.find()
+      .populate("country")
+      .sort({ createdAt: -1 });
 
     const formattedPackages = packages.map((packageItem) => ({
       ...packageItem.toObject(),
@@ -104,8 +108,12 @@ const getPackageById = async (req, res) => {
     // Add image URLs to the package
     const formattedPackage = {
       ...package.toObject(),
-      images: package?.images?.map((path) => getImageUrl(path)),
-      hotelImages: package?.hotelImages.map((path) => getImageUrl(path)),
+      images: package?.images?.map((path) => {
+        return path;
+      }),
+      hotelImages: package?.hotelImages.map((path) => {
+        return path;
+      }),
     };
 
     res.status(200).json(formattedPackage);
@@ -117,55 +125,77 @@ const getPackageById = async (req, res) => {
 };
 
 const updatePackage = async (req, res) => {
-  console.log(req.body);
-  console.log(req.files);
-
   try {
     const packageId = req.params.id;
     const updatedData = req.body;
+
     let images = [];
     let hotelImages = [];
-
     if (req.files) {
       if (req.files.images) {
-        images = req.files.images.map((file) => `/uploads/${file.filename}`);
+        req.files.images.forEach((file) => {
+          images.push(`/uploads/${file.filename}`);
+        });
       }
-
       if (req.files.hotelImages) {
-        hotelImages = req.files.hotelImages.map(
-          (file) => `/uploads/${file.filename}`
-        );
+        req.files.hotelImages.forEach((file) => {
+          hotelImages.push(`/uploads/${file.filename}`);
+        });
       }
     }
+    const existingImages = updatedData.existingImages || [];
+    const existingHotelImages = updatedData.existingHotelImages || [];
 
-    // if (updatedData.tourDuration) {
-    //   updatedData.tourDuration = JSON.parse(updatedData.tourDuration);
-    // }
-    // if (updatedData.includeItems) {
-    //   updatedData.includeItems = JSON.parse(updatedData.includeItems);
-    // }
-    // if (updatedData.notIncludeItems) {
-    //   updatedData.notIncludeItems = JSON.parse(updatedData.notIncludeItems);
-    // }
-    // if (updatedData.bookedFlights) {
-    //   updatedData.bookedFlights = JSON.parse(updatedData.bookedFlights);
-    // }
-    // if (updatedData.insurance) {
-    //   updatedData.insurance = JSON.parse(updatedData.insurance);
-    // }
+    updatedData.images = [...existingImages, ...images];
+    updatedData.hotelImages = [...existingHotelImages, ...hotelImages];
 
-    if (images.length > 0) {
-      updatedData.images = images;
+    const parseJsonField = (field) => {
+      try {
+        if (typeof field === "string") {
+          return JSON.parse(field);
+        }
+        return field;
+      } catch (error) {
+        return field;
+      }
+    };
+
+    const filterItems = (items) => {
+      const seenTexts = new Set();
+      return items.filter((item) => {
+        if (!item.name || seenTexts.has(item.text)) {
+          return false;
+        }
+        seenTexts.add(item.text);
+        return true;
+      });
+    };
+
+    if (updatedData.tourDuration) {
+      updatedData.tourDuration = parseJsonField(updatedData.tourDuration);
     }
-    if (hotelImages.length > 0) {
-      updatedData.hotelImages = hotelImages;
+    if (updatedData.includeItems) {
+      console.log(updatedData.includeItems);
+      const parsedIncludeItems = parseJsonField(updatedData.includeItems);
+      updatedData.includeItems = filterItems(parsedIncludeItems); // Filter items
     }
-
+    if (updatedData.notIncludeItems) {
+      console.log(updatedData.notIncludeItems);
+      const parsedNotIncludeItems = parseJsonField(updatedData.notIncludeItems);
+      updatedData.notIncludeItems = filterItems(parsedNotIncludeItems); // Filter items
+    }
+    if (updatedData.bookedFlights) {
+      updatedData.bookedFlights = parseJsonField(updatedData.bookedFlights);
+    }
+    if (updatedData.insurance) {
+      updatedData.insurance = parseJsonField(updatedData.insurance);
+    }
     const updatedPackage = await Package.findByIdAndUpdate(
       packageId,
       updatedData,
       { new: true }
     );
+
     if (!updatedPackage) {
       return res.status(404).json({ message: "Package not found" });
     }
@@ -181,6 +211,7 @@ const updatePackage = async (req, res) => {
       },
     });
   } catch (error) {
+    console.error(error);
     res
       .status(400)
       .json({ message: "Error updating package", error: error.message });

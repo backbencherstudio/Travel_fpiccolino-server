@@ -32,11 +32,11 @@ const packageSchema = new mongoose.Schema(
       type: Number,
       // required: true,
     },
-    country: {
-      type: mongoose.Schema.Types.ObjectId,
-      ref: "Country",
-      // type: String,
-    },
+    // country: {
+    //   type: mongoose.Schema.Types.ObjectId,
+    //   ref: "Country",
+    //   // type: String,
+    // },
     includeItems: [
       {
         name: {
@@ -88,6 +88,9 @@ const packageSchema = new mongoose.Schema(
         price: { type: String },
       },
     ],
+    country: {
+      type: String,
+    },
     category: [
       {
         type: String,
@@ -104,7 +107,6 @@ const packageSchema = new mongoose.Schema(
         type: String,
       },
     ],
-
     hotelName: { type: String },
     hotelAbout: { type: String },
     hotelImages: [
