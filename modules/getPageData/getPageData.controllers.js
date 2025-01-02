@@ -201,18 +201,18 @@ const get_all_inclusive_TourPage = async (req, res) => {
     throw error.message;
   }
 };
+
 const country_wise = async (req, res) => {
   try {
-    const countryId = req.params.id;
-
-    const [country, sectionTitle] = await Promise.all([
-      Country.findOne({ _id: countryId }),
-      SectinTitle.find({ name: { $regex: /^country_wise/ } }),
-    ]);
+    const country = await Country.findOne({ _id: req.params.id });
 
     const packages = country ? await Package.find({ country: country.name }) : [];
 
+    const sectionTitle = await SectinTitle.find({
+      name: { $regex: /^country_wise/ },
+    });
 
+    const footer = await Footer.find();
     const response = {
       hero: {
         image: getImageUrl(country?.image),
@@ -225,15 +225,15 @@ const country_wise = async (req, res) => {
         subtitle: sectionTitle[0]?.description,
         data: packages,
       },
+      footer: footer
     };
 
     res.status(200).json(response);
   } catch (error) {
     console.error(error); 
-    res.status(500).json({ message: error.message });
+    res.status(500).json({ message: error.message  });
   }
 };
-
 
 
 const BlogPage = async (req, res) => {
