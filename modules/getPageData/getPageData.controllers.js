@@ -7,6 +7,96 @@ const Review = require("../review/review.model");
 const Blogs = require("../blogs/blog.model");
 const Footer = require("../footer/footer.model");
 
+// const getHomePage = async (req, res) => {
+//   try {
+//     const [
+//       getHomeHeader,
+//       getsectionTitle,
+//       getMostLovedAdventures,
+//       getCountry,
+//       getReview,
+//       Blog,
+//       footer,
+//     ] = await Promise.all([
+//       Header.findOne({ pageName: "home" }).lean(),
+//       SectinTitle.find({ name: { $regex: /^landing/ } }).lean(),
+//       Package.find().lean(),
+//       Country.find().lean(),
+//       Review.find().lean(),
+//       Blogs.find().select("_id category heroSection").lean(),
+//       Footer.find().lean(),
+//     ]);
+
+//     const transformedAdventures = getMostLovedAdventures.map((adventure) => ({
+//       ...adventure,
+//       images: adventure?.images?.map((image) => getImageUrl(image)),
+//       hotelImages: adventure?.images?.map((image) => getImageUrl(image)),
+//     }));
+//     //.sort((a, b) => b - a);
+
+//     const transformedCountry = getCountry.map((country) => ({
+//       ...country,
+//       image: country?.image ? getImageUrl(country.image) : null,
+//     }));
+//     // .sort((a, b) => b - a);
+
+//     const getSectionData = (name) => {
+//       const section = getsectionTitle.find((item) => item.name === name);
+//       return {
+//         title: section?.title || "",
+//         description: section?.description || "",
+//       };
+//     };
+
+//     const blogSection = Blog.map((blog) => ({
+//       ...blog,
+//       headerImg: blog?.heroSection?.length
+//         ? `${baseUrl}/uploads/${blog.heroSection[0].headerImg}`
+//         : null,
+//     })).sort((a, b) => b - a);
+
+//     const response = {
+//       hero: {
+//         blogDetailsTitle: getHomeHeader?.blogDetailsTitle,
+//         image: getImageUrl(getHomeHeader?.heroImage),
+//         titleOne: getHomeHeader?.titleOne,
+//         titleTwo: getHomeHeader?.titleTwo,
+//         pageName: getHomeHeader?.pageName,
+//         descriptionOne: getHomeHeader?.descriptionOne,
+//         descriptionTwo: getHomeHeader?.descriptionTwo,
+//       },
+//       package: {
+//         ...getSectionData("landing1"),
+//         data: transformedAdventures,
+//       },
+//       country: {
+//         ...getSectionData("landing2"),
+//         data: transformedCountry,
+//       },
+//       countryWithImage: {
+//         ...getSectionData("landing3"),
+//         data: transformedCountry,
+//       },
+//       titleWithoutContent: getSectionData("landing4"),
+//       review: {
+//         ...getSectionData("landing5"),
+//         data: getReview,
+//       },
+//       // contact: getSectionData("landing6"),
+//       blogSection: {
+//         ...getSectionData("landing6"),
+//         data: blogSection,
+//       },
+//       footer: footer,
+//     };
+
+//     res.status(200).json(response);
+//   } catch (error) {
+//     res.status(500).json({ error: error.message });
+//   }
+// };
+
+
 const getHomePage = async (req, res) => {
   try {
     const [
@@ -21,7 +111,7 @@ const getHomePage = async (req, res) => {
       Header.findOne({ pageName: "home" }).lean(),
       SectinTitle.find({ name: { $regex: /^landing/ } }).lean(),
       Package.find().lean(),
-      Country.find().select("name image").lean(),
+      Country.find().lean(),
       Review.find().lean(),
       Blogs.find().select("_id category heroSection").lean(),
       Footer.find().lean(),
@@ -32,13 +122,11 @@ const getHomePage = async (req, res) => {
       images: adventure?.images?.map((image) => getImageUrl(image)),
       hotelImages: adventure?.images?.map((image) => getImageUrl(image)),
     }));
-    //.sort((a, b) => b - a);
 
     const transformedCountry = getCountry.map((country) => ({
       ...country,
       image: country?.image ? getImageUrl(country.image) : null,
     }));
-    // .sort((a, b) => b - a);
 
     const getSectionData = (name) => {
       const section = getsectionTitle.find((item) => item.name === name);
@@ -53,7 +141,23 @@ const getHomePage = async (req, res) => {
       headerImg: blog?.heroSection?.length
         ? `${baseUrl}/uploads/${blog.heroSection[0].headerImg}`
         : null,
-    })).sort((a, b) => b - a);
+    }));
+
+    // Include lowest amount for each country
+    const countryWithLowestAmount = transformedCountry.map((country) => {
+      const countryPackages = transformedAdventures.filter(
+        (adventure) => adventure.country === country.name
+      );
+
+      const lowestAmount = countryPackages.reduce((prev, curr) =>
+        prev.amount < curr.amount ? prev : curr
+      , {}).amount;
+
+      return {
+        ...country,
+        lowestAmount: lowestAmount || null, // Include only the amount
+      };
+    });
 
     const response = {
       hero: {
@@ -75,14 +179,13 @@ const getHomePage = async (req, res) => {
       },
       countryWithImage: {
         ...getSectionData("landing3"),
-        data: transformedCountry,
+        data: countryWithLowestAmount,
       },
       titleWithoutContent: getSectionData("landing4"),
       review: {
         ...getSectionData("landing5"),
         data: getReview,
       },
-      // contact: getSectionData("landing6"),
       blogSection: {
         ...getSectionData("landing6"),
         data: blogSection,
@@ -95,6 +198,8 @@ const getHomePage = async (req, res) => {
     res.status(500).json({ error: error.message });
   }
 };
+
+
 
 const getAboutPage = async (req, res) => {
   try {
@@ -271,26 +376,80 @@ const BlogPage = async (req, res) => {
 
 const getPolicy = async (req, res) => {
   try {
-    const getHomeHeader = await Header.findOne({ pageName: "policy" });
-    // const footer = await
-    const getsectionTitle = await SectinTitle.find({
-      name: { $regex: /^policy/ },
-    });
+    const [getPolicyHeader, footer] = await Promise.all([
+      Header.findOne({ pageName: "policy" }).lean(),
+      Footer.find().lean(),
+    ]);
+
     const response = {
       hero: {
-        blogDetailsTitle: getHomeHeader?.blogDetailsTitle,
-        image: getImageUrl(getHomeHeader?.image),
-        titleOne: getHomeHeader?.titleOne,
-        titleTwo: getHomeHeader?.titleTwo,
-        pageName: getHomeHeader?.pageName,
-        descriptionOne: getHomeHeader?.descriptionOne,
-        descriptionTwo: getHomeHeader?.descriptionTwo,
+        blogDetailsTitle: getPolicyHeader?.blogDetailsTitle,
+        image: getPolicyHeader?.image ? getImageUrl(getPolicyHeader.image) : null,
+        titleOne: getPolicyHeader?.titleOne,
+        titleTwo: getPolicyHeader?.titleTwo,
+        pageName: getPolicyHeader?.pageName,
+        descriptionOne: getPolicyHeader?.descriptionOne,
+        descriptionTwo: getPolicyHeader?.descriptionTwo,
       },
+      footer: footer,
+    };
+
+    res.status(200).json(response);
+  } catch (error) {
+    res.status(500).json({ message: 'An error occurred', error });
+  }
+};
+
+
+const getfaq = async (req, res) => {
+  try {
+    const [getFaqHeader, footer] = await Promise.all([
+      Header.findOne({ pageName: "faq" }).lean(),
+      Footer.find().lean(),
+    ]);
+
+    const response = {
+      hero: {
+        blogDetailsTitle: getFaqHeader?.blogDetailsTitle,
+        image: getFaqHeader?.heroImage ? getImageUrl(getFaqHeader.heroImage) : null,
+        titleOne: getFaqHeader?.titleOne,
+        titleTwo: getFaqHeader?.titleTwo,
+        pageName: getFaqHeader?.pageName,
+        descriptionOne: getFaqHeader?.descriptionOne,
+        descriptionTwo: getFaqHeader?.descriptionTwo,
+      },
+      footer,
     };
 
     res.status(200).json(response);
   } catch (error) {
     res.status(500).json(error);
+  }
+};
+
+const contactPage = async (req, res) => {
+  try {
+    const [getContactHeader, footer] = await Promise.all([
+      Header.findOne({ pageName: "contact" }).lean(),
+      Footer.find().lean(),
+    ]);
+
+    const response = {
+      hero: {
+        blogDetailsTitle: getContactHeader?.blogDetailsTitle,
+        image: getContactHeader?.heroImage ? getImageUrl(getContactHeader.heroImage) : null,
+        titleOne: getContactHeader?.titleOne,
+        titleTwo: getContactHeader?.titleTwo,
+        pageName: getContactHeader?.pageName,
+        descriptionOne: getContactHeader?.descriptionOne,
+        descriptionTwo: getContactHeader?.descriptionTwo,
+      },
+      footer,
+    };
+
+    res.status(200).json(response);
+  } catch (error) {
+    res.status(500).json({ message: "An error occurred", error });
   }
 };
 
@@ -302,4 +461,6 @@ module.exports = {
   getPolicy,
   getAboutPage,
   country_wise,
+  getfaq,
+  contactPage
 };
