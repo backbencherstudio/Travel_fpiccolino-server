@@ -147,27 +147,25 @@ const get_all_inclusive_TourPage = async (req, res) => {
 
     const packages = await Package.aggregate([
       {
-        $facet: {
-          allInclusive: [
-            { $match: { category: "all inclusive" } },
-            { $limit: 10 },
-          ],
-          others: [
-            { $match: { category: { $ne: "all inclusive" } } },
-            { $limit: 10 },
-          ],
+        $addFields: {
+          bookedFlights: {
+            $cond: {
+              if: { $gt: [{ $size: "$bookedFlights" }, 0] },  
+              then: "$bookedFlights",
+              else: "$$REMOVE", 
+            },
+          },
         },
-      },
+      }
     ]);
-    // const getCountry = await Country.find();
 
-    // const transformedTour = getTourPackage
-    //   .map((adventure) => ({
-    //     ...adventure.toObject(),
-    //     images: adventure?.images?.map((image) => getImageUrl(image)),
-    //   }))
-    //   .sort((a, b) => b - a);
 
+    const transformedPackages = packages.map((pkg) => ({
+      ...pkg,
+      images: pkg.images?.map((image) => getImageUrl(image)) || [],
+      hotelImages: pkg.hotelImages?.map((image) => getImageUrl(image)) || [],
+    }));
+    
     const response = {
       hero: {
         blogDetailsTitle: getTourHeader?.blogDetailsTitle,
@@ -178,62 +176,64 @@ const get_all_inclusive_TourPage = async (req, res) => {
         descriptionOne: getTourHeader?.descriptionOne,
         descriptionTwo: getTourHeader?.descriptionTwo,
       },
-      about: {
-        title: getsectionTitle[0]?.title,
-        subtitle: getsectionTitle[0]?.description,
-      },
-      team: {
-        title: getsectionTitle[1]?.title,
-        subtitle: getsectionTitle[1]?.description,
-      },
-      testimonial: {
-        title: getsectionTitle[2]?.title,
-        subtitle: getsectionTitle[2]?.description,
-      },
-      contact: {
-        title: getsectionTitle[3]?.title,
-        subtitle: getsectionTitle[3]?.description,
-      },
+     package: {
+      title: getsectionTitle[0]?.title,
+      subtitle: getsectionTitle[0]?.description,
+      data: transformedPackages,
+     }
     };
 
-    res.status(200).json({ getTourHeader, getsectionTitle });
+    res.status(200).json(response);
   } catch (error) {
     throw error.message;
   }
 };
 
+
 const country_wise = async (req, res) => {
   try {
-    const country = await Country.findOne({ _id: req.params.id });
+    const countryId = req.params.id;
+    const country = await Country.findOne({ _id: countryId }).lean()
+    const [ packages, sectionTitles, footer] = await Promise.all([
+      Package.find({ country: country.name }).lean(),
+      SectinTitle.find({ name: { $regex: /^country_wise/ } }).select("title description").lean(),
+      Footer.find().lean(),
+    ]);
 
-    const packages = country ? await Package.find({ country: country.name }) : [];
+    const transformedPackages = packages.map((pkg) => ({
+      ...pkg,
+      images: pkg.images?.map(getImageUrl) || [],
+      hotelImages: pkg.hotelImages?.map(getImageUrl) || [],
+    }));
 
-    const sectionTitle = await SectinTitle.find({
-      name: { $regex: /^country_wise/ },
-    });
-
-    const footer = await Footer.find();
     const response = {
       hero: {
         image: getImageUrl(country?.image),
-        titleOne: country?.contentTitle,
-        descriptionOne: country?.contentDescription,
-        countryName: country?.name,
+        titleOne: country?.contentTitle || "",
+        descriptionOne: country?.contentDescription || "",
+        countryName: country?.name || "",
       },
       package: {
-        title: sectionTitle[0]?.title,
-        subtitle: sectionTitle[0]?.description,
-        data: packages,
+        title: sectionTitles?.[0]?.title,
+        subtitle: sectionTitles?.[0]?.description,
+        data: transformedPackages,
       },
-      footer: footer
+      footer: footer.map((item) => ({
+        companyName: item.companyName,
+        description: item.description,
+        contactInfo: item.contactInfo,
+        quickLinks: item.quickLinks,
+        copyright: item.copyright,
+      })),
     };
 
     res.status(200).json(response);
   } catch (error) {
-    console.error(error); 
-    res.status(500).json({ message: error.message  });
+    console.error(error);
+    res.status(500).json({ message: error.message });
   }
 };
+
 
 
 const BlogPage = async (req, res) => {
