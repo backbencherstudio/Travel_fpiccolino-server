@@ -204,8 +204,10 @@ const updatePackage = async (req, res) => {
       message: "Package updated successfully",
       package: {
         ...updatedPackage.toObject(),
-        imageUrl: updatedPackage?.images?.map((path) => path),
-        hotelImageUrls: updatedPackage?.hotelImages?.map((path) => path),
+        images: updatedPackage?.images?.map((path) => getImageUrl(path)),
+        hotelImages: updatedPackage?.hotelImages?.map((path) =>
+          getImageUrl(path)
+        ),
       },
     });
   } catch (error) {

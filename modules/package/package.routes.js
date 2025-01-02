@@ -19,6 +19,8 @@ router.post(
 router.get("/", getAllPackages);
 router.get("/:id", getPackageById);
 
+// router.put("/:id", upload.array("images"), updatePackage);
+
 router.put(
   "/:id",
   upload.fields([{ name: "images" }, { name: "hotelImages" }]),

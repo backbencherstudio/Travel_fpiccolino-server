@@ -7,94 +7,6 @@ const Review = require("../review/review.model");
 const Blogs = require("../blogs/blog.model");
 const Footer = require("../footer/footer.model");
 
-
-// const getHomePage = async (req, res) => {
-//   try {
-//     const [
-//       getHomeHeader,
-//       getsectionTitle,
-//       getMostLovedAdventures,
-//       getCountry,
-//       getReview,
-//       Blog,
-//       footer,
-//     ] = await Promise.all([
-//       Header.findOne({ pageName: "home" }).lean(),
-//       SectinTitle.find({ name: { $regex: /^landing/ } }).lean(),
-//       Package.find().lean(),
-//       Country.find().lean(),
-//       Review.find().lean(),
-//       Blogs.find().lean(),
-//       Footer.find().lean(),
-//     ]);
-
-//     const transformedAdventures = getMostLovedAdventures
-//       .map((adventure) => ({
-//         ...adventure,
-//         images: adventure?.images?.map((image) => getImageUrl(image)),
-//         hotelImages: adventure?.images?.map((image) => getImageUrl(image)),
-//       }))
-//       .sort((a, b) => b - a);
-
-//     const transformedCountry = getCountry
-//       .map((country) => ({
-//         ...country,
-//         image: country?.image ? getImageUrl(country.image) : null,
-//       }))
-//       .sort((a, b) => b - a);
-
-//     const getSectionData = (name) => {
-//       const section = getsectionTitle.find((item) => item.name === name);
-//       return {
-//         title: section?.title || "",
-//         description: section?.description || "",
-//       };
-//     };
-
-//     const response = {
-//       hero: {
-//         blogDetailsTitle: getHomeHeader?.blogDetailsTitle,
-//         image: getImageUrl(getHomeHeader?.image),
-//         titleOne: getHomeHeader?.titleOne,
-//         titleTwo: getHomeHeader?.titleTwo,
-//         pageName: getHomeHeader?.pageName,
-//         descriptionOne: getHomeHeader?.descriptionOne,
-//         descriptionTwo: getHomeHeader?.descriptionTwo,
-//       },
-//       package: {
-//         ...getSectionData("landing1"),
-//         data: transformedAdventures,
-//       },
-//       country: {
-//         ...getSectionData("landing2"),
-//         data: transformedCountry,
-//       },
-//       countryWithImage: {
-//         ...getSectionData("landing3"),
-//         data: transformedCountry,
-//       },
-//       titleWithoutContent: getSectionData("landing4"),
-//       review: {
-//         ...getSectionData("landing5"),
-//         data: getReview,
-//       },
-//       contact: getSectionData("landing6"),
-//       blogSection: {
-//         ...getSectionData("landing5"),
-//         data: Blog,
-//       },
-//       footer: {
-//         ...getSectionData("landing6"),
-//         footer: footer,
-//       },
-//     };
-
-//     res.status(200).json(response);
-//   } catch (error) {
-//     res.status(500).json({ error: error.message });
-//   }
-// };
-
 const getHomePage = async (req, res) => {
   try {
     const [
@@ -115,20 +27,18 @@ const getHomePage = async (req, res) => {
       Footer.find().lean(),
     ]);
 
-    const transformedAdventures = getMostLovedAdventures
-      .map((adventure) => ({
-        ...adventure,
-        images: adventure?.images?.map((image) => getImageUrl(image)),
-        hotelImages: adventure?.images?.map((image) => getImageUrl(image)),
-      }))
-      //.sort((a, b) => b - a);
+    const transformedAdventures = getMostLovedAdventures.map((adventure) => ({
+      ...adventure,
+      images: adventure?.images?.map((image) => getImageUrl(image)),
+      hotelImages: adventure?.images?.map((image) => getImageUrl(image)),
+    }));
+    //.sort((a, b) => b - a);
 
-    const transformedCountry = getCountry
-      .map((country) => ({
-        ...country,
-        image: country?.image ? getImageUrl(country.image) : null,
-      }))
-     // .sort((a, b) => b - a);
+    const transformedCountry = getCountry.map((country) => ({
+      ...country,
+      image: country?.image ? getImageUrl(country.image) : null,
+    }));
+    // .sort((a, b) => b - a);
 
     const getSectionData = (name) => {
       const section = getsectionTitle.find((item) => item.name === name);
@@ -227,37 +137,35 @@ const getAboutPage = async (req, res) => {
   }
 };
 
-const getTourPage = async (req, res) => {
+const get_all_inclusive_TourPage = async (req, res) => {
   try {
-    const getTourHeader = await Header.findOne({ pageName: "tour" });
+    const getTourHeader = await Header.findOne({ pageName: "tour" }); //for all inclucive
 
     const getsectionTitle = await SectinTitle.find({
-      name: { $regex: /^tour/ },
+      name: { $regex: /^all_inclusive_tour/ },
     });
 
     const packages = await Package.aggregate([
       {
-        $facet: {
-          allInclusive: [
-            { $match: { category: "all inclusive" } },
-            { $limit: 10 },
-          ],
-          others: [
-            { $match: { category: { $ne: "all inclusive" } } },
-            { $limit: 10 },
-          ],
+        $addFields: {
+          bookedFlights: {
+            $cond: {
+              if: { $gt: [{ $size: "$bookedFlights" }, 0] },  
+              then: "$bookedFlights",
+              else: "$$REMOVE", 
+            },
+          },
         },
-      },
+      }
     ]);
-    // const getCountry = await Country.find();
 
-    // const transformedTour = getTourPackage
-    //   .map((adventure) => ({
-    //     ...adventure.toObject(),
-    //     images: adventure?.images?.map((image) => getImageUrl(image)),
-    //   }))
-    //   .sort((a, b) => b - a);
 
+    const transformedPackages = packages.map((pkg) => ({
+      ...pkg,
+      images: pkg.images?.map((image) => getImageUrl(image)) || [],
+      hotelImages: pkg.hotelImages?.map((image) => getImageUrl(image)) || [],
+    }));
+    
     const response = {
       hero: {
         blogDetailsTitle: getTourHeader?.blogDetailsTitle,
@@ -268,29 +176,65 @@ const getTourPage = async (req, res) => {
         descriptionOne: getTourHeader?.descriptionOne,
         descriptionTwo: getTourHeader?.descriptionTwo,
       },
-      about: {
-        title: getsectionTitle[0]?.title,
-        subtitle: getsectionTitle[0]?.description,
-      },
-      team: {
-        title: getsectionTitle[1]?.title,
-        subtitle: getsectionTitle[1]?.description,
-      },
-      testimonial: {
-        title: getsectionTitle[2]?.title,
-        subtitle: getsectionTitle[2]?.description,
-      },
-      contact: {
-        title: getsectionTitle[3]?.title,
-        subtitle: getsectionTitle[3]?.description,
-      },
+     package: {
+      title: getsectionTitle[0]?.title,
+      subtitle: getsectionTitle[0]?.description,
+      data: transformedPackages,
+     }
     };
 
-    res.status(200).json(packages);
+    res.status(200).json(response);
   } catch (error) {
     throw error.message;
   }
 };
+
+
+const country_wise = async (req, res) => {
+  try {
+    const countryId = req.params.id;
+    const country = await Country.findOne({ _id: countryId }).lean()
+    const [ packages, sectionTitles, footer] = await Promise.all([
+      Package.find({ country: country.name }).lean(),
+      SectinTitle.find({ name: { $regex: /^country_wise/ } }).select("title description").lean(),
+      Footer.find().lean(),
+    ]);
+
+    const transformedPackages = packages.map((pkg) => ({
+      ...pkg,
+      images: pkg.images?.map(getImageUrl) || [],
+      hotelImages: pkg.hotelImages?.map(getImageUrl) || [],
+    }));
+
+    const response = {
+      hero: {
+        image: getImageUrl(country?.image),
+        titleOne: country?.contentTitle || "",
+        descriptionOne: country?.contentDescription || "",
+        countryName: country?.name || "",
+      },
+      package: {
+        title: sectionTitles?.[0]?.title,
+        subtitle: sectionTitles?.[0]?.description,
+        data: transformedPackages,
+      },
+      footer: footer.map((item) => ({
+        companyName: item.companyName,
+        description: item.description,
+        contactInfo: item.contactInfo,
+        quickLinks: item.quickLinks,
+        copyright: item.copyright,
+      })),
+    };
+
+    res.status(200).json(response);
+  } catch (error) {
+    console.error(error);
+    res.status(500).json({ message: error.message });
+  }
+};
+
+
 
 const BlogPage = async (req, res) => {
   try {
@@ -349,11 +293,13 @@ const getPolicy = async (req, res) => {
     res.status(500).json(error);
   }
 };
+
 // const
 module.exports = {
   getHomePage,
-  getTourPage,
+  get_all_inclusive_TourPage,
   BlogPage,
   getPolicy,
   getAboutPage,
+  country_wise,
 };
