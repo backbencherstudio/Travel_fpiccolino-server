@@ -1,3 +1,4 @@
+const { log } = require("console");
 const {
   getImageUrl,
   updateImageUrl,
@@ -37,7 +38,7 @@ const filterDuplicateItems = (items) => {
 const cleanupImages = async (imagePaths) => {
   for (const imagePath of imagePaths) {
     try {
-      const fullPath = path.join(__dirname, "../../public", imagePath);
+      const fullPath = path.join(__dirname, "../..", imagePath);
       await fs.unlink(fullPath);
     } catch (error) {
       console.error(`Failed to delete image: ${imagePath}`, error);
