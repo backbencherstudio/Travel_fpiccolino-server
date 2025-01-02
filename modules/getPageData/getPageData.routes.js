@@ -12,3 +12,4 @@ router.get("/BlogPage", BlogPage);
 router.get("/policyPage", getPolicy)
 
 module.exports = router;               
+ 
