@@ -46,6 +46,27 @@ const createOrder = async (req, res) => {
   }
 };
 
+
+const checkout = async (req, res) =>{
+  try {
+     req.session.userData = req.body
+     res.status(200).json({message : "success"})    
+
+  } catch (error) {
+    res.status(500).json(error)    
+  }
+
+}
+
+const accesCheckoutData = async (req, res) =>{
+  try {
+    let data =  req.session.userData  
+    res.status(200).json(data)  
+  } catch (error) {
+    res.status(500).json(error)
+  }
+}
+
 const getOrderById = async (req, res) => {
   try {
     const orderId = req.params.id;
@@ -158,6 +179,8 @@ const searchOrders = async (req, res) => {
 
 module.exports = {
   createOrder,
+  checkout,
+  accesCheckoutData,
   getOrderById,
   getUserOrders,
   updateOrderStatus,

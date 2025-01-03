@@ -1,3 +1,4 @@
+const { log } = require("console");
 const {
   getImageUrl,
   updateImageUrl,
@@ -37,7 +38,7 @@ const filterDuplicateItems = (items) => {
 const cleanupImages = async (imagePaths) => {
   for (const imagePath of imagePaths) {
     try {
-      const fullPath = path.join(__dirname, "../../public", imagePath);
+      const fullPath = path.join(__dirname, "../..", imagePath);
       await fs.unlink(fullPath);
     } catch (error) {
       console.error(`Failed to delete image: ${imagePath}`, error);
@@ -101,7 +102,6 @@ const updatePackage = async (req, res) => {
     const updatedData = req.body;
 
     // const imageUpdate = req.body.imageUrl;
-
 
     // Get existing package
     const existingPackage = await Package.findById(packageId);
@@ -196,9 +196,36 @@ const deletePackage = async (req, res) => {
 
 const getAllPackages = async (req, res) => {
   try {
-    const packages = await Package.find()
-      .populate("country")
-      .sort({ createdAt: -1 });
+    const { search, startDate, endDate } = req.query;
+
+    const start = startDate ? new Date(startDate) : null;
+    const end = endDate ? new Date(endDate) : null;
+
+    const queryConditions = [];
+
+    if (search) {
+      queryConditions.push({
+        $or: [
+          { destination: { $regex: search, $options: "i" } },
+          { country: { $regex: search, $options: "i" } },
+        ],
+      });
+    }
+    if (start) {
+      queryConditions.push({
+        createdAt: { $gte: start },
+      });
+    }
+    if (end) {
+      queryConditions.push({
+        createdAt: { $lte: end },
+      });
+    }
+    const packages = queryConditions.length
+      ? await Package.find({ $and: queryConditions })
+          .populate("country")
+          .sort({ createdAt: -1 })
+      : await Package.find().populate("country").sort({ createdAt: -1 });
 
     const formattedPackages = packages.map((packageItem) => ({
       ...packageItem.toObject(),

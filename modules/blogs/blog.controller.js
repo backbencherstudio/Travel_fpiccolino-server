@@ -235,7 +235,6 @@ exports.updateTexContent = async (req, res) => {
   console.log(learn, thought);
 
   try {
-    
     const blog = await Blog.findById(req.params.id);
     if (!blog) {
       return res.status(404).json({ message: "Blog not found" });
@@ -278,7 +277,46 @@ exports.deleteBlog = async (req, res) => {
 
 exports.getAllBlogs = async (req, res) => {
   try {
-    const blogs = await Blog.find();
+    const searchQuery = req.query.search || "";
+    const { startDate, endDate } = req.query;
+
+    // Convert startDate and endDate to valid Date objects
+    const start = startDate ? new Date(startDate) : null;
+    const end = endDate ? new Date(endDate) : null;
+
+    // Build the query conditions
+    const queryConditions = [];
+
+    // If there is a search query, add it to the conditions
+    if (searchQuery) {
+      queryConditions.push({
+        $or: [
+          {
+            "heroSection.mainHeading": { $regex: searchQuery, $options: "i" },
+          },
+          { category: { $regex: searchQuery, $options: "i" } },
+        ],
+      });
+    }
+
+    if (start) {
+      queryConditions.push({
+        createdAt: { $gte: start }, // Ensure createdAt is greater than or equal to startDate
+      });
+    }
+
+    // If there is an endDate, add the condition for createdAt <= endDate
+    if (end) {
+      queryConditions.push({
+        createdAt: { $lte: end }, // Ensure createdAt is less than or equal to endDate
+      });
+    }
+
+    // If there are conditions, apply them to the query, otherwise fetch all blogs
+    const blogs = queryConditions.length
+      ? await Blog.find({ $and: queryConditions })
+      : await Blog.find();
+
     res.status(200).json({ message: "Blogs retrieved successfully", blogs });
   } catch (error) {
     res
