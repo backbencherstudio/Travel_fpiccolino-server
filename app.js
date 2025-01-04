@@ -27,6 +27,8 @@ const orderPersonalDetails = require("./modules/order/orderPersonalDetails/order
 
 const blogs = require("./modules/blogs/blog.route");
 const path = require("path");
+const bodyParser = require("body-parser");
+
 const shorts = require("./modules/shorts/short.route");
 const app = express();
 
@@ -41,7 +43,16 @@ app.use(
   })
 );
 
-app.use(express.json());
+app.use((req, res, next) => {
+  if (req.originalUrl === "/order/webhook") {
+    bodyParser.raw({ type: "application/json" })(req, res, next);
+    // express.raw()(req, res, next)
+  } else {
+    express.json()(req, res, next); // Use JSON parsing for all other routes
+  }
+});
+
+// app.use(express.json());
 app.use(express.urlencoded({ extended: true }));
 
 app.use(morgan("dev"));
@@ -58,10 +69,6 @@ app.use(
     cookie: { maxAge: 3600000 },
   })
 );
-
-// $2a$08$/r6NcvcPcHX4L5qhxRLiQ.dNjMsCNHjlY1R8k187uAFPG87YA85Oi
-
-// $2a$08$/r6NcvcPcHX4L5qhxRLiQ.dNjMsCNHjlY1R8k187uAFPG87YA85Oi
 
 app.use("/users", user);
 app.use("/package", package);
