@@ -1,4 +1,3 @@
- 
 const {
   getAllUsers,
   checkAuthStatus,
@@ -20,7 +19,6 @@ const { upload } = require("../../middleware/Multer.config");
 const route = require("express").Router();
 
 route.get("/", getAllUsers);
-route.get("/:id", getSingleUser);
 
 route.get("/check", checkAuthStatus);
 
@@ -29,13 +27,20 @@ route.post("/verify-otp", verifyOTP);
 route.post("/resendotp", resendOtp);
 route.post("/login", authenticateUser);
 
-route.put("/update-profile", upload.single("image"), verifyUser, editUserProfile);
+route.patch(
+  "/update-profile",
+  upload.single("image"),
+  verifyUser,
+  editUserProfile
+);
 
 route.post("/logout", logout);
 
 // Forgot passwords
-route.post("/request-forgot-password-otp", verifyUser, forgotPasswordOTPsend);
-route.post("/match-password-otp", verifyUser, matchForgotPasswordOTP);
-route.patch("/reset-forgot-password", verifyUser, resetPasssword);
+route.post("/request-forgot-password-otp", forgotPasswordOTPsend);
+route.post("/match-password-otp",  matchForgotPasswordOTP);
+route.patch("/reset-forgot-password", resetPasssword);
+
+route.get("/:id", getSingleUser);
 
 module.exports = route;
