@@ -19,6 +19,7 @@ const router = express.Router();
 router.post("/", createOrder);
 
 router.post("/checkout", checkout);
+
 router.get("/checkout", accesCheckoutData);
 router.delete("/checkout", deleteCheckoutData);
 
