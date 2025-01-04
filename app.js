@@ -27,7 +27,7 @@ const orderPersonalDetails = require("./modules/order/orderPersonalDetails/order
 
 const blogs = require("./modules/blogs/blog.route");
 const path = require("path");
-
+const shorts = require("./modules/shorts/short.route");
 const app = express();
 
 app.use(
@@ -82,6 +82,7 @@ app.use("/api/footer", footer);
 
 app.use("/order/:orderId/orderPersonalDetails", orderPersonalDetails);
 app.use("/dashboard", dashboard);
+app.use("/api/shorts", shorts);
 // app.use("/api/newsletter", newsletter);
 
 app.use("/category", category);
