@@ -217,6 +217,7 @@ const verifyOTP = async (req, res) => {
       return;
     }
 
+    console.log(req.session.userData.email);
     console.log("req.session.otp", req.session.otp);
 
     if (otp != req.session.otp) {
@@ -266,23 +267,27 @@ const authenticateUser = async (req, res) => {
         .json({ message: "Please fill all required fields" });
     }
 
-    const user = await User.findOne({ email }).lean(); // Use `lean()` for a plain object
+    const user = await User.findOne({ email }).lean(); // Get plain JS object
 
     if (!user) {
       return res.status(400).json({ message: "User not found!" });
     }
 
+    console.log("plain:", password);
+    console.log("hashedPassword", user.password);
+
+    // Compare passwords
     const passwordMatch = await bcrypt.compare(password, user.password);
+
+    console.log("isMatched", passwordMatch);
 
     if (!passwordMatch) {
       return res.status(400).json({ message: "Invalid email or password" });
     }
 
     const token = generateToken(user._id, user.email, user.role);
-
     setTokenCookie(res, token);
 
-    // Add `image_url` if the user has an image
     const userResponse = {
       ...user,
       image_url: user.image ? getImageUrl(user.image) : null,
@@ -315,7 +320,7 @@ const editUserProfile = async (req, res) => {
 
     const updatedUser = await User.findByIdAndUpdate(req.userId, req.body, {
       new: true,
-    });
+    }).lean();
 
     if (!updatedUser) {
       return res.status(404).json({ message: "User not found" });

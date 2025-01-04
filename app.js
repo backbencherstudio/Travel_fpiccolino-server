@@ -59,6 +59,10 @@ app.use(
   })
 );
 
+// $2a$08$/r6NcvcPcHX4L5qhxRLiQ.dNjMsCNHjlY1R8k187uAFPG87YA85Oi
+
+// $2a$08$/r6NcvcPcHX4L5qhxRLiQ.dNjMsCNHjlY1R8k187uAFPG87YA85Oi
+
 app.use("/users", user);
 app.use("/package", package);
 app.use("/category", category);
