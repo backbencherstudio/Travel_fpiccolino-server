@@ -305,6 +305,7 @@ const authenticateUser = async (req, res) => {
 };
 
 const editUserProfile = async (req, res) => {
+  console.log(req.body);
   try {
     if (!req.userId) {
       return res.status(401).json({ message: "Unauthorized user" });

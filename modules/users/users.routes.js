@@ -27,7 +27,7 @@ route.post("/verify-otp", verifyOTP);
 route.post("/resendotp", resendOtp);
 route.post("/login", authenticateUser);
 
-route.put(
+route.patch(
   "/update-profile",
   upload.single("image"),
   verifyUser,
