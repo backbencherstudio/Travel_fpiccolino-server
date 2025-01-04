@@ -12,9 +12,12 @@ const {
   checkout,
   accesCheckoutData,
   deleteCheckoutData,
+  stripePaymentFun,
 } = require("./order.controllers");
 
 const router = express.Router();
+
+router.post("stripePayment", stripePaymentFun )
 
 router.post("/", createOrder);
 

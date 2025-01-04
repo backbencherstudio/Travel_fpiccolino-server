@@ -2,6 +2,28 @@ const Order = require("./order.models");
 const Package = require("./../package/package.model");
 const User = require("../users/users.models");
 
+const stripe = require('stripe')(process.env.STRIPE_SECRET_KEY);
+
+const stripePaymentFun = async (req, res) => {
+  const { paymentMethodId, amount } = req.body;
+  console.log(paymentMethodId, amount);
+  
+  try {
+      const paymentIntent = await stripe.paymentIntents.create({
+          amount,
+          currency: 'usd',
+          payment_method: paymentMethodId,
+          confirm: true,
+      });
+      res.status(200).json({ success: true, paymentIntent });
+  } catch (err) {
+      res.status(400).json({ success: false, error: err.message });
+  }
+ 
+  };
+
+
+
 const createOrder = async (req, res) => {
   try {
     const {
@@ -187,6 +209,7 @@ const searchOrders = async (req, res) => {
 };
 
 module.exports = {
+  stripePaymentFun,
   createOrder,
   checkout,
   accesCheckoutData,

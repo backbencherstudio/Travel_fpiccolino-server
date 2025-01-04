@@ -20,7 +20,6 @@ const { upload } = require("../../middleware/Multer.config");
 const route = require("express").Router();
 
 route.get("/", getAllUsers);
-route.get("/:id", getSingleUser);
 
 route.get("/check", checkAuthStatus);
 
@@ -37,5 +36,6 @@ route.post("/logout", logout);
 route.post("/request-forgot-password-otp", verifyUser, forgotPasswordOTPsend);
 route.post("/match-password-otp", verifyUser, matchForgotPasswordOTP);
 route.patch("/reset-forgot-password", verifyUser, resetPasssword);
+route.get("/:id", getSingleUser);
 
 module.exports = route;
