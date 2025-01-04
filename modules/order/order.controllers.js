@@ -67,6 +67,15 @@ const accesCheckoutData = async (req, res) =>{
   }
 }
 
+const deleteCheckoutData = async (req, res) =>{
+  try {
+     delete req.session.userData  
+    res.status(200).json({message : "delete successFull"})  
+  } catch (error) {
+    res.status(500).json(error)
+  }
+}
+
 const getOrderById = async (req, res) => {
   try {
     const orderId = req.params.id;
@@ -181,6 +190,7 @@ module.exports = {
   createOrder,
   checkout,
   accesCheckoutData,
+  deleteCheckoutData,
   getOrderById,
   getUserOrders,
   updateOrderStatus,
