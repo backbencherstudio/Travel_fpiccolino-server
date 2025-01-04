@@ -1,0 +1,395 @@
+const express = require("express");
+const morgan = require("morgan");
+const cors = require("cors");
+const session = require("express-session");
+
+const cookieParser = require("cookie-parser");
+const user = require("./modules/users/users.routes");
+
+const subscriber = require("./modules/subscriber/subscriber.routes");
+const newsletter = require("./modules/newsletter/newsletter.routes");
+const package = require("./modules/package/package.routes");
+const category = require("./modules/category/category.routes");
+const blogss = require("./modules/blogs/blog.route");
+const contact = require("./modules/contact/contact.route");
+const payment = require("./modules/payment/payment.routes");
+const transaction = require("./modules/transaction/transaction.routes");
+const country = require("./modules/country/country.routes");
+const pageData = require("./modules/getPageData/getPageData.routes");
+const header = require("./modules/header/header.routes");
+const order = require("./modules/order/order.routes");
+const sectionTitle = require("./modules/sectionTitle/sectionTitle.routes");
+const review = require("./modules/review/review.route");
+const footer = require("./modules/footer/footer.route");
+const dashboard = require("./modules/dashboard/dashboard.routes");
+
+const orderPersonalDetails = require("./modules/order/orderPersonalDetails/orderPersonalDetails.routes");
+
+const blogs = require("./modules/blogs/blog.route");
+const path = require("path");
+const bodyParser = require("body-parser");
+
+const app = express();
+
+app.use(
+  cors({
+    origin: [
+      "http://localhost:5173",
+      "http://localhost:5174",
+      "http://10.0.2.2:8081",
+    ],
+    credentials: true,
+  })
+);
+
+app.use((req, res, next) => {
+  
+  if (req.originalUrl === '/order/webhook') {
+      bodyParser.raw({ type: 'application/json' })(req, res, next);
+      // express.raw()(req, res, next)
+  } else {
+      express.json()(req, res, next); // Use JSON parsing for all other routes
+  }
+});
+
+
+
+// app.use(express.json());
+app.use(express.urlencoded({ extended: true }));
+
+app.use(morgan("dev"));
+app.use("/uploads", express.static(path.join(__dirname, "uploads")));
+
+app.use(cookieParser());
+// app.use("/uploads", express.static("uploads"));
+
+app.use(
+  session({
+    secret: "changeit",
+    resave: true,
+    saveUninitialized: true,
+    cookie: { maxAge: 3600000 },
+  })
+);
+
+const stripe = require('stripe')(process.env.STRIPE_SECRET_KEY);
+const endpointSecret = process.env.STRIPE_WEBHOOK_SECRET;
+
+
+// app.use ("/order/webhook", bodyParser.raw({ type: 'application/json' }), async (req, res) => {
+//   console.log("hitttt");
+  
+//   const sig = req.headers['stripe-signature'];
+
+//   try {
+//       const event = stripe.webhooks.constructEvent(
+//           req.body,
+//           sig,
+//           process.env.STRIPE_WEBHOOK_SECRET
+//       );
+
+//       console.log(event);
+      
+
+//       switch (event.type) {
+//           case 'invoice.payment_succeeded': {
+//               const invoice = event.data.object;
+//               // const user = await User.findOne({ stripeSubscriptionId: invoice.subscription });
+
+//               // if (user) {
+//               //     user.paymentStatus = 'paid';
+//               //     user.totalPaid += invoice.amount_paid / 100;
+//               //     user.expirationDate = new Date(invoice.lines.data[0].period.end * 1000);
+//               //     await user.save();
+//               // }
+//               break;
+//           }
+//           case 'invoice.payment_failed': {
+//               const invoice = event.data.object;
+//               // const user = await User.findOne({ stripeSubscriptionId: invoice.subscription });
+
+//               // if (user) {
+//               //     user.paymentStatus = 'failed';
+//               //     await user.save();
+//               // }
+//               break;
+//           }
+//           default:
+//               console.log(`Unhandled event type: ${event.type}`);
+//       }
+
+//       res.status(200).json({ received: true });
+//   } catch (err) {
+//       console.error(`Webhook Error: ${err.message}`);
+//       res.status(400).send(`Webhook Error: ${err.message}`);
+//   }
+// })
+
+
+// app.post("/order/webhook", bodyParser.raw({ type: 'application/json' }), async (req, res) => {
+//   console.log("Webhook received");
+
+//   const sig = req.headers['stripe-signature']; 
+//   let event;
+
+//   try {
+//       event = stripe.webhooks.constructEvent(req.body, sig, endpointSecret);
+//       console.log(`Event Type: ${event.type}`);
+
+//       switch (event.type) {
+//           case 'payment_intent.succeeded':
+//               const paymentIntent = event.data.object;
+//               console.log("PaymentIntent was successful!", paymentIntent.id);
+//               break;
+
+//           case 'invoice.payment_succeeded':
+//               const invoice = event.data.object;
+//               console.log("Invoice payment succeeded:", invoice.id);
+//               break;
+
+//           case 'invoice.payment_failed':
+//               console.log("Invoice payment failed.");
+//               break;
+
+//           default:
+//               console.log(`Unhandled event type: ${event.type}`);
+//       }
+
+//       res.status(200).json({ received: true }); // Respond to Stripe that the event was received
+
+//   } catch (err) {
+//       console.error(`Webhook Error: ${err.message}`);
+//       res.status(400).send(`Webhook Error: ${err.message}`);
+//   }
+// });
+
+// app.post(
+//   "/order/webhook",
+//   async (req, res) => {
+//     const sig = req.headers['stripe-signature'];
+//     let event;
+
+//     try {
+//       event = stripe.webhooks.constructEvent(req.body, sig, endpointSecret);
+//       console.log(`Event Type: ${event.type}`);
+
+//       switch (event.type) {
+//         case 'charge.succeeded':
+//           const paymentIntent = event.data.object;
+//           console.log("PaymentIntent was successful!", paymentIntent.id);
+//           break;
+
+//         case 'invoice.payment_succeeded':
+//           const invoice = event.data.object;
+//           console.log("Invoice payment succeeded:", invoice.id);
+//           break;
+
+//         case 'invoice.payment_failed':
+//           console.log("Invoice payment failed.");
+//           break;
+
+//         default:
+//           console.log(`Unhandled event type: ${event.type}`);
+//       }
+
+//       res.status(200).json({ received: true });
+//     } catch (err) {
+//       console.error(`Webhook Error: ${err.message}`);
+//       res.status(400).send(`Webhook Error: ${err.message}`);
+//     }
+// });
+
+// app.post(
+//   "/order/webhook",
+//   async (req, res) => {
+//     const sig = req.headers['stripe-signature'];
+//     let event;
+
+//     try {
+//       event = stripe.webhooks.constructEvent(req.body, sig, endpointSecret);
+//       console.log(`Event Type: ${event.type}`);
+
+//       switch (event.type) {
+//         case 'payment_intent.created':
+//           console.log(214, "PaymentIntent was created:", event.data.object.id);
+//           break;
+
+//         case 'payment_intent.succeeded':
+//           const paymentIntentSucceeded = event.data.object;
+//           console.log(219, "PaymentIntent was successful!", paymentIntentSucceeded.id);
+//           break;
+
+//         case 'payment_intent.payment_failed':
+//           console.log(223, "PaymentIntent payment failed:", event.data.object.id);
+//           break;
+
+//         case 'charge.succeeded':
+//           const chargeSucceeded = event.data.object;
+//           console.log(228, "Charge succeeded:", chargeSucceeded.id, `Amount: ${chargeSucceeded.amount / 100} ${chargeSucceeded.currency}`);
+//           break;
+
+//         case 'charge.failed':
+//           console.log(232, "Charge failed:", event.data.object.id);
+//           break;
+
+//         case 'charge.updated':
+//           const chargeUpdated = event.data.object;
+//           console.log(237, "Charge was updated:", chargeUpdated.id, `Status: ${chargeUpdated.status}`);
+//           break;
+
+//         case 'charge.refunded':
+//           console.log(241, "Charge was refunded:", event.data.object.id);
+//           break;
+
+//         case 'invoice.payment_succeeded':
+//           const invoiceSucceeded = event.data.object;
+//           console.log(246, "Invoice payment succeeded:", invoiceSucceeded);
+//           console.log(247, "Invoice Url:", invoiceSucceeded.hosted_invoice_url);
+//           console.log(248, "Invoice payment succeeded:", invoiceSucceeded.invoice_pdf);
+//           break;
+
+//         case 'invoice.payment_failed':
+//           console.log(250 , "Invoice payment failed:", event.data.object.id);
+//           break;
+
+//         case 'invoice.created':
+//           console.log(254, "Invoice was created:", event.data.object.id);
+//           break;
+
+//         case 'checkout.session.completed':
+//           const checkoutSession = event.data.object;
+//           console.log(259, `Checkout session completed for session: ${checkoutSession.id}`);
+//           break;
+
+//         case 'customer.subscription.created':
+//           console.log(263, "Subscription created:", event.data.object.id);
+//           break;
+
+//         case 'customer.subscription.updated':
+//           console.log(267, "Subscription updated:", event.data.object.id);
+//           break;
+
+//         case 'customer.subscription.deleted':
+//           console.log(271 , "Subscription deleted:", event.data.object.id);
+//           break;
+
+//         default:
+//           console.log(275, `Unhandled event type: ${event.type}`);
+//       }
+
+//       res.status(200).json({ received: true });
+//     } catch (err) {
+//       console.error(280,`Webhook Error: ${err.message}`);
+//       res.status(400).send(`Webhook Error: ${err.message}`);
+//     }
+//   }
+// );
+
+
+
+
+// app.post(
+//   "/order/webhook",
+//   async (req, res) => {
+//     const sig = req.headers['stripe-signature'];
+//     let event;
+
+//     try {
+//       event = stripe.webhooks.constructEvent(req.body, sig, endpointSecret);
+//       console.log(`Event Type: ${event.type}`);
+
+//       switch (event.type) {
+//         case 'invoice.payment_succeeded':
+//           const invoiceSucceeded = event.data.object;
+//           console.log(246, "Invoice payment succeeded:", invoiceSucceeded.id);
+//           if (invoiceSucceeded.hosted_invoice_url) {
+//             console.log("Invoice URL:", invoiceSucceeded.hosted_invoice_url);
+//           } else {
+//             console.log("Hosted invoice URL not available.");
+//           }
+//           break;
+
+//         case 'invoice.created':
+//           const invoiceCreated = event.data.object;
+//           console.log("Invoice created:", invoiceCreated.id);
+//           if (invoiceCreated.hosted_invoice_url) {
+//             console.log("Invoice URL:", invoiceCreated.hosted_invoice_url);
+//           } else {
+//             console.log("Hosted invoice URL not available.");
+//           }
+//           break;
+
+//         case 'invoice.updated':
+//           const invoiceUpdated = event.data.object;
+//           console.log("Invoice updated:", invoiceUpdated.id);
+//           if (invoiceUpdated.hosted_invoice_url) {
+//             console.log("Updated Invoice URL:", invoiceUpdated.hosted_invoice_url);
+//           } else {
+//             console.log("Hosted invoice URL not available for update.");
+//           }
+//           break;
+
+//         case 'checkout.session.completed':
+//           const checkoutSession = event.data.object;
+//           console.log(`Checkout session completed for session: ${checkoutSession.id}`);
+//           if (checkoutSession.invoice) {
+//             // If there's an associated invoice, retrieve its details
+//             const invoice = await stripe.invoices.retrieve(checkoutSession.invoice);
+//             console.log(334, "Invoice URL from checkout session:", invoice.hosted_invoice_url);
+//           }
+//           break;
+
+//         default:
+//           console.log(`Unhandled event type: ${event.type}`);
+//       }
+
+//       res.status(200).json({ received: true });
+//     } catch (err) {
+//       console.error(`Webhook Error: ${err.message}`);
+//       res.status(400).send(`Webhook Error: ${err.message}`);
+//     }
+//   }
+// );
+
+
+
+app.use("/users", user);
+app.use("/package", package);
+app.use("/category", category);
+app.use("/api/blogs", blogss);
+
+app.use("/category", category);
+app.use("/api/blogs", blogs);
+app.use("/api/contact", contact);
+app.use("/api/subscriber", subscriber);
+app.use("/api/newsletter", newsletter);
+app.use("/api/payment", payment);
+app.use("/api/transaction", transaction);
+app.use("/api/country", country);
+app.use("/api/pageData", pageData);
+app.use("/header", header);
+app.use("/order", order);
+app.use("/section-title", sectionTitle);
+
+app.use("/api/review", review);
+app.use("/api/footer", footer);
+
+app.use("/order/:orderId/orderPersonalDetails", orderPersonalDetails);
+app.use("/dashboard", dashboard);
+// app.use("/api/newsletter", newsletter);
+
+app.use("/category", category);
+
+app.use((req, res, next) => {
+  res.status.json({
+    message: "404! Route is not found",
+  });
+});
+
+app.use((err, req, res, next) => {
+  res.status(500).json({
+    message: err,
+  });
+});
+
+module.exports = app;
