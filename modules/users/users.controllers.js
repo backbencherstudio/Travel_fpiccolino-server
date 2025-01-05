@@ -366,7 +366,10 @@ const forgotPasswordOTPsend = async (req, res) => {
 
     res
       .status(200)
-      .json({ message: "OTP sent successfully for password change", success: true });
+      .json({
+        message: "OTP sent successfully for password change",
+        success: true,
+      });
   } catch (error) {
     res.status(500).json(error);
   }
@@ -374,9 +377,9 @@ const forgotPasswordOTPsend = async (req, res) => {
 
 // Match forgot password OTP
 const matchForgotPasswordOTP = async (req, res) => {
-  console.log(req.body)
+  console.log(req.body);
   try {
-    const { otp } = req.body; 
+    const { otp } = req.body;
     if (!otp) {
       res.status(400).json({
         message: `OTP is required`,
@@ -404,14 +407,14 @@ const matchForgotPasswordOTP = async (req, res) => {
 
 // Reset password
 const resetPasssword = async (req, res) => {
-  console.log("hiiiiiiiiiii")
+  console.log("hiiiiiiiiiii");
   try {
     if (!req.session.isOtpValid) {
       res.status(400).json({ message: "OTP invalid" });
       return;
     }
     const { password } = req.body;
-    console.log(password)
+    console.log(password);
 
     if (password.length < 8) {
       res
@@ -430,7 +433,9 @@ const resetPasssword = async (req, res) => {
     // Clear session after password reset
     req.session.destroy();
 
-    res.status(200).json({ message: "Password reset successfully", success: true });
+    res
+      .status(200)
+      .json({ message: "Password reset successfully", success: true });
   } catch (error) {
     res.status(500).json(error);
   }

@@ -296,6 +296,41 @@ const searchOrders = async (req, res) => {
   }
 };
 
+
+const getUserStatus = async (req, res) => {
+  try {
+    const { userId } = req.params;
+
+    if (!userId) {
+      return res.status(400).json({ message: "User ID is required" });
+    }
+
+    const orders = await Order.find({ userId });
+
+    if (!orders.length) {
+      return res.status(404).json({ message: "No orders found for this user" });
+    }
+
+    const totalOrders = orders.length;
+    const statusCounts = orders.reduce(
+      (acc, order) => {
+        acc[order.status] = (acc[order.status] || 0) + 1;
+        return acc;
+      },
+      { pending: 0, confirmed: 0, completed: 0, cancelled: 0 }
+    );
+
+    res.status(200).json({
+      totalOrders,
+      statusCounts, // { pending: X, confirmed: X, completed: X, cancelled: X }
+    });
+  } catch (error) {
+    res.status(500).json({ message: error.message });
+  }
+};
+
+
+
 module.exports = {
   stripePaymentFun,
   // handleWebhook,
@@ -311,4 +346,5 @@ module.exports = {
   updateOrder,
   cancelOrder,
   searchOrders,
+  getUserStatus
 };

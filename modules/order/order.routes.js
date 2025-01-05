@@ -15,6 +15,7 @@ const {
   stripePaymentFun,
   checkoutNewUserData,
   accesCheckoutNewData,
+  getUserStatus
   // handleWebhook,
 } = require("./order.controllers");
 
@@ -35,6 +36,7 @@ router.delete("/checkout", deleteCheckoutData);
 router.post("/checkoutWithNewData", checkoutNewUserData);
 router.get("/checkoutWithNewData", accesCheckoutNewData);
 
+router.get("/getUserStatus/:userId", getUserStatus)
 
 router.get("/:id", getOrderById);
 
