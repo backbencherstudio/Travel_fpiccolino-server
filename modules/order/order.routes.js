@@ -20,11 +20,11 @@ const {
 
 const router = express.Router();
 
+router.post("/", createOrder);
+
 router.post("/stripePayment", stripePaymentFun )
 // router.post("/webhook", bodyParser.raw({ type: 'application/json' }), handleWebhook )
 
-
-router.post("/", createOrder);
 
 // ==================================>>> created by ami ( checkout data )
 router.post("/checkout", checkout);

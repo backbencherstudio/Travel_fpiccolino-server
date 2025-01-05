@@ -93,49 +93,30 @@ const stripePaymentFun = async (req, res) => {
 
 
 
+// const createOrder = async (req, res) => {
+//   try {
+//     console.log(req.body);    
+
+//     const savedOrder = await Order.save(req.body);
+
+//     res.status(201).json(savedOrder);
+//   } catch (error) {
+//     throw error;
+//   }
+// };
+
+
 const createOrder = async (req, res) => {
   try {
-    const {
-      userId,
-      packageId,
-      quantity,
-      paymentMethod,
-      notes,
-      shippingAddress,
-    } = req.body;
-
-    const user = await User.findById(userId);
-    const packageData = await Package.findById(packageId);
-    if (!user || !packageData) {
-      return res.status(404).json({ error: "User or Package not found" });
-    }
-    const totalPrice = Number(packageData.price) * quantity;
-
-    const newOrder = new Order({
-      userId,
-      packageId,
-      quantity,
-      totalPrice,
-      paymentMethod,
-      notes,
-      shippingAddress,
-    });
-
+    const newOrder = new Order(req.body);
     const savedOrder = await newOrder.save();
-
-    // proceed to payment
-    // const paymentResponse = await paymentHelper.makePayment({
-    //   package_name: packageData.tourName,
-    //   amount: totalPrice,
-    //   order_id: savedOrder._id,
-    // });
-
     res.status(201).json(savedOrder);
   } catch (error) {
-    // res.status(500).json({ error: error.message });
-    throw error;
+    console.error("Error creating order:", error);
+    res.status(500).json({ message: "An error occurred while creating the order", error });
   }
 };
+
 
 
 const checkout = async (req, res) =>{

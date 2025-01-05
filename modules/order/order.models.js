@@ -1,57 +1,97 @@
 const mongoose = require("mongoose");
 const { Schema } = mongoose;
 
+// Schema for Traveler Details
+const TravelerSchema = new Schema({
+  fullName: { type: String, required: true },
+  lastName: { type: String, required: true },
+  gender: { type: String, enum: ["male", "female", "other"], required: true },
+  date: { type: Date },
+  email: { type: String, required: true },
+  phone: { type: String },
+});
+
+// Schema for Flight Details
+const FlightSchema = new Schema({
+  arrivalTime: { type: String },
+  breakTime: { type: String },
+  departureTime: { type: String },
+  flightClass: { type: String, default: "" },
+  flightFrom: { type: String },
+  flightTo: { type: String },
+  price: { type: Number },
+});
+
+// Schema for Insurance Details
+const InsuranceSchema = new Schema({
+  insuranceName: { type: String },
+  description: { type: String },
+  price: { type: Number },
+});
+
+// Schema for Tour Duration
+const TourDurationSchema = new Schema({
+  nights: { type: Number, required: true },
+  days: { type: Number, required: true },
+});
+
+// Main Order Schema
 const OrderSchema = new Schema(
   {
-    userId: {
-      type: mongoose.Types.ObjectId,
-      ref: "User", 
-      required: true,
-    },
     packageId: {
       type: mongoose.Types.ObjectId,
-      ref: "Package",  
+      ref: "Package",
       required: true,
     },
-    transactionId: {
+    userId: {
       type: mongoose.Types.ObjectId,
-      ref: "Transaction", 
-    },
-    status: {
-      type: String,
-      enum: ["pending", "confirmed", "completed", "cancelled"],
-      default: "pending",
-    },
-    quantity: {
-      type: Number,
-      required: true,
-      default: 1,
-    },
-    totalPrice: {
-      type: Number,
-      required: true,  
-    },
-    paymentMethod: {
-      type: String,
-      enum: ["stripe", "paypal", "cash"],
+      ref: "User",
       required: true,
     },
-    notes: {
-      type: String,  
+    paymentId: {
+      type: String,
+      required: true,
     },
-    shippingAddress: {
-      street: { type: String },
-      city: { type: String },
-      state: { type: String },
-      country: { type: String },
-      zipCode: { type: String },
+    totalPackageAmount: {
+      type: Number,
+      required: true,
     },
+    toureAmount: {
+      type: Number,
+      required: true,
+    },
+
+    // Optional Flight Details (defaults to {})
+    flight: {
+      type: [FlightSchema, Boolean],
+      default: false, // Set to false if no flight is included
+    },
+
+    // Optional Insurance Details (defaults to false)
+    insurance: {
+      type: [InsuranceSchema, Boolean],
+      default: false, // Set to false if no insurance is included
+    },
+
+    // Optional flightPrice (defaults to false)
+    flightPrice: {
+      type: Number,
+      default: false,
+    },
+
+    tourDate: {
+      type: Date,
+      required: true,
+    },
+    travelers: [TravelerSchema],
+    person: {
+      type: Number,
+      required: true,
+    },
+    tourDuration: TourDurationSchema,
     orderDate: {
       type: Date,
       default: Date.now,
-    },
-    completionDate: {
-      type: Date, 
     },
   },
   {
