@@ -1,5 +1,5 @@
 // create/ single order/ all order/ unpay user
-const bodyParser = require("body-parser")
+const bodyParser = require("body-parser");
 const express = require("express");
 const {
   createOrder,
@@ -15,17 +15,16 @@ const {
   stripePaymentFun,
   checkoutNewUserData,
   accesCheckoutNewData,
-  getUserStatus
+  getAllOrders,
   // handleWebhook,
 } = require("./order.controllers");
 
 const router = express.Router();
 
-router.post("/stripePayment", stripePaymentFun )
-// router.post("/webhook", bodyParser.raw({ type: 'application/json' }), handleWebhook )
-
-
 router.post("/", createOrder);
+
+router.post("/stripePayment", stripePaymentFun);
+// router.post("/webhook", bodyParser.raw({ type: 'application/json' }), handleWebhook )
 
 // ==================================>>> created by ami ( checkout data )
 router.post("/checkout", checkout);
@@ -36,9 +35,8 @@ router.delete("/checkout", deleteCheckoutData);
 router.post("/checkoutWithNewData", checkoutNewUserData);
 router.get("/checkoutWithNewData", accesCheckoutNewData);
 
-router.get("/getUserStatus/:userId", getUserStatus)
-
 router.get("/:id", getOrderById);
+router.get("/", getAllOrders);
 
 router.get("/user/:userId", getUserOrders);
 
