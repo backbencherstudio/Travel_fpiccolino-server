@@ -55,7 +55,7 @@ app.use((req, res, next) => {
 // app.use(express.json());
 app.use(express.urlencoded({ extended: true }));
 
-app.use(morgan("dev"));
+// app.use(morgan("dev"));
 app.use("/uploads", express.static(path.join(__dirname, "uploads")));
 
 app.use(cookieParser());
