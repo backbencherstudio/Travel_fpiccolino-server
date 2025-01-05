@@ -35,7 +35,6 @@ router.delete("/checkout", deleteCheckoutData);
 router.post("/checkoutWithNewData", checkoutNewUserData);
 router.get("/checkoutWithNewData", accesCheckoutNewData);
 
-
 router.get("/:id", getOrderById);
 
 router.get("/user/:userId", getUserOrders);
