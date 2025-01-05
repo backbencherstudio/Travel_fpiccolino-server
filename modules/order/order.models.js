@@ -1,7 +1,6 @@
 const mongoose = require("mongoose");
 const { Schema } = mongoose;
 
-// Schema for Traveler Details
 const TravelerSchema = new Schema({
   fullName: { type: String, required: true },
   lastName: { type: String, required: true },
@@ -11,7 +10,6 @@ const TravelerSchema = new Schema({
   phone: { type: String },
 });
 
-// Schema for Flight Details
 const FlightSchema = new Schema({
   arrivalTime: { type: String },
   breakTime: { type: String },
@@ -22,20 +20,17 @@ const FlightSchema = new Schema({
   price: { type: Number },
 });
 
-// Schema for Insurance Details
 const InsuranceSchema = new Schema({
   insuranceName: { type: String },
   description: { type: String },
   price: { type: Number },
 });
 
-// Schema for Tour Duration
 const TourDurationSchema = new Schema({
   nights: { type: Number, required: true },
   days: { type: Number, required: true },
 });
 
-// Main Order Schema
 const OrderSchema = new Schema(
   {
     packageId: {
@@ -61,19 +56,16 @@ const OrderSchema = new Schema(
       required: true,
     },
 
-    // Optional Flight Details (defaults to {})
     flight: {
       type: [FlightSchema, Boolean],
-      default: false, // Set to false if no flight is included
+      default: false, 
     },
 
-    // Optional Insurance Details (defaults to false)
     insurance: {
       type: [InsuranceSchema, Boolean],
-      default: false, // Set to false if no insurance is included
+      default: false, 
     },
 
-    // Optional flightPrice (defaults to false)
     flightPrice: {
       type: Number,
       default: false,
