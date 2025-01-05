@@ -217,6 +217,7 @@ const verifyOTP = async (req, res) => {
       return;
     }
 
+    console.log(req.session.userData.email);
     console.log("req.session.otp", req.session.otp);
 
     if (otp != req.session.otp) {
@@ -266,23 +267,27 @@ const authenticateUser = async (req, res) => {
         .json({ message: "Please fill all required fields" });
     }
 
-    const user = await User.findOne({ email }).lean(); // Use `lean()` for a plain object
+    const user = await User.findOne({ email }).lean(); // Get plain JS object
 
     if (!user) {
       return res.status(400).json({ message: "User not found!" });
     }
 
+    console.log("plain:", password);
+    console.log("hashedPassword", user.password);
+
+    // Compare passwords
     const passwordMatch = await bcrypt.compare(password, user.password);
+
+    console.log("isMatched", passwordMatch);
 
     if (!passwordMatch) {
       return res.status(400).json({ message: "Invalid email or password" });
     }
 
     const token = generateToken(user._id, user.email, user.role);
-
     setTokenCookie(res, token);
 
-    // Add `image_url` if the user has an image
     const userResponse = {
       ...user,
       image_url: user.image ? getImageUrl(user.image) : null,
@@ -300,6 +305,7 @@ const authenticateUser = async (req, res) => {
 };
 
 const editUserProfile = async (req, res) => {
+  console.log(req.body);
   try {
     if (!req.userId) {
       return res.status(401).json({ message: "Unauthorized user" });
@@ -315,7 +321,7 @@ const editUserProfile = async (req, res) => {
 
     const updatedUser = await User.findByIdAndUpdate(req.userId, req.body, {
       new: true,
-    });
+    }).lean();
 
     if (!updatedUser) {
       return res.status(404).json({ message: "User not found" });
@@ -338,6 +344,12 @@ const editUserProfile = async (req, res) => {
 const forgotPasswordOTPsend = async (req, res) => {
   try {
     const { email } = req.body;
+    if (!email) {
+      res.status(400).json({
+        message: `Email is required`,
+      });
+      return;
+    }
     const user = await User.findOne({ email });
     if (!user) {
       res.status(400).json({
@@ -354,7 +366,7 @@ const forgotPasswordOTPsend = async (req, res) => {
 
     res
       .status(200)
-      .json({ message: "OTP sent successfully for password change" });
+      .json({ message: "OTP sent successfully for password change", success: true });
   } catch (error) {
     res.status(500).json(error);
   }
@@ -362,8 +374,9 @@ const forgotPasswordOTPsend = async (req, res) => {
 
 // Match forgot password OTP
 const matchForgotPasswordOTP = async (req, res) => {
+  console.log(req.body)
   try {
-    const { otp } = req.body;
+    const { otp } = req.body; 
     if (!otp) {
       res.status(400).json({
         message: `OTP is required`,
@@ -391,17 +404,19 @@ const matchForgotPasswordOTP = async (req, res) => {
 
 // Reset password
 const resetPasssword = async (req, res) => {
+  console.log("hiiiiiiiiiii")
   try {
     if (!req.session.isOtpValid) {
       res.status(400).json({ message: "OTP invalid" });
       return;
     }
     const { password } = req.body;
+    console.log(password)
 
-    if (password.length < 6) {
+    if (password.length < 8) {
       res
         .status(400)
-        .json({ message: "Password must be at least 6 characters" });
+        .json({ message: "Password must be at least 8 characters" });
       return;
     }
 
@@ -415,7 +430,7 @@ const resetPasssword = async (req, res) => {
     // Clear session after password reset
     req.session.destroy();
 
-    res.status(200).json({ message: "Password reset successfully" });
+    res.status(200).json({ message: "Password reset successfully", success: true });
   } catch (error) {
     res.status(500).json(error);
   }

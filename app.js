@@ -27,7 +27,9 @@ const orderPersonalDetails = require("./modules/order/orderPersonalDetails/order
 
 const blogs = require("./modules/blogs/blog.route");
 const path = require("path");
+const bodyParser = require("body-parser");
 
+const shorts = require("./modules/shorts/short.route");
 const app = express();
 
 app.use(
@@ -41,7 +43,16 @@ app.use(
   })
 );
 
-app.use(express.json());
+app.use((req, res, next) => {
+  if (req.originalUrl === "/order/webhook") {
+    bodyParser.raw({ type: "application/json" })(req, res, next);
+    // express.raw()(req, res, next)
+  } else {
+    express.json()(req, res, next); // Use JSON parsing for all other routes
+  }
+});
+
+// app.use(express.json());
 app.use(express.urlencoded({ extended: true }));
 
 app.use(morgan("dev"));
@@ -82,6 +93,7 @@ app.use("/api/footer", footer);
 
 app.use("/order/:orderId/orderPersonalDetails", orderPersonalDetails);
 app.use("/dashboard", dashboard);
+app.use("/api/shorts", shorts);
 // app.use("/api/newsletter", newsletter);
 
 app.use("/category", category);

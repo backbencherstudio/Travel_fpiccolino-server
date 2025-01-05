@@ -274,7 +274,7 @@ const get_all_inclusive_TourPage = async (req, res) => {
     const response = {
       hero: {
         blogDetailsTitle: getTourHeader?.blogDetailsTitle,
-        image: getImageUrl(getTourHeader?.image),
+        heroImage: getImageUrl(getTourHeader?.heroImage),
         titleOne: getTourHeader?.titleOne,
         titleTwo: getTourHeader?.titleTwo,
         pageName: getTourHeader?.pageName,
@@ -285,7 +285,11 @@ const get_all_inclusive_TourPage = async (req, res) => {
       title: getsectionTitle[0]?.title,
       subtitle: getsectionTitle[0]?.description,
       data: transformedPackages,
-     }
+     },
+    //  shortVideo: {
+    //   title: getsectionTitle[1]?.title,
+    //   subtitle: getsectionTitle[2]?.description,
+    //  },
     };
 
     res.status(200).json(response);
@@ -313,7 +317,7 @@ const country_wise = async (req, res) => {
 
     const response = {
       hero: {
-        image: getImageUrl(country?.image),
+        heroImage: getImageUrl(country?.image),
         titleOne: country?.contentTitle || "",
         descriptionOne: country?.contentDescription || "",
         countryName: country?.name || "",
