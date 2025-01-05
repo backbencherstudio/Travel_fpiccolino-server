@@ -331,38 +331,90 @@ const searchOrders = async (req, res) => {
   }
 };
 
-
 const getUserStatus = async (req, res) => {
   try {
-    const { userId } = req.params;
+    const userId = req.params.userId;
+    const orders = await Order.find({ userId }).populate("packageId");
 
-    if (!userId) {
-      return res.status(400).json({ message: "User ID is required" });
-    }
-
-    const orders = await Order.find({ userId });
-
-    if (!orders.length) {
+    if (orders.length === 0) {
       return res.status(404).json({ message: "No orders found for this user" });
     }
 
-    const totalOrders = orders.length;
-    const statusCounts = orders.reduce(
-      (acc, order) => {
-        acc[order.status] = (acc[order.status] || 0) + 1;
-        return acc;
-      },
-      { pending: 0, confirmed: 0, completed: 0, cancelled: 0 }
-    );
+    let totalTours = 0;
+    let completedTours = [];
+    let pendingTours = [];
+    let ongoingTours = [];
+
+    const currentDate = new Date();
+
+    const getImageUrl = (imagePath) => {
+      return `${process.env.APP_URL}${imagePath}`;
+    };
+
+    for (const order of orders) {
+      const packageData = order.packageId;
+      if (!packageData) continue;
+
+      totalTours++;
+
+      const startDate = new Date(packageData.tourDate);
+      const nights = packageData.tourDuration?.nights || 0;
+      const days = packageData.tourDuration?.days || 0;
+      const durationInHours = nights * 12 + days * 12;
+      const endDate = new Date(startDate.getTime() + durationInHours * 60 * 60 * 1000);
+
+      const updatedPackageData = {
+        ...packageData.toObject(),
+        hotelImages: undefined,
+        hotelAbout: undefined,
+        hotelName: undefined,
+        images: packageData.images?.map(getImageUrl), 
+      };
+
+      const tourDetails = {
+        orderId: order._id,
+        travelers: order.travelers,
+        totalPrice: order.totalPrice,
+        paymentMethod: order.paymentMethod,
+        packageData: updatedPackageData, 
+        status: "",
+        startDate: startDate.toISOString(),
+        endDate: endDate.toISOString(),
+      };
+
+      if (currentDate < startDate) {
+        tourDetails.status = "pending";
+        pendingTours.push(tourDetails);
+      } else if (currentDate > endDate) {
+        tourDetails.status = "completed";
+        completedTours.push(tourDetails);
+      } else {
+        tourDetails.status = "ongoing";
+        ongoingTours.push(tourDetails);
+      }
+    }
 
     res.status(200).json({
-      totalOrders,
-      statusCounts, // { pending: X, confirmed: X, completed: X, cancelled: X }
+      summary: {
+        totalTours,
+        completedToursCount: completedTours.length,
+        pendingToursCount: pendingTours.length,
+        ongoingToursCount: ongoingTours.length,
+      },
+      tours: {
+        completedTours,
+        pendingTours,
+        ongoingTours,
+      },
     });
   } catch (error) {
-    res.status(500).json({ message: error.message });
+    console.error("Error in getUserStatus:", error);
+    res.status(500).json({ error: error.message });
   }
 };
+
+
+
 
 
 
@@ -382,4 +434,5 @@ module.exports = {
   cancelOrder,
   searchOrders,
   getAllOrders,
+  getUserStatus
 };

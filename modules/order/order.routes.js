@@ -13,6 +13,7 @@ const {
   accesCheckoutData,
   deleteCheckoutData,
   stripePaymentFun,
+  getUserStatus,
   checkoutNewUserData,
   accesCheckoutNewData,
   getAllOrders,
@@ -39,6 +40,8 @@ router.get("/:id", getOrderById);
 router.get("/", getAllOrders);
 
 router.get("/user/:userId", getUserOrders);
+
+router.get("/user/:userId/status", getUserStatus);   
 
 router.put("/:id/status", updateOrderStatus);
 
