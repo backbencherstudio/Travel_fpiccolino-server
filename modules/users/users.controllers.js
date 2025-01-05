@@ -36,9 +36,37 @@ const setTokenCookie = (res, token) => {
 // Get all users
 const getAllUsers = async (req, res) => {
   try {
-    let users = await User.find();
+    const { search, startDate, endDate } = req.query;
 
-    const usersResponse = users.map(user => ({
+    // Prepare filter conditions
+    const queryConditions = [];
+
+    // Search filter
+    if (search) {
+      queryConditions.push({
+        $or: [
+          { name: { $regex: search, $options: "i" } }, // Search by name, case-insensitive
+          { email: { $regex: search, $options: "i" } }, // Search by email, case-insensitive
+        ],
+      });
+    }
+
+    // Date range filter
+    if (startDate && endDate) {
+      const start = new Date(startDate);
+      const end = new Date(endDate);
+      queryConditions.push({
+        createdAt: { $gte: start, $lte: end }, // Filter by createdAt date range
+      });
+    }
+
+    // Query the database with filters
+    let users = queryConditions.length
+      ? await User.find({ $and: queryConditions })
+      : await User.find();
+
+    // Format the users' data
+    const usersResponse = users.map((user) => ({
       ...user.toObject(),
       image: user.image ? getImageUrl(user.image) : null,
     }));
@@ -46,28 +74,32 @@ const getAllUsers = async (req, res) => {
     res.status(200).json(usersResponse);
   } catch (error) {
     console.error(error);
-    res.status(500).json({ message: "Error fetching users", error: error.message });
+    res
+      .status(500)
+      .json({ message: "Error fetching users", error: error.message });
   }
 };
 
 const getSingleUser = async (req, res) => {
   try {
-    const userId = req.params.id; 
+    const userId = req.params.id;
 
-    const user = await User.findById(userId).lean(); 
+    const user = await User.findById(userId).lean();
 
     if (!user) {
       return res.status(404).json({ message: "User not found" });
     }
     const userResponse = {
       ...user,
-      image: user.image ? getImageUrl(user.image) : null, 
+      image: user.image ? getImageUrl(user.image) : null,
     };
 
     res.status(200).json(userResponse);
   } catch (error) {
     console.error("Error fetching user:", error);
-    res.status(500).json({ message: "Internal server error", error: error.message });
+    res
+      .status(500)
+      .json({ message: "Internal server error", error: error.message });
   }
 };
 

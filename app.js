@@ -55,7 +55,7 @@ app.use(
     secret: "changeit",
     resave: true,
     saveUninitialized: true,
-    cookie: { maxAge: 600000 },
+    cookie: { maxAge: 3600000 },
   })
 );
 
