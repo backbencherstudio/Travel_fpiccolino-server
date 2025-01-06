@@ -6,6 +6,7 @@ const Package = require("../package/package.model");
 const Review = require("../review/review.model");
 const Blogs = require("../blogs/blog.model");
 const Footer = require("../footer/footer.model");
+const shortModel = require("../shorts/short.model");
 
 // const getHomePage = async (req, res) => {
 //   try {
@@ -242,30 +243,39 @@ const getAboutPage = async (req, res) => {
 
 const get_all_inclusive_TourPage = async (req, res) => {
   try {
-    const getTourHeader = await Header.findOne({ pageName: "tour" }); //for all inclucive
-
-    const getsectionTitle = await SectinTitle.find({
-      name: { $regex: /^all_inclusive_tour/ },
-    });
-
-    const packages = await Package.aggregate([
-      {
-        $addFields: {
-          bookedFlights: {
-            $cond: {
-              if: { $gt: [{ $size: "$bookedFlights" }, 0] },
-              then: "$bookedFlights",
-              else: "$$REMOVE",
+    const [getTourHeader, getsectionTitle, packages] = await Promise.all([
+      Header.findOne({ pageName: "tour" }).lean(),
+      SectinTitle.find({ name: { $regex: /^all_inclusive_tour/ } }).lean(),
+      Package.aggregate([
+        {
+          $addFields: {
+            bookedFlights: {
+              $cond: {
+                if: { $gt: [{ $size: "$bookedFlights" }, 0] },
+                then: "$bookedFlights",
+                else: "$$REMOVE",
+              },
             },
           },
         },
-      },
+      ]),
     ]);
+
+    // Convert section titles array to a dictionary for faster lookups
+    const sectionTitleMap = getsectionTitle.reduce((acc, item) => {
+      acc[item.name] = item;
+      return acc;
+    }, {});
+
+    const getSectionData = (name) => ({
+      title: sectionTitleMap[name]?.title || "",
+      description: sectionTitleMap[name]?.description || "",
+    });
 
     const transformedPackages = packages.map((pkg) => ({
       ...pkg,
-      images: pkg.images?.map((image) => getImageUrl(image)) || [],
-      hotelImages: pkg.hotelImages?.map((image) => getImageUrl(image)) || [],
+      images: pkg.images?.map(getImageUrl) || [],
+      hotelImages: pkg.hotelImages?.map(getImageUrl) || [],
     }));
 
     const response = {
@@ -279,19 +289,18 @@ const get_all_inclusive_TourPage = async (req, res) => {
         descriptionTwo: getTourHeader?.descriptionTwo,
       },
       package: {
-        title: getsectionTitle[0]?.title,
-        subtitle: getsectionTitle[0]?.description,
+        ...getSectionData("all_inclusive_tour1"),
         data: transformedPackages,
       },
-      //  shortVideo: {
-      //   title: getsectionTitle[1]?.title,
-      //   subtitle: getsectionTitle[2]?.description,
-      //  },
+      shortVideo: {
+        ...getSectionData("all_inclusive_tour2"),
+      },
     };
 
     res.status(200).json(response);
   } catch (error) {
-    throw error.message;
+    console.error("Error fetching all-inclusive tour page data:", error);
+    res.status(500).json({ error: error.message });
   }
 };
 
@@ -471,10 +480,11 @@ const getfaq = async (req, res) => {
 //   }
 // };
 
-
 const contactPage = async (req, res) => {
   try {
-    const getContactHeader = await Header.findOne({ pageName: "contact" }).lean();
+    const getContactHeader = await Header.findOne({
+      pageName: "contact",
+    }).lean();
 
     if (!getContactHeader) {
       return res.status(404).json({ message: "Contact header not found" });
@@ -500,7 +510,6 @@ const contactPage = async (req, res) => {
     res.status(500).json(error.message);
   }
 };
-
 
 module.exports = {
   getHomePage,
