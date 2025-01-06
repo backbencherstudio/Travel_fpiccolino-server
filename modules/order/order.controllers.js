@@ -2,26 +2,25 @@ const Order = require("./order.models");
 const Package = require("./../package/package.model");
 const User = require("../users/users.models");
 
-const stripe = require('stripe')(process.env.STRIPE_SECRET_KEY);
+const stripe = require("stripe")(process.env.STRIPE_SECRET_KEY);
 
-const stripePaymentFun = async (req, res) => {  
-  const { paymentMethodId, amount } = req.body; 
+const stripePaymentFun = async (req, res) => {
+  const { paymentMethodId, amount } = req.body;
   try {
-      const paymentIntent = await stripe.paymentIntents.create({
-          amount: amount * 100, 
-          currency: 'usd',
-          payment_method: paymentMethodId,
-          payment_method_types: ['card'],
-          confirm: true,
-      });
+    const paymentIntent = await stripe.paymentIntents.create({
+      amount: amount * 100,
+      currency: "usd",
+      payment_method: paymentMethodId,
+      payment_method_types: ["card"],
+      confirm: true,
+    });
 
-      res.status(200).json({ success: true, paymentIntent });
+    res.status(200).json({ success: true, paymentIntent });
   } catch (err) {
-      console.error("Stripe Error:", err); 
-      res.status(400).json({ success: false, error: err.message });
+    console.error("Stripe Error:", err);
+    res.status(400).json({ success: false, error: err.message });
   }
 };
-
 
 // const handleWebhook = async (req, res) => {
 //   const sig = req.headers['stripe-signature'];
@@ -67,14 +66,12 @@ const stripePaymentFun = async (req, res) => {
 //   }
 // };
 
-
-
-// const stripePaymentFun = async (req, res) => {  
+// const stripePaymentFun = async (req, res) => {
 //   const { paymentMethodId, amount } = req.body;
 //   console.log("hit");
-  
+
 //   console.log(111, paymentMethodId, amount);
-  
+
 //   try {
 //       const paymentIntent = await stripe.paymentIntents.create({
 //           amount,
@@ -86,105 +83,143 @@ const stripePaymentFun = async (req, res) => {
 //   } catch (err) {
 //       res.status(400).json({ success: false, error: err.message });
 //   }
- 
+
 //   };
 
+// const createOrder = async (req, res) => {
+//   try {
+//     console.log(req.body);
 
+//     const savedOrder = await Order.save(req.body);
 
+//     res.status(201).json(savedOrder);
+//   } catch (error) {
+//     throw error;
+//   }
+// };
 
 const createOrder = async (req, res) => {
   try {
-    const {
-      userId,
-      packageId,
-      quantity,
-      paymentMethod,
-      notes,
-      shippingAddress,
-    } = req.body;
-
-    const user = await User.findById(userId);
-    const packageData = await Package.findById(packageId);
-    if (!user || !packageData) {
-      return res.status(404).json({ error: "User or Package not found" });
-    }
-    const totalPrice = Number(packageData.price) * quantity;
-
-    const newOrder = new Order({
-      userId,
-      packageId,
-      quantity,
-      totalPrice,
-      paymentMethod,
-      notes,
-      shippingAddress,
-    });
-
+    const newOrder = new Order(req.body);
     const savedOrder = await newOrder.save();
-
-    // proceed to payment
-    // const paymentResponse = await paymentHelper.makePayment({
-    //   package_name: packageData.tourName,
-    //   amount: totalPrice,
-    //   order_id: savedOrder._id,
-    // });
-
     res.status(201).json(savedOrder);
   } catch (error) {
-    // res.status(500).json({ error: error.message });
-    throw error;
+    console.error("Error creating order:", error);
+    res
+      .status(500)
+      .json({ message: "An error occurred while creating the order", error });
   }
 };
 
-
-const checkout = async (req, res) =>{
+const getAllOrders = async (req, res) => {
   try {
-     req.session.userData = req.body
-     res.status(200).json({message : "success"})    
+    const searchQuery = req.query.search || "";
+    const { startDate, endDate } = req.query;
 
+    const start = startDate ? new Date(startDate) : null;
+    const end = endDate ? new Date(endDate) : null;
+
+    const queryConditions = [];
+
+    let parsedSearchQuery = searchQuery;
+    let isNumberSearch = false;
+    if (!isNaN(searchQuery) && searchQuery.trim() !== "") {
+      parsedSearchQuery = parseFloat(searchQuery);
+      isNumberSearch = true;
+    }
+
+    // Add search condition for numeric fields
+    if (searchQuery) {
+      if (isNumberSearch) {
+        queryConditions.push({
+          $or: [
+            { toureAmount: parsedSearchQuery },
+            { totalPackageAmount: parsedSearchQuery },
+            { person: parsedSearchQuery },
+          ],
+        });
+      } else {
+        queryConditions.push({
+          $or: [
+            {
+              toureAmount: { $regex: searchQuery, $options: "i" }, // Search as string for non-numeric values
+            },
+            { totalPackageAmount: { $regex: searchQuery, $options: "i" } }, // Search as string for non-numeric values
+          ],
+        });
+      }
+    }
+
+    // Add date filtering if start or end dates are provided
+    if (start) {
+      queryConditions.push({
+        createdAt: { $gte: start },
+      });
+    }
+
+    if (end) {
+      queryConditions.push({
+        createdAt: { $lte: end },
+      });
+    }
+
+    // Execute query with conditions
+    const Orders = queryConditions.length
+      ? await Order.find({ $and: queryConditions })
+      : await Order.find();
+
+    res.status(200).json({ message: "Orders retrieved successfully", Orders });
   } catch (error) {
-    res.status(500).json(error)    
+    res
+      .status(500)
+      .json({ message: "Failed to retrieve Orders", error: error.message });
   }
-}
+};
 
-const accesCheckoutData = async (req, res) =>{
+const checkout = async (req, res) => {
   try {
-    let data =  req.session.userData  
-    res.status(200).json(data)  
+    req.session.userData = req.body;
+    res.status(200).json({ message: "success" });
   } catch (error) {
-    res.status(500).json(error)
+    res.status(500).json(error);
   }
-}
+};
 
-const deleteCheckoutData = async (req, res) =>{
+const accesCheckoutData = async (req, res) => {
   try {
-     delete req.session.userData  
-    res.status(200).json({message : "delete successFull"})  
+    let data = req.session.userData;
+    res.status(200).json(data);
   } catch (error) {
-    res.status(500).json(error)
+    res.status(500).json(error);
   }
-}
+};
 
-
-const checkoutNewUserData = async (req, res) =>{
+const deleteCheckoutData = async (req, res) => {
   try {
-     req.session.userUpdateData = req.body
-     res.status(200).json({message : "success"})    
-
+    delete req.session.userData;
+    res.status(200).json({ message: "delete successFull" });
   } catch (error) {
-    res.status(500).json(error)    
+    res.status(500).json(error);
   }
-}
+};
 
-const accesCheckoutNewData = async (req, res) =>{
+const checkoutNewUserData = async (req, res) => {
   try {
-    let data =  req.session.userUpdateData  
-    res.status(200).json(data)  
+    req.session.userUpdateData = req.body;
+    res.status(200).json({ message: "success" });
   } catch (error) {
-    res.status(500).json(error)
+    res.status(500).json(error);
   }
-}
+};
 
+const accesCheckoutNewData = async (req, res) => {
+  try {
+    let data = req.session.userUpdateData;
+    res.status(200).json(data);
+  } catch (error) {
+    res.status(500).json(error);
+  }
+};
 
 const getOrderById = async (req, res) => {
   try {
@@ -311,4 +346,5 @@ module.exports = {
   updateOrder,
   cancelOrder,
   searchOrders,
+  getAllOrders,
 };
