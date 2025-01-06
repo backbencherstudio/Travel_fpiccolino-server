@@ -359,7 +359,9 @@ const BlogPage = async (req, res) => {
     const response = {
       hero: {
         // blogDetailsTitle: getHomeHeader?.blogDetailsTitle || "",
-        image: getHomeHeader?.heroImage ? getImageUrl(getHomeHeader.heroImage) : null,
+        image: getHomeHeader?.heroImage
+          ? getImageUrl(getHomeHeader.heroImage)
+          : null,
         titleOne: getHomeHeader?.titleOne || "",
         // titleTwo: getHomeHeader?.titleTwo || "",
         // pageName: getHomeHeader?.pageName || "",
@@ -369,28 +371,31 @@ const BlogPage = async (req, res) => {
       categoryLists,
       footer,
     };
- 
 
     res.status(200).json(response);
   } catch (error) {
     console.error(error);
-    res.status(500).json({ message: "An error occurred", error: error.message }); // Improved error handling
+    res
+      .status(500)
+      .json({ message: "An error occurred", error: error.message }); // Improved error handling
   }
 };
 
-
 const getPolicy = async (req, res) => {
   try {
-    const [getPolicyHeader, footer] = await Promise.all([
-      Header.findOne({ pageName: "policy" }).lean(),
-      Footer.find().lean(),
-    ]);
+    // const [getPolicyHeader, footer] = await Promise.all([
+    //   Header.findOne({ pageName: "policy" }).lean(),
+    //   Footer.find().lean(),
+    // ]);
 
+    const getPolicyHeader = await Header.findOne({ pageName: "policy" }).lean();
+
+    console.log(getPolicyHeader);
     const response = {
       hero: {
         blogDetailsTitle: getPolicyHeader?.blogDetailsTitle,
-        image: getPolicyHeader?.image
-          ? getImageUrl(getPolicyHeader.image)
+        image: getPolicyHeader?.heroImage
+          ? getImageUrl(getPolicyHeader.heroImage)
           : null,
         titleOne: getPolicyHeader?.titleOne,
         titleTwo: getPolicyHeader?.titleTwo,
@@ -398,9 +403,10 @@ const getPolicy = async (req, res) => {
         descriptionOne: getPolicyHeader?.descriptionOne,
         descriptionTwo: getPolicyHeader?.descriptionTwo,
       },
-      footer: footer,
+      // footer: footer,
     };
 
+    console.log(response);
     res.status(200).json(response);
   } catch (error) {
     res.status(500).json({ message: "An error occurred", error });
@@ -409,10 +415,12 @@ const getPolicy = async (req, res) => {
 
 const getfaq = async (req, res) => {
   try {
-    const [getFaqHeader, footer] = await Promise.all([
-      Header.findOne({ pageName: "faq" }).lean(),
-      Footer.find().lean(),
-    ]);
+    // const [getFaqHeader, footer] = await Promise.all([
+    //   Header.findOne({ pageName: "faq" }).lean(),
+    //   Footer.find().lean(),
+    // ]);
+
+    const getFaqHeader = await Header.findOne({ pageName: "faq" }).lean();
 
     const response = {
       hero: {
@@ -426,7 +434,7 @@ const getfaq = async (req, res) => {
         descriptionOne: getFaqHeader?.descriptionOne,
         descriptionTwo: getFaqHeader?.descriptionTwo,
       },
-      footer,
+      // footer,
     };
 
     res.status(200).json(response);
@@ -435,31 +443,61 @@ const getfaq = async (req, res) => {
   }
 };
 
+// const contactPage = async (req, res) => {
+//   try {
+//     const [getContactHeader, footer] = await Promise.all([
+//       Header.findOne({ pageName: "contact" }).lean(),
+//       Footer.find().lean(),
+//     ]);
+
+//     const response = {
+//       hero: {
+//         blogDetailsTitle: getContactHeader?.blogDetailsTitle,
+//         image: getContactHeader?.heroImage
+//           ? getImageUrl(getContactHeader.heroImage)
+//           : null,
+//         titleOne: getContactHeader?.titleOne,
+//         titleTwo: getContactHeader?.titleTwo,
+//         pageName: getContactHeader?.pageName,
+//         descriptionOne: getContactHeader?.descriptionOne,
+//         descriptionTwo: getContactHeader?.descriptionTwo,
+//       },
+//       footer,
+//     };
+
+//     res.status(200).json(response);
+//   } catch (error) {
+//     res.status(500).json({ message: "An error occurred", error });
+//   }
+// };
+
+
 const contactPage = async (req, res) => {
   try {
-    const [getContactHeader, footer] = await Promise.all([
-      Header.findOne({ pageName: "contact" }).lean(),
-      Footer.find().lean(),
-    ]);
+    const getContactHeader = await Header.findOne({ pageName: "contact" }).lean();
+
+    if (!getContactHeader) {
+      return res.status(404).json({ message: "Contact header not found" });
+    }
 
     const response = {
       hero: {
-        blogDetailsTitle: getContactHeader?.blogDetailsTitle,
-        image: getContactHeader?.heroImage
+        blogDetailsTitle: getContactHeader.blogDetailsTitle,
+        image: getContactHeader.heroImage
           ? getImageUrl(getContactHeader.heroImage)
           : null,
-        titleOne: getContactHeader?.titleOne,
-        titleTwo: getContactHeader?.titleTwo,
-        pageName: getContactHeader?.pageName,
-        descriptionOne: getContactHeader?.descriptionOne,
-        descriptionTwo: getContactHeader?.descriptionTwo,
+        titleOne: getContactHeader.titleOne,
+        titleTwo: getContactHeader.titleTwo,
+        pageName: getContactHeader.pageName,
+        descriptionOne: getContactHeader.descriptionOne,
+        descriptionTwo: getContactHeader.descriptionTwo,
       },
-      footer,
     };
 
     res.status(200).json(response);
   } catch (error) {
-    res.status(500).json({ message: "An error occurred", error });
+    console.error("Error fetching contact page data:", error);
+    res.status(500).json(error.message);
   }
 };
 
