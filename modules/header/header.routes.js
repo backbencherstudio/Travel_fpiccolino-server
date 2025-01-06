@@ -7,13 +7,14 @@ const {
   deleteHeader,
 } = require("./header.controlle");
 const { upload } = require("../../middleware/Multer.config");
+const { verifyAdmin } = require("../../middleware/verifyAdmin");
 
 const router = express.Router();
 
 router.get("/", getAllHeaders);
 router.get("/:pageName", getHeader);
-router.post("/", upload.single("heroImage"), createHeader);
-router.put("/", upload.single("heroImage"), updateHeader);
-router.delete("/:pageName", deleteHeader);
+router.post("/", upload.single("heroImage"), verifyAdmin, createHeader);
+router.put("/", upload.single("heroImage"), verifyAdmin, updateHeader);
+router.delete("/:pageName", verifyAdmin, deleteHeader);
 
 module.exports = router;

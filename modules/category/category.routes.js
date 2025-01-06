@@ -4,14 +4,15 @@ const {
   getAllCategories,
   deleteCategory,
 } = require("./category.controll");
+const { verifyAdmin } = require("../../middleware/verifyAdmin");
 
 const router = express.Router();
 
 router.get("/", getAllCategories);
-router.post("/", createCategory);
+router.post("/", verifyAdmin, createCategory);
 
 // router.get("/:id", getPackageById);
 
-router.delete("/:id", deleteCategory);
+router.delete("/:id", verifyAdmin, deleteCategory);
 
 module.exports = router;

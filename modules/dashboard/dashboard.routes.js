@@ -1,12 +1,13 @@
 const express = require("express");
 const controller = require("./dashboard.controller");
+const { verifyAdmin } = require("../../middleware/verifyAdmin");
 
 const router = express.Router();
 
-router.get("/", controller.getAll);
-router.get("/getRadarData", controller.getRadarData);
-router.get("/getRevenueData", controller.getRevenueData);
-router.get("/bookingData", controller.bookingData);
-
+router.get("/", verifyAdmin, controller.getAll);
+router.get("/getRadarData", verifyAdmin, controller.getRadarData);
+router.get("/getRevenueData", verifyAdmin, controller.getRevenueData);
+router.get("/bookingData", verifyAdmin, controller.bookingData);
+ 
 
 module.exports = router;
