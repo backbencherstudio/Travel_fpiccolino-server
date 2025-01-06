@@ -13,6 +13,4 @@ router.get("/policyPage", getPolicy);
 router.get("/faqPage", getfaq);
 router.get("/contactPage", contactPage);
 
-
-
 module.exports = router;               
