@@ -361,14 +361,16 @@ const getUserStatus = async (req, res) => {
       const nights = packageData.tourDuration?.nights || 0;
       const days = packageData.tourDuration?.days || 0;
       const durationInHours = nights * 12 + days * 12;
-      const endDate = new Date(startDate.getTime() + durationInHours * 60 * 60 * 1000);
+      const endDate = new Date(
+        startDate.getTime() + durationInHours * 60 * 60 * 1000
+      );
 
       const updatedPackageData = {
         ...packageData.toObject(),
         hotelImages: undefined,
         hotelAbout: undefined,
         hotelName: undefined,
-        images: packageData.images?.map(getImageUrl), 
+        images: packageData.images?.map(getImageUrl),
       };
 
       const tourDetails = {
@@ -376,7 +378,7 @@ const getUserStatus = async (req, res) => {
         travelers: order.travelers,
         totalPrice: order.totalPrice,
         paymentMethod: order.paymentMethod,
-        packageData: updatedPackageData, 
+        packageData: updatedPackageData,
         status: "",
         startDate: startDate.toISOString(),
         endDate: endDate.toISOString(),
@@ -413,11 +415,6 @@ const getUserStatus = async (req, res) => {
   }
 };
 
-
-
-
-
-
 module.exports = {
   stripePaymentFun,
   // handleWebhook,
@@ -434,5 +431,5 @@ module.exports = {
   cancelOrder,
   searchOrders,
   getAllOrders,
-  getUserStatus
+  getUserStatus,
 };
