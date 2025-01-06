@@ -334,6 +334,7 @@ const country_wise = async (req, res) => {
         subtitle: sectionTitles?.[0]?.description,
         data: transformedPackages,
       },
+      
       footer: footer.map((item) => ({
         companyName: item.companyName,
         description: item.description,

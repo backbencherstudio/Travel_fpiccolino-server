@@ -6,11 +6,12 @@ const {
     getContactById,
     deleteContact
   } = require("../contact/contact.controller");
+const { verifyUser } = require("../../middleware/verifyUser");
 
-router.post('/createContact', createContact);
+router.post('/createContact', verifyUser, createContact);
 router.get('/AllContact', getAllContacts);
 router.get('/ContactById/:id', getContactById);
-router.delete('/DeleteContact/:id', deleteContact);
+router.delete('/DeleteContact/:id', verifyUser, deleteContact);
 
 
 module.exports = router;
