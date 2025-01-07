@@ -6,6 +6,7 @@ const Package = require("../package/package.model");
 const Review = require("../review/review.model");
 const Blogs = require("../blogs/blog.model");
 const Footer = require("../footer/footer.model");
+const shortModel = require("../shorts/short.model");
 
 // const getHomePage = async (req, res) => {
 //   try {
@@ -96,7 +97,6 @@ const Footer = require("../footer/footer.model");
 //   }
 // };
 
-
 const getHomePage = async (req, res) => {
   try {
     const [
@@ -149,9 +149,10 @@ const getHomePage = async (req, res) => {
         (adventure) => adventure.country === country.name
       );
 
-      const lowestAmount = countryPackages.reduce((prev, curr) =>
-        prev.amount < curr.amount ? prev : curr
-      , {}).amount;
+      const lowestAmount = countryPackages.reduce(
+        (prev, curr) => (prev.amount < curr.amount ? prev : curr),
+        {}
+      ).amount;
 
       return {
         ...country,
@@ -199,8 +200,6 @@ const getHomePage = async (req, res) => {
   }
 };
 
-
-
 const getAboutPage = async (req, res) => {
   try {
     const [getHomeHeader, getsectionTitle, footer] = await Promise.all([
@@ -244,33 +243,41 @@ const getAboutPage = async (req, res) => {
 
 const get_all_inclusive_TourPage = async (req, res) => {
   try {
-    const getTourHeader = await Header.findOne({ pageName: "tour" }); //for all inclucive
-
-    const getsectionTitle = await SectinTitle.find({
-      name: { $regex: /^all_inclusive_tour/ },
-    });
-
-    const packages = await Package.aggregate([
-      {
-        $addFields: {
-          bookedFlights: {
-            $cond: {
-              if: { $gt: [{ $size: "$bookedFlights" }, 0] },  
-              then: "$bookedFlights",
-              else: "$$REMOVE", 
+    const [getTourHeader, getsectionTitle, packages] = await Promise.all([
+      Header.findOne({ pageName: "tour" }).lean(),
+      SectinTitle.find({ name: { $regex: /^all_inclusive_tour/ } }).lean(),
+      Package.aggregate([
+        {
+          $addFields: {
+            bookedFlights: {
+              $cond: {
+                if: { $gt: [{ $size: "$bookedFlights" }, 0] },
+                then: "$bookedFlights",
+                else: "$$REMOVE",
+              },
             },
           },
         },
-      }
+      ]),
     ]);
 
+    // Convert section titles array to a dictionary for faster lookups
+    const sectionTitleMap = getsectionTitle.reduce((acc, item) => {
+      acc[item.name] = item;
+      return acc;
+    }, {});
+
+    const getSectionData = (name) => ({
+      title: sectionTitleMap[name]?.title || "",
+      description: sectionTitleMap[name]?.description || "",
+    });
 
     const transformedPackages = packages.map((pkg) => ({
       ...pkg,
-      images: pkg.images?.map((image) => getImageUrl(image)) || [],
-      hotelImages: pkg.hotelImages?.map((image) => getImageUrl(image)) || [],
+      images: pkg.images?.map(getImageUrl) || [],
+      hotelImages: pkg.hotelImages?.map(getImageUrl) || [],
     }));
-    
+
     const response = {
       hero: {
         blogDetailsTitle: getTourHeader?.blogDetailsTitle,
@@ -281,31 +288,31 @@ const get_all_inclusive_TourPage = async (req, res) => {
         descriptionOne: getTourHeader?.descriptionOne,
         descriptionTwo: getTourHeader?.descriptionTwo,
       },
-     package: {
-      title: getsectionTitle[0]?.title,
-      subtitle: getsectionTitle[0]?.description,
-      data: transformedPackages,
-     },
-    //  shortVideo: {
-    //   title: getsectionTitle[1]?.title,
-    //   subtitle: getsectionTitle[2]?.description,
-    //  },
+      package: {
+        ...getSectionData("all_inclusive_tour1"),
+        data: transformedPackages,
+      },
+      shortVideo: {
+        ...getSectionData("all_inclusive_tour2"),
+      },
     };
 
     res.status(200).json(response);
   } catch (error) {
-    throw error.message;
+    console.error("Error fetching all-inclusive tour page data:", error);
+    res.status(500).json({ error: error.message });
   }
 };
-
 
 const country_wise = async (req, res) => {
   try {
     const countryId = req.params.id;
-    const country = await Country.findOne({ _id: countryId }).lean()
-    const [ packages, sectionTitles, footer] = await Promise.all([
+    const country = await Country.findOne({ _id: countryId }).lean();
+    const [packages, sectionTitles, footer] = await Promise.all([
       Package.find({ country: country.name }).lean(),
-      SectinTitle.find({ name: { $regex: /^country_wise/ } }).select("title description").lean(),
+      SectinTitle.find({ name: { $regex: /^country_wise/ } })
+        .select("title description")
+        .lean(),
       Footer.find().lean(),
     ]);
 
@@ -327,6 +334,7 @@ const country_wise = async (req, res) => {
         subtitle: sectionTitles?.[0]?.description,
         data: transformedPackages,
       },
+      
       footer: footer.map((item) => ({
         companyName: item.companyName,
         description: item.description,
@@ -343,86 +351,100 @@ const country_wise = async (req, res) => {
   }
 };
 
-
-
 const BlogPage = async (req, res) => {
   try {
-    const getBlogs = await Blogs.find();
-    res.status(200).json(getBlogs);
+    const [getHomeHeader, getBlogs, footer] = await Promise.all([
+      Header.findOne({ pageName: "blog" }).lean(),
+      Blogs.find().lean(),
+      Footer.find().lean(),
+    ]);
 
     const categories = [...new Set(getBlogs.map((blog) => blog.category))];
 
-    const categoryLists = categories.map((category) => {
-      return {
-        category: category,
-        blogs: getBlogs.filter((blog) => blog.category === category),
-      };
-    });
+    const categoryLists = categories.map((category) => ({
+      category: category,
+      blogs: getBlogs.filter((blog) => blog.category === category),
+    }));
 
     const response = {
       hero: {
-        blogDetailsTitle: getHomeHeader?.blogDetailsTitle,
-        image: getImageUrl(getHomeHeader?.image),
-        titleOne: getHomeHeader?.titleOne,
-        titleTwo: getHomeHeader?.titleTwo,
-        pageName: getHomeHeader?.pageName,
-        descriptionOne: getHomeHeader?.descriptionOne,
-        descriptionTwo: getHomeHeader?.descriptionTwo,
+        // blogDetailsTitle: getHomeHeader?.blogDetailsTitle || "",
+        image: getHomeHeader?.heroImage
+          ? getImageUrl(getHomeHeader.heroImage)
+          : null,
+        titleOne: getHomeHeader?.titleOne || "",
+        // titleTwo: getHomeHeader?.titleTwo || "",
+        // pageName: getHomeHeader?.pageName || "",
+        descriptionOne: getHomeHeader?.descriptionOne || "",
+        // descriptionTwo: getHomeHeader?.descriptionTwo || "",
       },
       categoryLists,
+      footer,
     };
 
     res.status(200).json(response);
   } catch (error) {
-    throw error.message;
+    console.error(error);
+    res
+      .status(500)
+      .json({ message: "An error occurred", error: error.message }); // Improved error handling
   }
 };
 
 const getPolicy = async (req, res) => {
   try {
-    const [getPolicyHeader, footer] = await Promise.all([
-      Header.findOne({ pageName: "policy" }).lean(),
-      Footer.find().lean(),
-    ]);
+    // const [getPolicyHeader, footer] = await Promise.all([
+    //   Header.findOne({ pageName: "policy" }).lean(),
+    //   Footer.find().lean(),
+    // ]);
 
+    const getPolicyHeader = await Header.findOne({ pageName: "policy" }).lean();
+
+    console.log(getPolicyHeader);
     const response = {
       hero: {
         blogDetailsTitle: getPolicyHeader?.blogDetailsTitle,
-        image: getPolicyHeader?.image ? getImageUrl(getPolicyHeader.image) : null,
+        image: getPolicyHeader?.heroImage
+          ? getImageUrl(getPolicyHeader.heroImage)
+          : null,
         titleOne: getPolicyHeader?.titleOne,
         titleTwo: getPolicyHeader?.titleTwo,
         pageName: getPolicyHeader?.pageName,
         descriptionOne: getPolicyHeader?.descriptionOne,
         descriptionTwo: getPolicyHeader?.descriptionTwo,
       },
-      footer: footer,
+      // footer: footer,
     };
 
+    console.log(response);
     res.status(200).json(response);
   } catch (error) {
-    res.status(500).json({ message: 'An error occurred', error });
+    res.status(500).json({ message: "An error occurred", error });
   }
 };
 
-
 const getfaq = async (req, res) => {
   try {
-    const [getFaqHeader, footer] = await Promise.all([
-      Header.findOne({ pageName: "faq" }).lean(),
-      Footer.find().lean(),
-    ]);
+    // const [getFaqHeader, footer] = await Promise.all([
+    //   Header.findOne({ pageName: "faq" }).lean(),
+    //   Footer.find().lean(),
+    // ]);
+
+    const getFaqHeader = await Header.findOne({ pageName: "faq" }).lean();
 
     const response = {
       hero: {
         blogDetailsTitle: getFaqHeader?.blogDetailsTitle,
-        image: getFaqHeader?.heroImage ? getImageUrl(getFaqHeader.heroImage) : null,
+        image: getFaqHeader?.heroImage
+          ? getImageUrl(getFaqHeader.heroImage)
+          : null,
         titleOne: getFaqHeader?.titleOne,
         titleTwo: getFaqHeader?.titleTwo,
         pageName: getFaqHeader?.pageName,
         descriptionOne: getFaqHeader?.descriptionOne,
         descriptionTwo: getFaqHeader?.descriptionTwo,
       },
-      footer,
+      // footer,
     };
 
     res.status(200).json(response);
@@ -431,33 +453,65 @@ const getfaq = async (req, res) => {
   }
 };
 
+// const contactPage = async (req, res) => {
+//   try {
+//     const [getContactHeader, footer] = await Promise.all([
+//       Header.findOne({ pageName: "contact" }).lean(),
+//       Footer.find().lean(),
+//     ]);
+
+//     const response = {
+//       hero: {
+//         blogDetailsTitle: getContactHeader?.blogDetailsTitle,
+//         image: getContactHeader?.heroImage
+//           ? getImageUrl(getContactHeader.heroImage)
+//           : null,
+//         titleOne: getContactHeader?.titleOne,
+//         titleTwo: getContactHeader?.titleTwo,
+//         pageName: getContactHeader?.pageName,
+//         descriptionOne: getContactHeader?.descriptionOne,
+//         descriptionTwo: getContactHeader?.descriptionTwo,
+//       },
+//       footer,
+//     };
+
+//     res.status(200).json(response);
+//   } catch (error) {
+//     res.status(500).json({ message: "An error occurred", error });
+//   }
+// };
+
 const contactPage = async (req, res) => {
   try {
-    const [getContactHeader, footer] = await Promise.all([
-      Header.findOne({ pageName: "contact" }).lean(),
-      Footer.find().lean(),
-    ]);
+    const getContactHeader = await Header.findOne({
+      pageName: "contact",
+    }).lean();
+
+    if (!getContactHeader) {
+      return res.status(404).json({ message: "Contact header not found" });
+    }
 
     const response = {
       hero: {
-        blogDetailsTitle: getContactHeader?.blogDetailsTitle,
-        image: getContactHeader?.heroImage ? getImageUrl(getContactHeader.heroImage) : null,
-        titleOne: getContactHeader?.titleOne,
-        titleTwo: getContactHeader?.titleTwo,
-        pageName: getContactHeader?.pageName,
-        descriptionOne: getContactHeader?.descriptionOne,
-        descriptionTwo: getContactHeader?.descriptionTwo,
+        blogDetailsTitle: getContactHeader.blogDetailsTitle,
+        image: getContactHeader.heroImage
+          ? getImageUrl(getContactHeader.heroImage)
+          : null,
+        titleOne: getContactHeader.titleOne,
+        titleTwo: getContactHeader.titleTwo,
+        pageName: getContactHeader.pageName,
+        descriptionOne: getContactHeader.descriptionOne,
+        descriptionTwo: getContactHeader.descriptionTwo,
       },
-      footer,
     };
 
     res.status(200).json(response);
   } catch (error) {
-    res.status(500).json({ message: "An error occurred", error });
+    console.error("Error fetching contact page data:", error);
+    res.status(500).json(error.message);
   }
 };
 
-// const
 module.exports = {
   getHomePage,
   get_all_inclusive_TourPage,
@@ -466,5 +520,5 @@ module.exports = {
   getAboutPage,
   country_wise,
   getfaq,
-  contactPage
+  contactPage,
 };

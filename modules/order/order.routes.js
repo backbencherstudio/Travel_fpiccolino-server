@@ -13,11 +13,13 @@ const {
   accesCheckoutData,
   deleteCheckoutData,
   stripePaymentFun,
+  getUserStatus,
   checkoutNewUserData,
   accesCheckoutNewData,
   getAllOrders,
   // handleWebhook,
 } = require("./order.controllers");
+const { verifyUser } = require("../../middleware/verifyUser");
 
 const router = express.Router();
 
@@ -27,12 +29,12 @@ router.post("/stripePayment", stripePaymentFun);
 // router.post("/webhook", bodyParser.raw({ type: 'application/json' }), handleWebhook )
 
 // ==================================>>> created by ami ( checkout data )
-router.post("/checkout", checkout);
+router.post("/checkout", verifyUser, checkout);
 router.get("/checkout", accesCheckoutData);
-router.delete("/checkout", deleteCheckoutData);
+router.delete("/checkout", verifyUser, deleteCheckoutData);
 
 // ==================================>>> created by ami  ( new checkout data )
-router.post("/checkoutWithNewData", checkoutNewUserData);
+router.post("/checkoutWithNewData", verifyUser, checkoutNewUserData);
 router.get("/checkoutWithNewData", accesCheckoutNewData);
 
 router.get("/:id", getOrderById);
@@ -40,10 +42,12 @@ router.get("/", getAllOrders);
 
 router.get("/user/:userId", getUserOrders);
 
-router.put("/:id/status", updateOrderStatus);
+router.get("/user/:userId/status", getUserStatus);   
 
-router.put("/:id", updateOrder);
+router.put("/:id/status", verifyUser, updateOrderStatus);
 
-router.delete("/:id", cancelOrder);
+router.put("/:id", verifyUser, updateOrder);
+
+router.delete("/:id", verifyUser, cancelOrder);
 
 module.exports = router;

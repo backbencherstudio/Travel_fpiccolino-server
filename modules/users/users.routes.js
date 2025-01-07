@@ -40,6 +40,7 @@ route.post("/logout", logout);
 route.post("/request-forgot-password-otp", verifyUser, forgotPasswordOTPsend);
 route.post("/match-password-otp", verifyUser, matchForgotPasswordOTP);
 route.patch("/reset-forgot-password", verifyUser, resetPasssword);
+
 route.get("/:id", getSingleUser);
 
 module.exports = route;
