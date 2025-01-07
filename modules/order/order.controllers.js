@@ -238,11 +238,12 @@ const getAllOrders = async (req, res) => {
     };
 
     let Orders = queryConditions.length
-      ? await Order.find({ $and: queryConditions }).populate(
-          "userId",
-          "-password"
-        )
-      : await Order.find().populate("userId", "-password");
+      ? await Order.find({ $and: queryConditions })
+          .populate("userId", "-password")
+          .sort({ createdAt: -1 })
+      : await Order.find()
+          .populate("userId", "-password")
+          .sort({ createdAt: -1 });
 
     Orders = Orders.map((order) => {
       if (order.userId && order.userId.image) {
