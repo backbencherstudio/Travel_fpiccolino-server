@@ -111,6 +111,70 @@ const createOrder = async (req, res) => {
   }
 };
 
+// const getAllOrders = async (req, res) => {
+//   try {
+//     const searchQuery = req.query.search || "";
+//     const { startDate, endDate } = req.query;
+
+//     const start = startDate ? new Date(startDate) : null;
+//     const end = endDate ? new Date(endDate) : null;
+
+//     const queryConditions = [];
+
+//     let parsedSearchQuery = searchQuery;
+//     let isNumberSearch = false;
+//     if (!isNaN(searchQuery) && searchQuery.trim() !== "") {
+//       parsedSearchQuery = parseFloat(searchQuery);
+//       isNumberSearch = true;
+//     }
+
+//     // Add search condition for numeric fields
+//     if (searchQuery) {
+//       if (isNumberSearch) {
+//         queryConditions.push({
+//           $or: [
+//             { toureAmount: parsedSearchQuery },
+//             { totalPackageAmount: parsedSearchQuery },
+//             { person: parsedSearchQuery },
+//           ],
+//         });
+//       } else {
+//         queryConditions.push({
+//           $or: [
+//             {
+//               toureAmount: { $regex: searchQuery, $options: "i" }, // Search as string for non-numeric values
+//             },
+//             { totalPackageAmount: { $regex: searchQuery, $options: "i" } }, // Search as string for non-numeric values
+//           ],
+//         });
+//       }
+//     }
+
+//     // Add date filtering if start or end dates are provided
+//     if (start) {
+//       queryConditions.push({
+//         createdAt: { $gte: start },
+//       });
+//     }
+
+//     if (end) {
+//       queryConditions.push({
+//         createdAt: { $lte: end },
+//       });
+//     }
+
+//     // Execute query with conditions
+//     const Orders = queryConditions.length
+//       ? await Order.find({ $and: queryConditions })
+//       : await Order.find();
+
+//     res.status(200).json({ message: "Orders retrieved successfully", Orders });
+//   } catch (error) {
+//     res
+//       .status(500)
+//       .json({ message: "Failed to retrieve Orders", error: error.message });
+//   }
+// };
 const getAllOrders = async (req, res) => {
   try {
     const searchQuery = req.query.search || "";
@@ -163,11 +227,30 @@ const getAllOrders = async (req, res) => {
       });
     }
 
-    // Execute query with conditions
-    const Orders = queryConditions.length
-      ? await Order.find({ $and: queryConditions })
-      : await Order.find();
+    const getImageUrl = (imagePath) => {
+      if (
+        imagePath.startsWith("http") ||
+        imagePath.startsWith(process.env.APP_URL)
+      ) {
+        return imagePath;
+      }
+      return `${process.env.APP_URL}${imagePath}`;
+    };
 
+    let Orders = queryConditions.length
+      ? await Order.find({ $and: queryConditions })
+          .populate("userId", "-password")
+          .sort({ createdAt: -1 })
+      : await Order.find()
+          .populate("userId", "-password")
+          .sort({ createdAt: -1 });
+
+    Orders = Orders.map((order) => {
+      if (order.userId && order.userId.image) {
+        order.userId.image = getImageUrl(order.userId.image); // Only update if not already a full URL
+      }
+      return order;
+    });
     res.status(200).json({ message: "Orders retrieved successfully", Orders });
   } catch (error) {
     res
