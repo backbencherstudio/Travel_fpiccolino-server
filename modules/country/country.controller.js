@@ -26,29 +26,31 @@ const create = async (req, res) => {
       message: "Country created successfully",
       country: {
         ...country.toObject(),
-        image: getImageUrl(country.image),  
+        image: getImageUrl(country.image),
       },
     });
   } catch (error) {
-    res.status(400).json({ message: "Error creating country", error: error.message });
+    res
+      .status(400)
+      .json({ message: "Error creating country", error: error.message });
   }
 };
 
-
 const getAll = async (req, res) => {
   try {
-    const countries = await Country.find().lean();
-    const countriesWithImages = countries.map(country => ({
+    const countries = await Country.find().lean().sort({ createdAt: -1 });
+    const countriesWithImages = countries.map((country) => ({
       ...country,
       image: country.image ? getImageUrl(country.image) : null,
     }));
 
     res.status(200).json(countriesWithImages);
   } catch (error) {
-    res.status(500).json({ message: "Error fetching countries", error: error.message });
+    res
+      .status(500)
+      .json({ message: "Error fetching countries", error: error.message });
   }
 };
-
 
 const getOne = async (req, res) => {
   try {
@@ -57,13 +59,15 @@ const getOne = async (req, res) => {
     const country = await Country.findById(id).lean();
 
     if (country) {
-      country.image = country.image ? getImageUrl(country.image) : null; 
+      country.image = country.image ? getImageUrl(country.image) : null;
       res.status(200).json(country);
     } else {
       res.status(404).json({ message: "Country not found" });
     }
   } catch (error) {
-    res.status(500).json({ message: "Error fetching country", error: error.message });
+    res
+      .status(500)
+      .json({ message: "Error fetching country", error: error.message });
   }
 };
 
@@ -96,7 +100,6 @@ const getOne = async (req, res) => {
 //   }
 // };
 
-
 // const update = async (req, res) => {
 //   try {
 //     const id = req.params.id;
@@ -113,7 +116,7 @@ const getOne = async (req, res) => {
 //     }
 
 //     const country = await Country.findByIdAndUpdate(id, updateData, {
-//       new: true, 
+//       new: true,
 //     });
 
 //     if (!country) {
@@ -124,14 +127,13 @@ const getOne = async (req, res) => {
 //       message: "Country updated successfully",
 //       country: {
 //         ...country.toObject(),
-//         image: getImageUrl(country.image), 
+//         image: getImageUrl(country.image),
 //       },
 //     });
 //   } catch (error) {
 //     res.status(400).json({ message: "Error updating country", error: error.message });
 //   }
 // };
-
 
 const update = async (req, res) => {
   try {
@@ -160,14 +162,15 @@ const update = async (req, res) => {
       message: "Country updated successfully",
       country: {
         ...country.toObject(),
-        image: getImageUrl(country.image),  
+        image: getImageUrl(country.image),
       },
     });
   } catch (error) {
-    res.status(400).json({ message: "Error updating country", error: error.message });
+    res
+      .status(400)
+      .json({ message: "Error updating country", error: error.message });
   }
 };
-
 
 const deleteData = async (req, res) => {
   try {
