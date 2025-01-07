@@ -37,6 +37,7 @@ app.use(
     origin: [
       "http://localhost:5173",
       "http://localhost:5174",
+      "https://scanning-cancel-configure-agreement.trycloudflare.com",
       "http://10.0.2.2:8081",
     ],
     credentials: true,

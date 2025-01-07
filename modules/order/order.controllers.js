@@ -1,6 +1,7 @@
 const Order = require("./order.models");
 const Package = require("./../package/package.model");
 const User = require("../users/users.models");
+// const { getImageUrl } = require("../../util/image_path");
 
 const stripe = require("stripe")(process.env.STRIPE_SECRET_KEY);
 
@@ -163,11 +164,29 @@ const getAllOrders = async (req, res) => {
       });
     }
 
-    // Execute query with conditions
-    const Orders = queryConditions.length
-      ? await Order.find({ $and: queryConditions })
-      : await Order.find();
+    const getImageUrl = (imagePath) => {
+      if (
+        imagePath.startsWith("http") ||
+        imagePath.startsWith(process.env.APP_URL)
+      ) {
+        return imagePath;
+      }
+      return `${process.env.APP_URL}${imagePath}`;
+    };
 
+    let Orders = queryConditions.length
+      ? await Order.find({ $and: queryConditions }).populate(
+          "userId",
+          "-password"
+        )
+      : await Order.find().populate("userId", "-password");
+
+    Orders = Orders.map((order) => {
+      if (order.userId && order.userId.image) {
+        order.userId.image = getImageUrl(order.userId.image); // Only update if not already a full URL
+      }
+      return order;
+    });
     res.status(200).json({ message: "Orders retrieved successfully", Orders });
   } catch (error) {
     res
