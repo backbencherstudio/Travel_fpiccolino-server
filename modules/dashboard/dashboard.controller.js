@@ -181,43 +181,115 @@ const getRadarData = async (req, res) => {
 
 
 
-// Controller function for getting total revenue by month and week
-const getRevenueData = async (req, res) => {
+const getOrderAndRevenueData = async (req, res) => {
   try {
+    // Query for total orders by month
+    const monthlyOrders = await Order.aggregate([
+      {
+        $project: {
+          month: { $month: "$orderDate" },
+        },
+      },
+      {
+        $group: {
+          _id: "$month",
+          totalOrders: { $sum: 1 },  // Count the number of orders in each month
+        },
+      },
+      {
+        $sort: { "_id": 1 },
+      },
+      {
+        $project: {
+          x: {
+            $arrayElemAt: [
+              ["Jan", "Feb", "Mar", "Apr", "May", "Jun", "Jul", "Aug", "Sep", "Oct", "Nov", "Dec"],
+              { $subtract: ["$_id", 1] }
+            ]
+          },
+          y: "$totalOrders",
+          _id: 0,
+        },
+      },
+    ]);
+
+    // Query for total orders by week
+    const weeklyOrders = await Order.aggregate([
+      {
+        $project: {
+          week: { $isoWeek: "$orderDate" },
+        },
+      },
+      {
+        $group: {
+          _id: "$week",
+          totalOrders: { $sum: 1 },  // Count the number of orders in each week
+        },
+      },
+      {
+        $sort: { "_id": 1 },
+      },
+      {
+        $project: {
+          x: { $concat: ["Week ", { $toString: "$_id" }] },
+          y: "$totalOrders",
+          _id: 0,
+        },
+      },
+    ]);
+
+    // Query for total orders by year
+    const yearlyOrders = await Order.aggregate([
+      {
+        $project: {
+          year: { $year: "$orderDate" },
+        },
+      },
+      {
+        $group: {
+          _id: "$year",
+          totalOrders: { $sum: 1 },  // Count the number of orders in each year
+        },
+      },
+      {
+        $sort: { "_id": 1 },
+      },
+      {
+        $project: {
+          x: { $toString: "$_id" },
+          y: "$totalOrders",
+          _id: 0,
+        },
+      },
+    ]);
+
     // Query for monthly revenue
     const monthlyRevenue = await Order.aggregate([
       {
         $project: {
           month: { $month: "$orderDate" },
-          year: { $year: "$orderDate" },
           totalPrice: 1,
         },
       },
       {
         $group: {
-          _id: { month: "$month", year: "$year" },
+          _id: "$month",
           totalRevenue: { $sum: "$totalPrice" },
         },
       },
       {
-        $sort: { "_id.year": 1, "_id.month": 1 },
+        $sort: { "_id": 1 },
       },
       {
         $project: {
           x: {
-            $concat: [
-              { 
-                $arrayElemAt: [
-                  ["Jan", "Feb", "Mar", "Apr", "May", "Jun", "Jul", "Aug", "Sep", "Oct", "Nov", "Dec"],
-                  { $subtract: ["$_id.month", 1] }
-                ] 
-              },
-              " ",
-              { $toString: "$_id.year" },
-            ],
+            $arrayElemAt: [
+              ["Jan", "Feb", "Mar", "Apr", "May", "Jun", "Jul", "Aug", "Sep", "Oct", "Nov", "Dec"],
+              { $subtract: ["$_id", 1] }
+            ]
           },
           y: "$totalRevenue",
-          _id: 0,  // Remove the _id field from the response
+          _id: 0,
         },
       },
     ]);
@@ -227,44 +299,75 @@ const getRevenueData = async (req, res) => {
       {
         $project: {
           week: { $isoWeek: "$orderDate" },
+          totalPrice: 1,
+        },
+      },
+      {
+        $group: {
+          _id: "$week",
+          totalRevenue: { $sum: "$totalPrice" },
+        },
+      },
+      {
+        $sort: { "_id": 1 },
+      },
+      {
+        $project: {
+          x: { $concat: ["Week ", { $toString: "$_id" }] },
+          y: "$totalRevenue",
+          _id: 0,
+        },
+      },
+    ]);
+
+    // Query for yearly revenue
+    const yearlyRevenue = await Order.aggregate([
+      {
+        $project: {
           year: { $year: "$orderDate" },
           totalPrice: 1,
         },
       },
       {
         $group: {
-          _id: { week: "$week", year: "$year" },
+          _id: "$year",
           totalRevenue: { $sum: "$totalPrice" },
         },
       },
       {
-        $sort: { "_id.year": 1, "_id.week": 1 },
+        $sort: { "_id": 1 },
       },
       {
         $project: {
-          x: { $concat: ["Week ", { $toString: "$_id.week" }] },
+          x: { $toString: "$_id" },
           y: "$totalRevenue",
-          _id: 0,  // Remove the _id field from the response
+          _id: 0,
         },
       },
     ]);
 
-    // Return both monthly and weekly revenue data
-    return res.status(200).json({
-      success: true,
-      revenueData: {
-        monthly: monthlyRevenue,
-        weekly: weeklyRevenue,
-      },
-    });
-  } catch (err) {
-    console.error(err);
-    return res.status(500).json({
-      success: false,
-      message: "Server Error",
-    });
+    // Combine all the data into a single response
+    const combinedData = {
+      orderData: [
+        ...monthlyOrders,
+        ...weeklyOrders,
+        ...yearlyOrders,
+      ],
+      revenueData: [
+        ...monthlyRevenue,
+        ...weeklyRevenue,
+        ...yearlyRevenue,
+      ],
+    };
+
+    res.json(combinedData);
+
+  } catch (error) {
+    console.error(error);
+    res.status(500).send("Error fetching order and revenue data");
   }
-};   
+};
+
 
 
 
@@ -292,6 +395,6 @@ const bookingData = async (req, res) => {
 module.exports = {
   getAll,
   getRadarData,
-  getRevenueData,
+  getOrderAndRevenueData,
   bookingData
 };
