@@ -4,15 +4,11 @@ const Package = require("../package/package.model");
 
 const getAll = async (req, res) => {
   try {
-    // get total revenue using order totalPrice field
+   
     const totalRevenue = await Order.aggregate([
       { $group: { _id: null, total: { $sum: "$totalPrice" } } },
     ]);
 
-    // get total travellers using order passenger field
-    // const totalTravellers = await Order.aggregate([
-    //   { $group: { _id: null, total: { $sum: "$passenger" } } },
-    // ]);
     const orderss = await Order.find().populate("packageId");
 
     // Initialize passenger sum
@@ -24,33 +20,19 @@ const getAll = async (req, res) => {
         totalPassengers += order.packageId.pessenger;
       }
     });
+    let completedOrders = 0;
+    let pendingOrders = 0;
+    orderss.map((order) => {
+      if (order.status === "completed") {
+        completedOrders += 1;
+      }
+      else if(order.status === "pending") {
+        pendingOrders += 1;
+      }
+    });
 
-    // all Country-----------------------------------------------------
-    // const ordersWithCountryNames = await Promise.all(
-    //   orderss.map(async (order) => {
-    //     if (!order.packageId) {
-    //       return { ...order.toObject(), countries: [] }; // If packageId is missing, attach empty countries
-    //     }
-
-    //     const packageData = await Package.findById(order.packageId).populate({
-    //       path: "country",
-    //       select: "name -_id", // Only select the 'name' field from Country
-    //     });
-
-    //     // Extract the country names
-    //     const countries = packageData?.country
-    //       ? Array.isArray(packageData.country)
-    //         ? packageData.country.map((country) => country.name)
-    //         : [packageData.country.name]
-    //       : [];
-
-    //     return { ...order.toObject(), countries };
-    //   })
-    // );
-
-
-
-    // get total profit using order totalPrice field and cost_per_package field, profit is totalPrice - cost_per_package
+   
+    
     const totalCostPerPackage = await Order.aggregate([
       { $group: { _id: null, total: { $sum: "$cost_per_package" } } },
     ]);
@@ -78,6 +60,8 @@ const getAll = async (req, res) => {
       totalProfit: totalProfit,
       totalOrders: totalOrders,
       totalOrdersByCountry: totalOrdersByCountry,
+      completedOrders,
+      pendingOrders
      
       // orders: orders,
     });
@@ -91,20 +75,17 @@ const getAll = async (req, res) => {
 
 const getRadarData = async (req, res) => {
   try {
-    // Aggregate data from orders and join with package data
+    
    
     const totalOrders = await Order.countDocuments();
 
-    // If there are no orders, return 0% for both
     if (totalOrders === 0) {
       console.log("No orders found.");
       return;
     }
 
-    // Get the count of 'completed' orders
     const completedOrders = await Order.countDocuments({ status: "completed" });
 
-    // Get the count of 'pending' orders
     const pendingOrders = await Order.countDocuments({ status: "pending" });
 
     // Calculate percentages
@@ -158,22 +139,28 @@ const getRadarData = async (req, res) => {
     };
 
     const destinationMap = new Map();
-
+    let incrementStep = 10; // Define the increment step
+    let currentIncrement = incrementStep; // Start with the first increment
+    
     orders.forEach((order) => {
       const { destination, status } = order._id;
       const count = order.count;
-
+    
       if (!destinationMap.has(destination)) {
         destinationMap.set(destination, { completed: 0, pending: 0 });
         radarData.destination.push(destination);
       }
-
+    
+      // Apply the count increment logic
       if (status === "completed") {
-        destinationMap.get(destination).completed += count;
+        destinationMap.get(destination).completed += currentIncrement;
+        currentIncrement += incrementStep; // Increment for the next iteration
       } else if (status === "pending") {
-        destinationMap.get(destination).pending += count;
+        destinationMap.get(destination).pending += currentIncrement;
+        currentIncrement += incrementStep; // Increment for the next iteration
       }
     });
+    
 
     // Populate radarData
     radarData.completed = radarData.destination.map(
