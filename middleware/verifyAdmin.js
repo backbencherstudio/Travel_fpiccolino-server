@@ -20,7 +20,7 @@ const verifyAdmin = async (req, res, next) => {
 
     req.userId = decodedToken.userId;
     // check if the user is admin
-    if (decodedToken.role === "admin") {
+    if (decodedToken.role !== "admin") {
       res.status(401).json({ message: "You are not allowed to access" });
       return;
     }
