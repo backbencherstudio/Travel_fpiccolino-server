@@ -93,7 +93,7 @@ app.use("/api/review", review);
 app.use("/api/footer", footer);
 
 app.use("/order/:orderId/orderPersonalDetails", orderPersonalDetails);
-app.use("/dashboard", dashboard);
+app.use("/dashboard", dashboard); 
 app.use("/api/shorts", shorts);
 // app.use("/api/newsletter", newsletter);
 

@@ -19,8 +19,10 @@ const verifyAdmin = async (req, res, next) => {
     const decodedToken = verify(token, JWT_SECRET);
 
     req.userId = decodedToken.userId;
+    console.log(decodedToken?.role)
+   
     // check if the user is admin
-    if (decodedToken.role === "admin") {
+    if (decodedToken.role && decodedToken.role != "admin") {
       res.status(401).json({ message: "You are not allowed to access" });
       return;
     }
