@@ -6,7 +6,7 @@ const router = express.Router();
 
 router.get("/", verifyAdmin, controller.getAll);
 router.get("/getRadarData", verifyAdmin, controller.getRadarData);
-router.get("/getRevenueData", verifyAdmin, controller.getRevenueData);
+router.get("/getRevenueData", verifyAdmin, controller.getOrderAndRevenueData);
 router.get("/bookingData", verifyAdmin, controller.bookingData);
  
 

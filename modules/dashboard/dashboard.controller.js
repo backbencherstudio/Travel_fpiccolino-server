@@ -4,15 +4,10 @@ const Package = require("../package/package.model");
 
 const getAll = async (req, res) => {
   try {
-    // get total revenue using order totalPrice field
     const totalRevenue = await Order.aggregate([
       { $group: { _id: null, total: { $sum: "$totalPrice" } } },
     ]);
 
-    // get total travellers using order passenger field
-    // const totalTravellers = await Order.aggregate([
-    //   { $group: { _id: null, total: { $sum: "$passenger" } } },
-    // ]);
     const orderss = await Order.find().populate("packageId");
 
     // Initialize passenger sum
@@ -24,33 +19,16 @@ const getAll = async (req, res) => {
         totalPassengers += order.packageId.pessenger;
       }
     });
+    let completedOrders = 0;
+    let pendingOrders = 0;
+    orderss.map((order) => {
+      if (order.status === "completed") {
+        completedOrders += 1;
+      } else if (order.status === "pending") {
+        pendingOrders += 1;
+      }
+    });
 
-    // all Country-----------------------------------------------------
-    // const ordersWithCountryNames = await Promise.all(
-    //   orderss.map(async (order) => {
-    //     if (!order.packageId) {
-    //       return { ...order.toObject(), countries: [] }; // If packageId is missing, attach empty countries
-    //     }
-
-    //     const packageData = await Package.findById(order.packageId).populate({
-    //       path: "country",
-    //       select: "name -_id", // Only select the 'name' field from Country
-    //     });
-
-    //     // Extract the country names
-    //     const countries = packageData?.country
-    //       ? Array.isArray(packageData.country)
-    //         ? packageData.country.map((country) => country.name)
-    //         : [packageData.country.name]
-    //       : [];
-
-    //     return { ...order.toObject(), countries };
-    //   })
-    // );
-
-
-
-    // get total profit using order totalPrice field and cost_per_package field, profit is totalPrice - cost_per_package
     const totalCostPerPackage = await Order.aggregate([
       { $group: { _id: null, total: { $sum: "$cost_per_package" } } },
     ]);
@@ -78,7 +56,9 @@ const getAll = async (req, res) => {
       totalProfit: totalProfit,
       totalOrders: totalOrders,
       totalOrdersByCountry: totalOrdersByCountry,
-     
+      completedOrders,
+      pendingOrders,
+
       // orders: orders,
     });
   } catch (error) {
@@ -88,46 +68,24 @@ const getAll = async (req, res) => {
   }
 };
 
-
 const getRadarData = async (req, res) => {
   try {
-    // Aggregate data from orders and join with package data
-   
     const totalOrders = await Order.countDocuments();
 
-    // If there are no orders, return 0% for both
     if (totalOrders === 0) {
       console.log("No orders found.");
       return;
     }
 
-    // Get the count of 'completed' orders
     const completedOrders = await Order.countDocuments({ status: "completed" });
 
-    // Get the count of 'pending' orders
     const pendingOrders = await Order.countDocuments({ status: "pending" });
 
     // Calculate percentages
-    const completedPercentage = ((completedOrders / totalOrders) * 100).toFixed(2);
+    const completedPercentage = ((completedOrders / totalOrders) * 100).toFixed(
+      2
+    );
     const pendingPercentage = ((pendingOrders / totalOrders) * 100).toFixed(2);
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
 
     const orders = await Order.aggregate([
       {
@@ -158,6 +116,8 @@ const getRadarData = async (req, res) => {
     };
 
     const destinationMap = new Map();
+    let incrementStep = 10; // Define the increment step
+    let currentIncrement = incrementStep; // Start with the first increment
 
     orders.forEach((order) => {
       const { destination, status } = order._id;
@@ -168,10 +128,13 @@ const getRadarData = async (req, res) => {
         radarData.destination.push(destination);
       }
 
+      // Apply the count increment logic
       if (status === "completed") {
-        destinationMap.get(destination).completed += count;
+        destinationMap.get(destination).completed += currentIncrement;
+        currentIncrement += incrementStep; // Increment for the next iteration
       } else if (status === "pending") {
-        destinationMap.get(destination).pending += count;
+        destinationMap.get(destination).pending += currentIncrement;
+        currentIncrement += incrementStep; // Increment for the next iteration
       }
     });
 
@@ -184,53 +147,148 @@ const getRadarData = async (req, res) => {
     );
 
     // Send response
-    res.status(200).json({radarData,completedPercentage,pendingPercentage});
+    res.status(200).json({ radarData, completedPercentage, pendingPercentage });
   } catch (error) {
     console.error("Error fetching radar data:", error);
     res.status(500).json({ error: "Failed to fetch radar data" });
   }
 };
 
-
-
-
-// Controller function for getting total revenue by month and week
-const getRevenueData = async (req, res) => {
+const getOrderAndRevenueData = async (req, res) => {
   try {
+    // Query for total orders by month
+    const monthlyOrders = await Order.aggregate([
+      {
+        $project: {
+          month: { $month: "$orderDate" },
+        },
+      },
+      {
+        $group: {
+          _id: "$month",
+          totalOrders: { $sum: 1 }, // Count the number of orders in each month
+        },
+      },
+      {
+        $sort: { _id: 1 },
+      },
+      {
+        $project: {
+          x: {
+            $arrayElemAt: [
+              [
+                "Jan",
+                "Feb",
+                "Mar",
+                "Apr",
+                "May",
+                "Jun",
+                "Jul",
+                "Aug",
+                "Sep",
+                "Oct",
+                "Nov",
+                "Dec",
+              ],
+              { $subtract: ["$_id", 1] },
+            ],
+          },
+          y: "$totalOrders",
+          _id: 0,
+        },
+      },
+    ]);
+
+    // Query for total orders by week
+    const weeklyOrders = await Order.aggregate([
+      {
+        $project: {
+          week: { $isoWeek: "$orderDate" },
+        },
+      },
+      {
+        $group: {
+          _id: "$week",
+          totalOrders: { $sum: 1 }, // Count the number of orders in each week
+        },
+      },
+      {
+        $sort: { _id: 1 },
+      },
+      {
+        $project: {
+          x: { $concat: ["Week ", { $toString: "$_id" }] },
+          y: "$totalOrders",
+          _id: 0,
+        },
+      },
+    ]);
+
+    // Query for total orders by year
+    const yearlyOrders = await Order.aggregate([
+      {
+        $project: {
+          year: { $year: "$orderDate" },
+        },
+      },
+      {
+        $group: {
+          _id: "$year",
+          totalOrders: { $sum: 1 }, // Count the number of orders in each year
+        },
+      },
+      {
+        $sort: { _id: 1 },
+      },
+      {
+        $project: {
+          x: { $toString: "$_id" },
+          y: "$totalOrders",
+          _id: 0,
+        },
+      },
+    ]);
+
     // Query for monthly revenue
     const monthlyRevenue = await Order.aggregate([
       {
         $project: {
           month: { $month: "$orderDate" },
-          year: { $year: "$orderDate" },
           totalPrice: 1,
         },
       },
       {
         $group: {
-          _id: { month: "$month", year: "$year" },
+          _id: "$month",
           totalRevenue: { $sum: "$totalPrice" },
         },
       },
       {
-        $sort: { "_id.year": 1, "_id.month": 1 },
+        $sort: { _id: 1 },
       },
       {
         $project: {
           x: {
-            $concat: [
-              { 
-                $arrayElemAt: [
-                  ["Jan", "Feb", "Mar", "Apr", "May", "Jun", "Jul", "Aug", "Sep", "Oct", "Nov", "Dec"],
-                  { $subtract: ["$_id.month", 1] }
-                ] 
-              },
-              " ",
-              { $toString: "$_id.year" },
+            $arrayElemAt: [
+              [
+                "Jan",
+                "Feb",
+                "Mar",
+                "Apr",
+                "May",
+                "Jun",
+                "Jul",
+                "Aug",
+                "Sep",
+                "Oct",
+                "Nov",
+                "Dec",
+              ],
+              { $subtract: ["$_id", 1] },
             ],
           },
           y: "$totalRevenue",
-          _id: 0,  // Remove the _id field from the response
+          _id: 0,
         },
       },
     ]);
@@ -240,71 +298,190 @@ const getRevenueData = async (req, res) => {
       {
         $project: {
           week: { $isoWeek: "$orderDate" },
+          totalPrice: 1,
+        },
+      },
+      {
+        $group: {
+          _id: "$week",
+          totalRevenue: { $sum: "$totalPrice" },
+        },
+      },
+      {
+        $sort: { _id: 1 },
+      },
+      {
+        $project: {
+          x: { $concat: ["Week ", { $toString: "$_id" }] },
+          y: "$totalRevenue",
+          _id: 0,
+        },
+      },
+    ]);
+
+    // Query for yearly revenue
+    const yearlyRevenue = await Order.aggregate([
+      {
+        $project: {
           year: { $year: "$orderDate" },
           totalPrice: 1,
         },
       },
       {
         $group: {
-          _id: { week: "$week", year: "$year" },
+          _id: "$year",
           totalRevenue: { $sum: "$totalPrice" },
         },
       },
       {
-        $sort: { "_id.year": 1, "_id.week": 1 },
+        $sort: { _id: 1 },
       },
       {
         $project: {
-          x: { $concat: ["Week ", { $toString: "$_id.week" }] },
+          x: { $toString: "$_id" },
           y: "$totalRevenue",
-          _id: 0,  // Remove the _id field from the response
+          _id: 0,
         },
       },
     ]);
 
-    // Return both monthly and weekly revenue data
-    return res.status(200).json({
-      success: true,
-      revenueData: {
-        monthly: monthlyRevenue,
-        weekly: weeklyRevenue,
+    // Query for traveler counts by month
+    const monthlyTravelers = await Order.aggregate([
+      {
+        $project: {
+          month: { $month: "$orderDate" },
+          travelerCount: { $size: "$travelers" },
+        },
       },
-    });
-  } catch (err) {
-    console.error(err);
-    return res.status(500).json({
-      success: false,
-      message: "Server Error",
-    });
+      {
+        $group: {
+          _id: "$month",
+          totalTravelers: { $sum: "$travelerCount" },
+        },
+      },
+      {
+        $sort: { _id: 1 },
+      },
+      {
+        $project: {
+          x: {
+            $arrayElemAt: [
+              [
+                "Jan",
+                "Feb",
+                "Mar",
+                "Apr",
+                "May",
+                "Jun",
+                "Jul",
+                "Aug",
+                "Sep",
+                "Oct",
+                "Nov",
+                "Dec",
+              ],
+              { $subtract: ["$_id", 1] },
+            ],
+          },
+          y: "$totalTravelers",
+          _id: 0,
+        },
+      },
+    ]);
+
+    // Query for traveler counts by week
+    const weeklyTravelers = await Order.aggregate([
+      {
+        $project: {
+          week: { $isoWeek: "$orderDate" },
+          travelerCount: { $size: "$travelers" },
+        },
+      },
+      {
+        $group: {
+          _id: "$week",
+          totalTravelers: { $sum: "$travelerCount" },
+        },
+      },
+      {
+        $sort: { _id: 1 },
+      },
+      {
+        $project: {
+          x: { $concat: ["Week ", { $toString: "$_id" }] },
+          y: "$totalTravelers",
+          _id: 0,
+        },
+      },
+    ]);
+
+    // Query for traveler counts by year
+    const yearlyTravelers = await Order.aggregate([
+      {
+        $project: {
+          year: { $year: "$orderDate" },
+          travelerCount: { $size: "$travelers" },
+        },
+      },
+      {
+        $group: {
+          _id: "$year",
+          totalTravelers: { $sum: "$travelerCount" },
+        },
+      },
+      {
+        $sort: { _id: 1 },
+      },
+      {
+        $project: {
+          x: { $toString: "$_id" },
+          y: "$totalTravelers",
+          _id: 0,
+        },
+      },
+    ]);
+
+    // Combine all the data into a single response
+    const combinedData = {
+      orderData: [...monthlyOrders, ...weeklyOrders, ...yearlyOrders],
+      revenueData: [...monthlyRevenue, ...weeklyRevenue, ...yearlyRevenue],
+      travelerData: [
+        ...monthlyTravelers,
+        ...weeklyTravelers,
+        ...yearlyTravelers,
+      ],
+    };
+
+    res.json(combinedData);
+  } catch (error) {
+    console.error(error);
+    res.status(500).send("Error fetching order and revenue data"); // error
   }
-};   
-
-
+};
 
 const bookingData = async (req, res) => {
   const orders = await Order.find().populate("packageId").populate("userId");
-  let data = []
+  let data = [];
   orders.map((order) => {
     const userInfo = order.userId;
-    
-   const onedata = {
+
+    const onedata = {
       bookingId: order._id,
       customerName: userInfo?.name,
-      customerImg:   userInfo?.image,
+      customerImg: userInfo?.image,
       destination: order.packageId.destination,
       amount: order.totalPrice,
       status: order?.status,
-      date: order.orderDate
-    }
+      date: order.orderDate,
+    };
     data.push(onedata);
   });
   return res.status(200).json({ success: true, data });
-}
-
+};
 
 module.exports = {
   getAll,
   getRadarData,
-  getRevenueData,
-  bookingData
+  getOrderAndRevenueData,
+  bookingData,
 };
