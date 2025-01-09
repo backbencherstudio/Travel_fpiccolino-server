@@ -112,3 +112,70 @@ app.use((err, req, res, next) => {
 });
 
 module.exports = app;
+
+
+
+
+
+
+// const session = require("express-session");
+// const RedisStore = require("connect-redis")(session);
+
+// app.use(
+//   session({
+//     store: new RedisStore({ url: process.env.REDIS_URL }),
+//     secret: process.env.SESSION_SECRET || "changeit",
+//     resave: false,
+//     saveUninitialized: false,
+//     cookie: {
+//       maxAge: 3600000, // 1 hour
+//       secure: process.env.NODE_ENV === "production", // true in production
+//       sameSite: "strict",
+//     },
+//   })
+// );
+
+
+// app.enable("trust proxy"); // or app.set("trust proxy", 1);
+
+
+
+// cookie: {
+//   maxAge: 3600000,
+//   secure: process.env.NODE_ENV === "production", // true only in production
+//   sameSite: "strict",
+// },
+
+
+
+
+// const express = require("express");
+// const session = require("express-session");
+// const RedisStore = require("connect-redis")(session);
+// const app = express();
+
+// // If behind a proxy like NGINX/Heroku
+// app.set("trust proxy", 1);
+
+// app.use(
+//   session({
+//     store: new RedisStore({ url: process.env.REDIS_URL }),
+//     secret: process.env.SESSION_SECRET || "somefallbacksecret",
+//     resave: false,
+//     saveUninitialized: false,
+//     cookie: {
+//       maxAge: 3600000, // 1 hour
+//       secure: process.env.NODE_ENV === "production", // cookies only over HTTPS in production
+//       sameSite: "strict",
+//     },
+//   })
+// );
+
+// app.get("/", (req, res) => {
+//   req.session.views = (req.session.views || 0) + 1;
+//   res.send(`You have viewed this page ${req.session.views} times`);
+// });
+
+// app.listen(3000, () => {
+//   console.log("Server running on port 3000");
+// });
