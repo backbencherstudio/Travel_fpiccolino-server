@@ -3,6 +3,15 @@ const Package = require("./../package/package.model");
 const User = require("../users/users.models");
 // const { getImageUrl } = require("../../util/image_path");
 
+const setCookie = (key, data, res) => {
+  res.cookie(key, data, {
+    httpOnly: true,
+    sameSite: "none",
+    secure: process.env.NODE_ENV === "production",
+    maxAge: 30 * 24 * 60 * 60 * 1000, // 30 days
+  });
+};
+
 const stripe = require("stripe")(process.env.STRIPE_SECRET_KEY);
 
 const stripePaymentFun = async (req, res) => {
@@ -260,7 +269,9 @@ const getAllOrders = async (req, res) => {
 };
 const checkout = async (req, res) => {
   try {
-    req.session.userData = req.body;
+    // setCookie(req.body, )
+    setCookie("userData", req.body, res);
+    // req.session.userData = req.body;
     res.status(200).json({ message: "success" });
   } catch (error) {
     res.status(500).json(error);
@@ -269,7 +280,7 @@ const checkout = async (req, res) => {
 
 const accesCheckoutData = async (req, res) => {
   try {
-    let data = req.session.userData;
+    let data = req.cookies.userData;
     res.status(200).json(data);
   } catch (error) {
     res.status(500).json(error);
@@ -278,7 +289,9 @@ const accesCheckoutData = async (req, res) => {
 
 const deleteCheckoutData = async (req, res) => {
   try {
-    delete req.session.userData;
+    // delete req.session.userData;
+    res.clearCookie("userData");
+    
     res.status(200).json({ message: "delete successFull" });
   } catch (error) {
     res.status(500).json(error);
@@ -287,7 +300,8 @@ const deleteCheckoutData = async (req, res) => {
 
 const checkoutNewUserData = async (req, res) => {
   try {
-    req.session.userUpdateData = req.body;
+    // req.session.userUpdateData = req.body;
+    setCookie("userUpdateData", req.body, res);
     res.status(200).json({ message: "success" });
   } catch (error) {
     res.status(500).json(error);
@@ -296,7 +310,9 @@ const checkoutNewUserData = async (req, res) => {
 
 const accesCheckoutNewData = async (req, res) => {
   try {
-    let data = req.session.userUpdateData;
+    let data = req.cookies.userUpdateData //req.session.userUpdateData;
+  
+    
     res.status(200).json(data);
   } catch (error) {
     res.status(500).json(error);

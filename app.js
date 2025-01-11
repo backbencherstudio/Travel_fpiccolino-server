@@ -2,7 +2,7 @@ const express = require("express");
 const morgan = require("morgan");
 const cors = require("cors");
 const session = require("express-session");
-
+const bodyParser = require("body-parser");
 const cookieParser = require("cookie-parser");
 const user = require("./modules/users/users.routes");
 
@@ -27,7 +27,6 @@ const orderPersonalDetails = require("./modules/order/orderPersonalDetails/order
 
 const blogs = require("./modules/blogs/blog.route");
 const path = require("path");
-const bodyParser = require("body-parser");
 
 const shorts = require("./modules/shorts/short.route");
 const app = express();
@@ -37,12 +36,14 @@ app.use(
     origin: [
       "http://localhost:5173",
       "http://localhost:5174",
-      "https://scanning-cancel-configure-agreement.trycloudflare.com",
+      "https://asian-ban-regards-gotten.trycloudflare.com",
       "http://10.0.2.2:8081",
     ],
     credentials: true,
   })
 );
+
+app.use(cookieParser());
 
 app.use((req, res, next) => {
   if (req.originalUrl === "/order/webhook") {
@@ -56,18 +57,18 @@ app.use((req, res, next) => {
 // app.use(express.json());
 app.use(express.urlencoded({ extended: true }));
 
-// app.use(morgan("dev"));
+app.use(morgan("dev"));
 app.use("/uploads", express.static(path.join(__dirname, "uploads")));
 
-app.use(cookieParser());
 // app.use("/uploads", express.static("uploads"));
 
 app.use(
   session({
     secret: "changeit",
-    resave: true,
-    saveUninitialized: true,
-    cookie: { maxAge: 3600000 },
+    resave: false,
+    sameSite: "none",
+    saveUninitialized: false,
+    cookie: { maxAge: 3600000, sameSite: "none", secure: true },
   })
 );
 
@@ -93,7 +94,7 @@ app.use("/api/review", review);
 app.use("/api/footer", footer);
 
 app.use("/order/:orderId/orderPersonalDetails", orderPersonalDetails);
-app.use("/dashboard", dashboard); 
+app.use("/dashboard", dashboard);
 app.use("/api/shorts", shorts);
 // app.use("/api/newsletter", newsletter);
 
@@ -113,11 +114,6 @@ app.use((err, req, res, next) => {
 
 module.exports = app;
 
-
-
-
-
-
 // const session = require("express-session");
 // const RedisStore = require("connect-redis")(session);
 
@@ -135,19 +131,13 @@ module.exports = app;
 //   })
 // );
 
-
 // app.enable("trust proxy"); // or app.set("trust proxy", 1);
-
-
 
 // cookie: {
 //   maxAge: 3600000,
 //   secure: process.env.NODE_ENV === "production", // true only in production
 //   sameSite: "strict",
 // },
-
-
-
 
 // const express = require("express");
 // const session = require("express-session");

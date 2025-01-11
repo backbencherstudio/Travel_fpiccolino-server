@@ -28,6 +28,16 @@ const hashPassword = async (password) => {
 const setTokenCookie = (res, token) => {
   res.cookie("token", token, {
     httpOnly: true,
+    sameSite: "none",
+    secure: process.env.NODE_ENV === "production",
+    maxAge: 30 * 24 * 60 * 60 * 1000, // 30 days
+  });
+};
+
+const setCookie = (key, data, res) => {
+  res.cookie(key, data, {
+    httpOnly: true,
+    sameSite: "none",
     secure: process.env.NODE_ENV === "production",
     maxAge: 30 * 24 * 60 * 60 * 1000, // 30 days
   });
@@ -157,10 +167,14 @@ const registerUser = async (req, res) => {
     }
 
     // Store user data and OTP in session
-    req.session.otp = OTP;
-    req.session.userData = { name, password: hashedPassword, email, role };
+    // req.session.otp = OTP;
+    setCookie("otp", OTP, res);
+    const userData = { name, password: hashedPassword, email, role };
+    setCookie("userData", userData, res);
 
-    console.log(req.session.userData);
+    // req.session.userData = { name, password: hashedPassword, email, role };
+
+    // console.log(req.session.userData);
 
     // Send OTP email in the background (don't await)
     sendRegistrationOTPEmail(name, email, OTP)
@@ -201,33 +215,24 @@ const resendOtp = async (req, res) => {
 // Verify OTP
 const verifyOTP = async (req, res) => {
   try {
-    console.log(122, req.body);
     const { otp } = req.body;
-    console.log(otp);
-
-    if (
-      !req.session.userData ||
-      !req.session.userData.name ||
-      !req.session.userData.email ||
-      !req.session.userData.password
-    ) {
+    if (!req.cookies.otp || !req.cookies.userData) {
       res.status(400).json({
         message: "Registration incomplete",
       });
       return;
     }
 
-    console.log(req.session.userData.email);
-    console.log("req.session.otp", req.session.otp);
+ 
 
-    if (otp != req.session.otp) {
+    if (otp != req.cookies.otp) {
       res.status(400).json({
         message: "Invalid OTP",
       });
       return;
     }
 
-    const newUser = new User(req.session.userData);
+    const newUser = new User(req.cookies.userData);
 
     // Generate JWT and save the user simultaneously
     const [savedUser, token] = await Promise.all([
@@ -236,16 +241,6 @@ const verifyOTP = async (req, res) => {
     ]);
     setTokenCookie(res, token);
 
-    // Clear session data after successful save
-    delete req.session.userData;
-    delete req.session.otp;
-
-    // const options = {
-    //   expires: new Date(Date.now() + 3 * 24 * 60 * 60 * 1000),
-    //   httpOnly: true,
-    // };
-
-    console.log(savedUser);
     res
       .status(200)
       // .cookie("token", token, options)
@@ -364,12 +359,10 @@ const forgotPasswordOTPsend = async (req, res) => {
 
     if (user.name) await sendForgotPasswordOTP(user.name, user.email, otp);
 
-    res
-      .status(200)
-      .json({
-        message: "OTP sent successfully for password change",
-        success: true,
-      });
+    res.status(200).json({
+      message: "OTP sent successfully for password change",
+      success: true,
+    });
   } catch (error) {
     res.status(500).json(error);
   }

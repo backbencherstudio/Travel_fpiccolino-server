@@ -108,7 +108,6 @@ const getRadarData = async (req, res) => {
       },
     ]);
 
-    // Process aggregated data to radar chart format
     const radarData = {
       destination: [],
       completed: [],
@@ -116,8 +115,8 @@ const getRadarData = async (req, res) => {
     };
 
     const destinationMap = new Map();
-    let incrementStep = 10; // Define the increment step
-    let currentIncrement = incrementStep; // Start with the first increment
+    let incrementStep = 10;
+    let currentIncrement = incrementStep;
 
     orders.forEach((order) => {
       const { destination, status } = order._id;
@@ -131,7 +130,7 @@ const getRadarData = async (req, res) => {
       // Apply the count increment logic
       if (status === "completed") {
         destinationMap.get(destination).completed += currentIncrement;
-        currentIncrement += incrementStep; // Increment for the next iteration
+        currentIncrement += incrementStep;
       } else if (status === "pending") {
         destinationMap.get(destination).pending += currentIncrement;
         currentIncrement += incrementStep; // Increment for the next iteration
