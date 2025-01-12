@@ -5,9 +5,9 @@ const { verifyAdmin } = require("../../middleware/verifyAdmin");
 const router = express.Router();
 
 router.get("/", verifyAdmin, controller.getAll);
-router.get("/getRadarData",  controller.getRadarData);
+router.get("/getRadarData", verifyAdmin, controller.getRadarData);
 router.get("/getRevenueData", verifyAdmin, controller.getOrderAndRevenueData);
-router.get("/bookingData", verifyAdmin, controller.bookingData);
+// router.get("/bookingData", controller.bookingData);
  
 
 module.exports = router;
