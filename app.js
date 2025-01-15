@@ -36,7 +36,7 @@ app.use(
     origin: [
       "http://localhost:5173",
       "http://localhost:5174",
-      "https://olympics-locator-armor-factory.trycloudflare.com",
+      "https://emma-antigua-guys-fed.trycloudflare.com",
       "http://10.0.2.2:8081",
     ],
     credentials: true,
@@ -107,9 +107,7 @@ app.use((req, res, next) => {
 });
 
 app.use((err, req, res, next) => {
-  res.status(500).json({
-    message: err,
-  });
+  res.status(500).json({message: "500! internal server error!", err});
 });
 
 module.exports = app;
