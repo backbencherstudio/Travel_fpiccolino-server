@@ -128,27 +128,37 @@ exports.getReviewsByPackage = async (req, res) => {
         .status(404)
         .json({ message: "No reviews found for the specified package ID" });
     }
+
     // Fetch user details for each review
     const reviewsWithUserDetails = await Promise.all(
       reviews.map(async (review) => {
         const user = await User.findById(review.userId);
-        if (!user) {
-          return res.status(404).json({
-            message: `User not found for review with ID ${review._id}`,
-          });
-        }
         return {
           review,
-          user: {
-            id: user._id,
-            name: user.name,
-            email: user.email,
-            userImg: user.image,
-          },
+          user: user
+            ? {
+                id: user._id,
+                name: user.name,
+                email: user.email,
+                userImg: user.image,
+              }
+            : null, // Handle missing user gracefully
         };
       })
     );
-    return res.status(200).json(reviewsWithUserDetails);
+
+    // Filter out reviews where user details are missing if necessary
+    const filteredReviews = reviewsWithUserDetails.filter(
+      (item) => item.user !== null
+    );
+
+    if (filteredReviews.length === 0) {
+      return res.status(404).json({
+        message: "All reviews have missing user details",
+      });
+    }
+
+    return res.status(200).json(filteredReviews);
   } catch (error) {
     console.error(error);
     return res.status(500).json({
