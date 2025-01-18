@@ -1,21 +1,33 @@
 const mongoose = require("mongoose");
 const { Schema } = mongoose;
 
-const footerSchema = new Schema({
-    companyName: String,
-    description: String,
-    quickLinks: [
-      {
-        name: String,
-        url: String,
-      }
-    ],
-    contactInfo: {
-      phone: String,
-      email: String,
+const footerSchema = new Schema(
+  {
+    companyName: {
+      type: String,
+      required: true,
+      trim: true,
     },
-    copyright: String,
-  });
-  
-  
-  module.exports = mongoose.model("Footer", footerSchema);
+    description: {
+      type: String,
+      required: true,
+      trim: true,
+    },
+    contactInfo: {
+      phone: {
+        type: String,
+      },
+      email: {
+        type: String,
+      },
+    },
+    copyright: {
+      type: String,
+    },
+  },
+  {
+    timestamps: true,
+  }
+);
+
+module.exports = mongoose.model("Footer", footerSchema);
