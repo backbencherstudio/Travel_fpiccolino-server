@@ -96,7 +96,7 @@ app.use("/api/footer", footer);
 app.use("/order/:orderId/orderPersonalDetails", orderPersonalDetails);
 app.use("/dashboard", dashboard);
 app.use("/api/shorts", shorts);
-// app.use("/api/newsletter", newsletter);
+app.use("/api/newsletter", newsletter);
 
 app.use("/category", category);
 
@@ -107,7 +107,7 @@ app.use((req, res, next) => {
 });
 
 app.use((err, req, res, next) => {
-  res.status(500).json({message: "500! internal server error!", err});
+  res.status(500).json({ message: "500! internal server error!", err });
 });
 
 module.exports = app;

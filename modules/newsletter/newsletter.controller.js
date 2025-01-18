@@ -65,12 +65,10 @@ const createNewsletter = async (req, res) => {
     });
 
     await newNewsLetter.save();
-    res
-      .status(200)
-      .json({
-        message: "Newsletter subscription created successfully!",
-        success: true,
-      });
+    res.status(200).json({
+      message: "Newsletter subscription created successfully!",
+      success: true,
+    });
   } catch (error) {
     res.status(400).json({ error: error.message });
   }
@@ -78,7 +76,7 @@ const createNewsletter = async (req, res) => {
 
 const getAllNewsLetter = async (req, res) => {
   try {
-    const all = await newsLetterSchema.find();
+    const all = await newsLetterSchema.find().sort({ createdAt: -1 });
     res.status(200).json(all);
   } catch (error) {
     res.status(400).json({ error: error.message });
