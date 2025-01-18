@@ -13,6 +13,6 @@ router.post("/", verifyAdmin, createCategory);
 
 // router.get("/:id", getPackageById);
 
-router.delete("/:id", verifyAdmin, deleteCategory);
+router.delete("/:id", deleteCategory);
 
 module.exports = router;

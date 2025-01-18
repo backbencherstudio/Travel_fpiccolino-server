@@ -327,6 +327,7 @@ const getRadarData = async (req, res) => {
 
 const getOrderAndRevenueData = async (req, res) => {
   try {
+    console.log("first")
     // Query for total orders by month
     const monthlyOrders = await Order.aggregate([
       {

@@ -88,6 +88,7 @@ const getAllNewsLetter = async (req, res) => {
 const deleteNewsLetter = async (req, res) => {
   try {
     const newsletterId = req.params.id;
+    console.log(newsletterId)
     if (!newsletterId) {
       return res.status(400).json({ error: "Newsletter ID is required" });
     }

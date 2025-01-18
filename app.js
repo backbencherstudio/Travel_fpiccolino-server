@@ -36,7 +36,7 @@ app.use(
     origin: [
       "http://localhost:5173",
       "http://localhost:5174",
-      "https://emma-antigua-guys-fed.trycloudflare.com",
+      "https://critical-stainless-belong-modelling.trycloudflare.com",
       "http://10.0.2.2:8081",
     ],
     credentials: true,
@@ -96,7 +96,7 @@ app.use("/api/footer", footer);
 app.use("/order/:orderId/orderPersonalDetails", orderPersonalDetails);
 app.use("/dashboard", dashboard);
 app.use("/api/shorts", shorts);
-// app.use("/api/newsletter", newsletter);
+app.use("/api/newsletter", newsletter);
 
 app.use("/category", category);
 
