@@ -248,11 +248,12 @@ const getAllOrders = async (req, res) => {
     };
 
     let Orders = queryConditions.length
-      ? await Order.find({ $and: queryConditions }).populate(
-          "userId",
-          "-password"
-        )
-      : await Order.find().populate("userId", "-password");
+      ? await Order.find({ $and: queryConditions })
+          .populate("userId", "-password")
+          .sort({ createdAt: -1 })
+      : await Order.find()
+          .populate("userId", "-password")
+          .sort({ createdAt: -1 });
 
     Orders = Orders.map((order) => {
       if (order.userId && order.userId.image) {
@@ -291,7 +292,7 @@ const deleteCheckoutData = async (req, res) => {
   try {
     // delete req.session.userData;
     res.clearCookie("userData");
-    
+
     res.status(200).json({ message: "delete successFull" });
   } catch (error) {
     res.status(500).json(error);
@@ -310,9 +311,8 @@ const checkoutNewUserData = async (req, res) => {
 
 const accesCheckoutNewData = async (req, res) => {
   try {
-    let data = req.cookies.userUpdateData //req.session.userUpdateData;
-  
-    
+    let data = req.cookies.userUpdateData; //req.session.userUpdateData;
+
     res.status(200).json(data);
   } catch (error) {
     res.status(500).json(error);
