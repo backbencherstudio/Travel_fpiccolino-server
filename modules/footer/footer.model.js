@@ -24,6 +24,12 @@ const footerSchema = new Schema(
     copyright: {
       type: String,
     },
+    logoImg: {
+      type: String,
+    },
+    bannerImg: {
+      type: String,
+    },
   },
   {
     timestamps: true,
