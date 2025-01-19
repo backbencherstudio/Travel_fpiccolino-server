@@ -72,8 +72,8 @@ const getAllUsers = async (req, res) => {
 
     // Query the database with filters
     let users = queryConditions.length
-      ? await User.find({ $and: queryConditions })
-      : await User.find();
+      ? await User.find({ $and: queryConditions }).sort({ createdAt: -1 })
+      : await User.find().sort({ createdAt: -1 });
 
     // Format the users' data
     const usersResponse = users.map((user) => ({
