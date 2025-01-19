@@ -223,8 +223,6 @@ const verifyOTP = async (req, res) => {
       return;
     }
 
- 
-
     if (otp != req.cookies.otp) {
       res.status(400).json({
         message: "Invalid OTP",
@@ -310,10 +308,6 @@ const editUserProfile = async (req, res) => {
       req.body.image = `/uploads/${req.file.filename}`;
     }
 
-    if (req.body.password) {
-      req.body.password = await hashPassword(req.body.password);
-    }
-
     const updatedUser = await User.findByIdAndUpdate(req.userId, req.body, {
       new: true,
     }).lean();
@@ -352,8 +346,10 @@ const forgotPasswordOTPsend = async (req, res) => {
       });
       return;
     }
+
     const otp = generateOTP();
 
+    // Store OTP and email in the session directly
     req.session.otp = otp.toString();
     req.session.email = user.email;
 
@@ -370,7 +366,8 @@ const forgotPasswordOTPsend = async (req, res) => {
 
 // Match forgot password OTP
 const matchForgotPasswordOTP = async (req, res) => {
-  console.log(req.body);
+  console.log(req.session);
+
   try {
     const { otp } = req.body;
     if (!otp) {
@@ -380,6 +377,7 @@ const matchForgotPasswordOTP = async (req, res) => {
       return;
     }
 
+    // Check if the provided OTP matches the one in the session
     if (otp !== req.session.otp || otp === undefined) {
       res.status(400).json({
         message: `OTP does not match`,
