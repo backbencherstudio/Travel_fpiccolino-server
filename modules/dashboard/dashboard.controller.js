@@ -156,9 +156,10 @@ const Package = require("../package/package.model");
 const getAll = async (req, res) => {
   try {
     const totalRevenueData = await Order.aggregate([
-      { $group: { _id: null, total: { $sum: "$totalPackageAmount" } } },
+      { $group: { _id: null, total: { $sum: "$toureAmount" } } },
     ]);
-    const totalRevenue = totalRevenueData.length > 0 ? totalRevenueData[0].total : 0;
+    const totalRevenue =
+      totalRevenueData.length > 0 ? totalRevenueData[0].total : 0;
 
     const totalProfit = totalRevenue;
 
@@ -175,12 +176,18 @@ const getAll = async (req, res) => {
         totalTravellers += order.person;
       }
 
-      if (order.packageId && order.packageId.tourDate && order.packageId.tourDuration) {
+      if (
+        order.packageId &&
+        order.packageId.tourDate &&
+        order.packageId.tourDuration
+      ) {
         const startDate = new Date(order.packageId.tourDate);
         const nights = order.packageId.tourDuration.nights || 0;
         const days = order.packageId.tourDuration.days || 0;
         const durationInHours = nights * 12 + days * 12;
-        const endDate = new Date(startDate.getTime() + durationInHours * 60 * 60 * 1000);
+        const endDate = new Date(
+          startDate.getTime() + durationInHours * 60 * 60 * 1000
+        );
 
         if (currentDate < startDate) {
           pendingOrders++;
@@ -211,7 +218,9 @@ const getAll = async (req, res) => {
     ]);
 
     const totalOrdersByCountry =
-      totalOrdersByCountryData.length > 0 ? totalOrdersByCountryData : [{ _id: null, total: 0 }];
+      totalOrdersByCountryData.length > 0
+        ? totalOrdersByCountryData
+        : [{ _id: null, total: 0 }];
 
     res.status(200).json({
       totalRevenue: [{ _id: null, total: totalRevenue }],
@@ -224,17 +233,20 @@ const getAll = async (req, res) => {
     });
   } catch (error) {
     console.error("Error fetching data:", error);
-    res.status(500).json({ message: "Error fetching data", error: error.message });
+    res
+      .status(500)
+      .json({ message: "Error fetching data", error: error.message });
   }
 };
 
 const getRadarData = async (req, res) => {
-
   try {
     const totalOrders = await Order.countDocuments();
 
     if (totalOrders === 0) {
-      return res.status(200).json({ radarData: {}, completedPercentage: 0, pendingPercentage: 0 });
+      return res
+        .status(200)
+        .json({ radarData: {}, completedPercentage: 0, pendingPercentage: 0 });
     }
 
     const orders = await Order.aggregate([
@@ -249,7 +261,7 @@ const getRadarData = async (req, res) => {
       { $unwind: "$package" },
     ]);
 
-    console.log(orders)
+    console.log(orders);
 
     let completedOrdersCount = 0;
     let pendingOrdersCount = 0;
@@ -271,7 +283,9 @@ const getRadarData = async (req, res) => {
       const nights = packageData.tourDuration?.nights || 0;
       const days = packageData.tourDuration?.days || 0;
       const durationInHours = nights * 12 + days * 12;
-      const endDate = new Date(startDate.getTime() + durationInHours * 60 * 60 * 1000);
+      const endDate = new Date(
+        startDate.getTime() + durationInHours * 60 * 60 * 1000
+      );
 
       let status;
       if (currentDate < startDate) {
@@ -288,7 +302,11 @@ const getRadarData = async (req, res) => {
       const destination = packageData.destination;
 
       if (!destinationMap.has(destination)) {
-        destinationMap.set(destination, { completed: 0, pending: 0, ongoing: 0 });
+        destinationMap.set(destination, {
+          completed: 0,
+          pending: 0,
+          ongoing: 0,
+        });
         radarData.destination.push(destination);
       }
 
@@ -306,9 +324,18 @@ const getRadarData = async (req, res) => {
     );
 
     // Calculate percentages
-    const completedPercentage = ((completedOrdersCount / totalOrders) * 100).toFixed(2);
-    const pendingPercentage = ((pendingOrdersCount / totalOrders) * 100).toFixed(2);
-    const ongoingPercentage = ((ongoingOrdersCount / totalOrders) * 100).toFixed(2);
+    const completedPercentage = (
+      (completedOrdersCount / totalOrders) *
+      100
+    ).toFixed(2);
+    const pendingPercentage = (
+      (pendingOrdersCount / totalOrders) *
+      100
+    ).toFixed(2);
+    const ongoingPercentage = (
+      (ongoingOrdersCount / totalOrders) *
+      100
+    ).toFixed(2);
 
     // Send response
     res.status(200).json({
@@ -322,8 +349,6 @@ const getRadarData = async (req, res) => {
     res.status(500).json({ error: "Failed to fetch radar data" });
   }
 };
-
-
 
 const getOrderAndRevenueData = async (req, res) => {
   try {
@@ -425,13 +450,13 @@ const getOrderAndRevenueData = async (req, res) => {
       {
         $project: {
           month: { $month: "$orderDate" },
-          totalPrice: 1,
+          toureAmount: { $toDouble: "$toureAmount" },
         },
       },
       {
         $group: {
           _id: "$month",
-          totalRevenue: { $sum: "$totalPrice" },
+          totalRevenue: { $sum: "$toureAmount" },
         },
       },
       {
@@ -464,18 +489,18 @@ const getOrderAndRevenueData = async (req, res) => {
       },
     ]);
 
-    // Query for weekly revenue
+    // Weekly Revenue
     const weeklyRevenue = await Order.aggregate([
       {
         $project: {
           week: { $isoWeek: "$orderDate" },
-          totalPrice: 1,
+          toureAmount: 1,
         },
       },
       {
         $group: {
           _id: "$week",
-          totalRevenue: { $sum: "$totalPrice" },
+          totalRevenue: { $sum: "$toureAmount" }, // Sum the toureAmount for each week
         },
       },
       {
@@ -490,18 +515,18 @@ const getOrderAndRevenueData = async (req, res) => {
       },
     ]);
 
-    // Query for yearly revenue
+    // Yearly Revenue
     const yearlyRevenue = await Order.aggregate([
       {
         $project: {
           year: { $year: "$orderDate" },
-          totalPrice: 1,
+          toureAmount: 1,
         },
       },
       {
         $group: {
           _id: "$year",
-          totalRevenue: { $sum: "$totalPrice" },
+          totalRevenue: { $sum: "$toureAmount" }, // Sum the toureAmount for each year
         },
       },
       {
