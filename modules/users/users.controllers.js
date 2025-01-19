@@ -55,8 +55,8 @@ const getAllUsers = async (req, res) => {
     if (search) {
       queryConditions.push({
         $or: [
-          { name: { $regex: search, $options: "i" } }, // Search by name, case-insensitive
-          { email: { $regex: search, $options: "i" } }, // Search by email, case-insensitive
+          { name: { $regex: search, $options: "i" } },  
+          { email: { $regex: search, $options: "i" } },  
         ],
       });
     }
@@ -190,7 +190,7 @@ const registerUser = async (req, res) => {
 // Resend OTP
 const resendOtp = async (req, res) => {
   try {
-    const { userData } = req.session;
+    const { userData } = req.cookie;
 
     if (!userData?.email || !userData?.name) {
       res.status(400).json({ message: "User data not found!" });
@@ -198,8 +198,8 @@ const resendOtp = async (req, res) => {
     }
 
     const OTP = generateOTP();
-    req.session.otp = OTP;
 
+    setCookie("otp", OTP, res);
     // Send OTP email in the background (non-blocking)
     sendRegistrationOTPEmail(userData.name, userData.email, OTP)
       .then(() => console.log("OTP email sent"))
@@ -222,8 +222,6 @@ const verifyOTP = async (req, res) => {
       });
       return;
     }
-
- 
 
     if (otp != req.cookies.otp) {
       res.status(400).json({
@@ -310,9 +308,10 @@ const editUserProfile = async (req, res) => {
       req.body.image = `/uploads/${req.file.filename}`;
     }
 
-    if (req.body.password) {
-      req.body.password = await hashPassword(req.body.password);
-    }
+    // if (req?.body?.password && req?.body?.password?.length >0) {
+    //   console.log("password heat")
+    //   req.body.password = await hashPassword(req.body.password);
+    // }
 
     const updatedUser = await User.findByIdAndUpdate(req.userId, req.body, {
       new: true,
@@ -352,11 +351,12 @@ const forgotPasswordOTPsend = async (req, res) => {
       });
       return;
     }
-    const otp = generateOTP();
+    const otp = generateOTP().toString();
 
-    req.session.otp = otp.toString();
-    req.session.email = user.email;
-
+    // req.session.otp = otp.toString();
+    setCookie("otp", otp, res);
+    // req.session.email = user.email;
+    setCookie("email", user.email, res);
     if (user.name) await sendForgotPasswordOTP(user.name, user.email, otp);
 
     res.status(200).json({
@@ -370,7 +370,9 @@ const forgotPasswordOTPsend = async (req, res) => {
 
 // Match forgot password OTP
 const matchForgotPasswordOTP = async (req, res) => {
-  console.log(req.body);
+  console.log("route heat");
+  console.log("otp", req.body);
+  console.log("cookie", req.cookies.otp)
   try {
     const { otp } = req.body;
     if (!otp) {
@@ -380,15 +382,15 @@ const matchForgotPasswordOTP = async (req, res) => {
       return;
     }
 
-    if (otp !== req.session.otp || otp === undefined) {
+    if (otp !== req.cookies.otp || otp === undefined) {
       res.status(400).json({
         message: `OTP does not match`,
       });
       return;
     }
 
-    req.session.isOtpValid = true;
-
+    // req.session.isOtpValid = true;
+    setCookie("isOtpValid", true, res);
     res.status(200).json({
       success: true,
       message: "OTP matched successfully",
@@ -402,7 +404,7 @@ const matchForgotPasswordOTP = async (req, res) => {
 const resetPasssword = async (req, res) => {
   console.log("hiiiiiiiiiii");
   try {
-    if (!req.session.isOtpValid) {
+    if (!req.cookies.isOtpValid) {
       res.status(400).json({ message: "OTP invalid" });
       return;
     }
@@ -419,12 +421,15 @@ const resetPasssword = async (req, res) => {
     const hashedPassword = await hashPassword(password);
 
     await User.findOneAndUpdate(
-      { email: req.session.email },
+      { email: req.cookies.email },
       { password: hashedPassword }
     );
 
     // Clear session after password reset
     req.session.destroy();
+    res.clearCookie("otp");
+    res.clearCookie("email");
+    res.clearCookie("isOtpValid");
 
     res
       .status(200)
