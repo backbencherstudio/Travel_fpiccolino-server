@@ -432,7 +432,7 @@ const getOrderAndRevenueData = async (req, res) => {
       {
         $group: {
           _id: "$month",
-          totalRevenue: { $sum: "$totalPrice" },
+          totalRevenue: { $sum: "$totalPackageAmount" },
         },
       },
       {
@@ -476,7 +476,7 @@ const getOrderAndRevenueData = async (req, res) => {
       {
         $group: {
           _id: "$week",
-          totalRevenue: { $sum: "$totalPrice" },
+          totalRevenue: { $sum: "$totalPackageAmount" },
         },
       },
       {
@@ -502,7 +502,7 @@ const getOrderAndRevenueData = async (req, res) => {
       {
         $group: {
           _id: "$year",
-          totalRevenue: { $sum: "$totalPrice" },
+          totalRevenue: { $sum: "$totalPackageAmount" },
         },
       },
       {
