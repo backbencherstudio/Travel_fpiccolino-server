@@ -23,6 +23,7 @@ const review = require("./modules/review/review.route");
 const footer = require("./modules/footer/footer.route");
 const dashboard = require("./modules/dashboard/dashboard.routes");
 const approach = require("./modules/approach/approach.routes");
+const faq = require("./modules/faq/faq.routes");
 const orderPersonalDetails = require("./modules/order/orderPersonalDetails/orderPersonalDetails.routes");
 
 const blogs = require("./modules/blogs/blog.route");
@@ -100,6 +101,8 @@ app.use("/api/newsletter", newsletter);
 
 app.use("/category", category);
 app.use("/api/approach", approach);
+app.use("/api/faq", faq);
+
 app.use((req, res, next) => {
   res.status.json({
     message: "404! Route is not found",
