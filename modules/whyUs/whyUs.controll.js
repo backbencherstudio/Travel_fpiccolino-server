@@ -37,6 +37,7 @@ const deleteFile = (filePath) => {
 exports.whyUsPost = [
   upload.fields([
     { name: "bannerImage", maxCount: 1 },
+    { name: "sideImage", maxCount: 1 },
     { name: "logo1", maxCount: 1 },
     { name: "logo2", maxCount: 1 },
     { name: "logo3", maxCount: 1 },
@@ -57,6 +58,19 @@ exports.whyUsPost = [
       const bannerImage = newBannerImage
         ? newBannerImage.path
         : existingBannerImage || "";
+
+      // Handle side image
+      const newSideImage = req.files?.sideImage?.[0];
+      const existingSideImage = req.body.existingSideImage;
+      const originalSideImage = req.body.originalSideImage;
+
+      if (newSideImage && originalSideImage) {
+        deleteFile(originalSideImage);
+      }
+
+      const sideImage = newSideImage
+        ? newSideImage.path
+        : existingSideImage || "";
 
       const updatedLogos = [];
 
@@ -92,6 +106,7 @@ exports.whyUsPost = [
         {},
         {
           bannerImage,
+          sideImage,
           logos:
             updatedLogos.length > 0 ? updatedLogos : currentWhyUs?.logos || [],
         },

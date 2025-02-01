@@ -6,6 +6,10 @@ const whyUsSchema = new mongoose.Schema(
       type: String,
       required: true,
     },
+    sideImage: {
+      type: String,
+      required: true,
+    },
     logos: [
       {
         logo: {
