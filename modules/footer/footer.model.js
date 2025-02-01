@@ -30,6 +30,11 @@ const footerSchema = new Schema(
     bannerImg: {
       type: String,
     },
+    paymentLogos: [
+      {
+        type: String,
+      },
+    ],
   },
   {
     timestamps: true,

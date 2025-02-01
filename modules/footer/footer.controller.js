@@ -24,10 +24,10 @@ exports.footerpost = [
   upload.fields([
     { name: "logoImg", maxCount: 1 },
     { name: "bannerImg", maxCount: 1 },
+    { name: "paymentLogos", maxCount: 10 },
   ]),
   async (req, res) => {
     try {
-      // Parse the contact info from form data
       const footerData = {
         companyName: req.body.companyName,
         description: req.body.description,
@@ -48,7 +48,28 @@ exports.footerpost = [
         footerData.bannerImg = req.files.bannerImg[0].path;
       }
 
-      console.log("Processing footer data:", footerData);
+      // Handle payment logos
+      const existingPaymentLogos = req.body.existingPaymentLogos
+        ? JSON.parse(req.body.existingPaymentLogos)
+        : [];
+
+      // Get paths of newly uploaded payment logos
+      const newPaymentLogos =
+        req.files?.paymentLogos?.map((file) => file.path) || [];
+
+      // Process existing payment logos to remove base URL and 'uploads/' prefix
+      const processedExistingLogos = existingPaymentLogos.map((logo) => {
+        // Remove base URL if present
+        const withoutBaseUrl = logo.replace(/^https?:\/\/[^\/]+\//, "");
+        // Remove 'uploads/' prefix if present
+        return withoutBaseUrl.replace(/^uploads\//, "");
+      });
+
+      // Combine processed existing logos and new payment logos
+      footerData.paymentLogos = [
+        ...processedExistingLogos,
+        ...newPaymentLogos.map((path) => path.replace(/^uploads\//, "")),
+      ];
 
       const updatedFooter = await Footer.findOneAndUpdate(
         {}, // empty filter to update first document
@@ -57,7 +78,7 @@ exports.footerpost = [
           new: true,
           upsert: true,
           setDefaultsOnInsert: true,
-          runValidators: true, // This ensures required fields are checked
+          runValidators: true,
         }
       );
 
