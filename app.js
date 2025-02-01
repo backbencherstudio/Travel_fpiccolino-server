@@ -26,7 +26,7 @@ const approach = require("./modules/approach/approach.routes");
 const faq = require("./modules/faq/faq.routes");
 const textsRoutes = require("./modules/texts/texts.routes");
 const orderPersonalDetails = require("./modules/order/orderPersonalDetails/orderPersonalDetails.routes");
-
+const whyUs = require("./modules/whyUs/whyUs.routes");
 const blogs = require("./modules/blogs/blog.route");
 const path = require("path");
 
@@ -104,7 +104,7 @@ app.use("/category", category);
 app.use("/api/approach", approach);
 app.use("/api/faq", faq);
 app.use("/api/texts", textsRoutes);
-
+app.use("/api/whyUs", whyUs);
 app.use((req, res, next) => {
   res.status.json({
     message: "404! Route is not found",
