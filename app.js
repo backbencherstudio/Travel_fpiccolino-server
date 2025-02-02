@@ -28,6 +28,8 @@ const textsRoutes = require("./modules/texts/texts.routes");
 const orderPersonalDetails = require("./modules/order/orderPersonalDetails/orderPersonalDetails.routes");
 const whyUs = require("./modules/whyUs/whyUs.routes");
 const blogs = require("./modules/blogs/blog.route");
+const policy = require("./modules/policy/policy.routes");
+const authBanners = require("./modules/authBanners/authBanners.routes");
 const path = require("path");
 
 const shorts = require("./modules/shorts/short.route");
@@ -105,6 +107,8 @@ app.use("/api/approach", approach);
 app.use("/api/faq", faq);
 app.use("/api/texts", textsRoutes);
 app.use("/api/whyUs", whyUs);
+app.use("/api/policy", policy);
+app.use("/api/auth-banners", authBanners);
 app.use((req, res, next) => {
   res.status.json({
     message: "404! Route is not found",
