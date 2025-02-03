@@ -4,11 +4,9 @@ const whyUsSchema = new mongoose.Schema(
   {
     bannerImage: {
       type: String,
-      required: true,
     },
     sideImage: {
       type: String,
-      required: true,
     },
     logos: [
       {

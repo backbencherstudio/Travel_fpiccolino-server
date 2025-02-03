@@ -61,6 +61,7 @@ exports.footerpost = [
           phone: req.body["contactInfo.phone"],
           email: req.body["contactInfo.email"],
         },
+        socialLinks: JSON.parse(req.body.socialLinks || "[]"),
       };
 
       // Handle logo image

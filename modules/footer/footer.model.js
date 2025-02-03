@@ -35,6 +35,20 @@ const footerSchema = new Schema(
         type: String,
       },
     ],
+    socialLinks: [
+      {
+        name: {
+          type: String,
+          required: true,
+          trim: true,
+        },
+        url: {
+          type: String,
+          required: true,
+          trim: true,
+        },
+      },
+    ],
   },
   {
     timestamps: true,
