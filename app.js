@@ -4,6 +4,8 @@ const cors = require("cors");
 const session = require("express-session");
 const bodyParser = require("body-parser");
 const cookieParser = require("cookie-parser");
+const helmet = require('helmet');
+const path = require("path");
 const user = require("./modules/users/users.routes");
 
 const subscriber = require("./modules/subscriber/subscriber.routes");
@@ -30,51 +32,61 @@ const whyUs = require("./modules/whyUs/whyUs.routes");
 const blogs = require("./modules/blogs/blog.route");
 const policy = require("./modules/policy/policy.routes");
 const authBanners = require("./modules/authBanners/authBanners.routes");
-const path = require("path");
 
 const shorts = require("./modules/shorts/short.route");
 const app = express();
 
+// Apply Helmet first
+app.use(helmet({
+  contentSecurityPolicy: false,
+  crossOriginEmbedderPolicy: false,
+  crossOriginResourcePolicy: false
+}));
+
+// CORS configuration
 app.use(
   cors({
-    origin: [
-      "http://localhost:5173",
-      "http://localhost:5174",
-      "https://emma-antigua-guys-fed.trycloudflare.com",
-      "http://10.0.2.2:8081",
-    ],
+    origin: ['http://46.202.164.243', 'http://localhost:5173', 'http://localhost:5174'],
     credentials: true,
+    methods: ['GET', 'POST', 'PUT', 'DELETE', 'OPTIONS', 'PATCH'],
+    allowedHeaders: ['Content-Type', 'Authorization'],
   })
 );
 
-app.use(cookieParser());
+// Session configuration
+app.use(
+  session({
+    secret: process.env.SESSION_SECRET || "changeit",
+    resave: false,
+    saveUninitialized: false,
+    cookie: {
+      maxAge: 30 * 24 * 60 * 60 * 1000, // 30 days
+      secure: false, // Set to false if not using HTTPS
+      sameSite: 'lax',
+      httpOnly: true
+    }
+  })
+);
 
+// Trust proxy
+app.set('trust proxy', 1);
+
+// Other middleware
+app.use(cookieParser());
+app.use(morgan("dev"));
+app.use(express.urlencoded({ extended: true }));
+
+// Custom body parser middleware
 app.use((req, res, next) => {
   if (req.originalUrl === "/order/webhook") {
     bodyParser.raw({ type: "application/json" })(req, res, next);
-    // express.raw()(req, res, next)
   } else {
-    express.json()(req, res, next); // Use JSON parsing for all other routes
+    express.json()(req, res, next);
   }
 });
 
-// app.use(express.json());
-app.use(express.urlencoded({ extended: true }));
-
-app.use(morgan("dev"));
+// Static files
 app.use("/uploads", express.static(path.join(__dirname, "uploads")));
-
-// app.use("/uploads", express.static("uploads"));
-
-app.use(
-  session({
-    secret: "changeit",
-    resave: false,
-    sameSite: "none",
-    saveUninitialized: false,
-    cookie: { maxAge: 3600000, sameSite: "none", secure: true },
-  })
-);
 
 app.use("/users", user);
 app.use("/package", package);

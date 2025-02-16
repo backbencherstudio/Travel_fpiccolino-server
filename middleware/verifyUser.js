@@ -4,25 +4,23 @@ const dotenv = require("dotenv");
 dotenv.config();
 
 const verifyUser = async (req, res, next) => {
-  const { token } = req.cookies;  
+  const { token } = req.cookies;
   const JWT_SECRET = process.env.WEBTOKEN_SECRET_KEY;
 
   if (!token) {
-    res.status(400).json({
+    return res.status(401).json({
       message: "Unauthorized user",
     });
-    return;
   }
 
   try {
-    // Decoding only userId from the token
     const decodedToken = verify(token, JWT_SECRET);
-
     req.userId = decodedToken.userId;
+    req.userRole = decodedToken.role;
     next();
   } catch (error) {
-    res.status(401).json({ message: "Invalid token" });
-    return;
+    console.error('Token verification error:', error);
+    return res.status(401).json({ message: "Invalid token" });
   }
 };
 

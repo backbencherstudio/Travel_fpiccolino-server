@@ -9,7 +9,7 @@ const verifyAdmin = async (req, res, next) => {
 
   if (!token) {
     res.status(400).json({
-      message: "Unauthorized user",
+      message: "Unauthorized admin",
     });
     return;
   }

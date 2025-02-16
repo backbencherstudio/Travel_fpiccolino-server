@@ -21,7 +21,7 @@ const sendEmail = async (to, subject, htmlContent) => {
   });
 
   const mailOptions = {
-    from: "no-reply@yourdomain.com",
+    from: `"LA TUA FUGA"<2003monowar@gmail.com>`,
     to,
     subject,
     html: htmlContent,
@@ -55,3 +55,4 @@ module.exports = {
   sendForgotPasswordOTP,
   resendRegistrationOTP,
 };
+

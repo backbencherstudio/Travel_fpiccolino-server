@@ -27,19 +27,40 @@ const hashPassword = async (password) => {
 
 const setTokenCookie = (res, token) => {
   res.cookie("token", token, {
-    httpOnly: true,
-    sameSite: "none",
-    secure: process.env.NODE_ENV === "production",
     maxAge: 30 * 24 * 60 * 60 * 1000, // 30 days
+    httpOnly: true,
+    secure: false,
+    sameSite: 'lax',
+    path: '/'
   });
+  return res;
 };
 
 const setCookie = (key, data, res) => {
   res.cookie(key, data, {
+    maxAge: 30 * 24 * 60 * 60 * 1000,
     httpOnly: true,
-    sameSite: "none",
-    secure: process.env.NODE_ENV === "production",
-    maxAge: 30 * 24 * 60 * 60 * 1000, // 30 days
+    secure: false,
+    sameSite: 'lax',
+    path: '/'
+  });
+};
+
+const generateRefreshToken = (userId) => {
+  return sign({ userId }, process.env.REFRESH_TOKEN_SECRET, {
+    expiresIn: '7d'
+  });
+};
+
+// Add refresh token when setting cookies
+const setTokens = (res, accessToken, refreshToken) => {
+  setTokenCookie(res, accessToken);
+  res.cookie('refreshToken', refreshToken, {
+    maxAge: 7 * 24 * 60 * 60 * 1000,
+    httpOnly: true,
+    secure: false,
+    sameSite: 'lax',
+    path: '/'
   });
 };
 
@@ -200,12 +221,10 @@ const resendOtp = async (req, res) => {
     const OTP = generateOTP();
 
     setCookie("otp", OTP, res);
-    // Send OTP email in the background (non-blocking)
     sendRegistrationOTPEmail(userData.name, userData.email, OTP)
       .then(() => console.log("OTP email sent"))
       .catch((err) => console.error("Error sending OTP email:", err));
 
-    // Respond immediately without waiting for email to be sent
     res.status(200).json({ message: "OTP resent successfully", otp: true });
   } catch (error) {
     res.status(500).json({ message: error.message });
@@ -237,12 +256,9 @@ const verifyOTP = async (req, res) => {
       newUser.save(),
       generateToken(newUser._id, newUser.email, newUser.role),
     ]);
-    setTokenCookie(res, token);
 
-    res
-      .status(200)
-      // .cookie("token", token, options)
-      .json({ token, user: savedUser, success: true });
+    res.status(200);
+    setTokenCookie(res, token).json({ token, user: savedUser, success: true });
   } catch (error) {
     res.status(500).json(error);
     console.log(error);
