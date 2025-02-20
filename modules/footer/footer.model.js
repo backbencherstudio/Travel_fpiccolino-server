@@ -30,6 +30,9 @@ const footerSchema = new Schema(
     bannerImg: {
       type: String,
     },
+    emailModalImg: {
+      type: String,
+    },
     paymentLogos: [
       {
         type: String,

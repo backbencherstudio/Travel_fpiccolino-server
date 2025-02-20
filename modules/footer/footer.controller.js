@@ -48,6 +48,7 @@ exports.footerpost = [
     { name: "logoImg", maxCount: 1 },
     { name: "bannerImg", maxCount: 1 },
     { name: "paymentLogos", maxCount: 10 },
+    { name: "emailModalImg", maxCount: 1 },
   ]),
   async (req, res) => {
     try {
@@ -69,6 +70,11 @@ exports.footerpost = [
       const existingLogoImg = req.body.existingLogoImg;
       const originalLogoImg = req.body.originalLogoImg;
 
+      // Handle email modal image
+      const newEmailModalImg = req.files?.emailModalImg?.[0];
+      const existingEmailModalImg = req.body.existingEmailModalImg;
+      const originalEmailModalImg = req.body.originalEmailModalImg;
+
       if (newLogoImg && originalLogoImg) {
         deleteFile(originalLogoImg);
       }
@@ -77,6 +83,22 @@ exports.footerpost = [
         footerData.logoImg = newLogoImg.path.replace(/^uploads\//, "");
       } else if (existingLogoImg) {
         footerData.logoImg = existingLogoImg.replace(/^uploads\//, "");
+      }
+
+      if (newEmailModalImg && originalEmailModalImg) {
+        deleteFile(originalEmailModalImg);
+      }
+
+      if (newEmailModalImg) {
+        footerData.emailModalImg = newEmailModalImg.path.replace(
+          /^uploads\//,
+          ""
+        );
+      } else if (existingEmailModalImg) {
+        footerData.emailModalImg = existingEmailModalImg.replace(
+          /^uploads\//,
+          ""
+        );
       }
 
       // Handle banner image
