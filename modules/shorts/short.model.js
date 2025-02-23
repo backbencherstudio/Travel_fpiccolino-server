@@ -6,6 +6,11 @@ const shortsSchema = new mongoose.Schema(
       type: String,
       required: true, // Ensure URL is mandatory
     },
+    countryId: {
+      type: mongoose.Schema.Types.ObjectId,
+      ref: "Country",
+      required: true,
+    },
   },
   {
     timestamps: true,

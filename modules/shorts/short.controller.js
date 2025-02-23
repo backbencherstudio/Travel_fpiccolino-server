@@ -3,21 +3,21 @@ const Shorts = require("./short.model");
 // Create Shorts
 exports.createShorts = async (req, res) => {
   try {
-    const { url } = req.body;
-    console.log("7", url);
+    const { url, countryId } = req.body;
+    console.log("Request body:", { url, countryId });
 
-    if (!url) {
-      return res.status(400).json({ message: "URL is required" });
+    if (!url || !countryId) {
+      return res
+        .status(400)
+        .json({ message: "URL and Country ID are required" });
     }
 
-    const shorts = await Shorts({ url });
-    console.log("13", shorts);
+    const shorts = await Shorts({ url, countryId });
     const result = await shorts.save();
-    console.log("15", result);
 
     res.status(201).json({
       message: "Shorts created successfully",
-      short: shorts,
+      short: result,
     });
   } catch (error) {
     console.error("Create shorts error:", error);
@@ -30,7 +30,9 @@ exports.createShorts = async (req, res) => {
 // Get All Shorts
 exports.getAllShorts = async (req, res) => {
   try {
-    const shorts = await Shorts.find().sort({ createdAt: -1 });
+    const shorts = await Shorts.find()
+      .sort({ createdAt: -1 })
+      .populate("countryId", "name"); // Optionally populate country details
     res.status(200).json({ message: "Shorts fetched successfully", shorts });
   } catch (error) {
     console.error("Get all shorts error:", error);
@@ -68,21 +70,23 @@ const mongoose = require("mongoose");
 exports.updateShort = async (req, res) => {
   try {
     const { shortId } = req.params;
-    const { url } = req.body;
+    const { url, countryId } = req.body;
 
     if (!mongoose.isValidObjectId(shortId)) {
       return res.status(400).json({ message: "Invalid Short ID" });
     }
 
-    if (!url) {
-      return res.status(400).json({ message: "URL is required to update" });
+    if (!url || !countryId) {
+      return res
+        .status(400)
+        .json({ message: "URL and Country ID are required to update" });
     }
 
     const updatedShort = await Shorts.findByIdAndUpdate(
       shortId,
-      { url },
+      { url, countryId },
       { new: true }
-    );
+    ).populate("countryId", "name");
 
     if (!updatedShort) {
       return res.status(404).json({ message: "Short not found" });
