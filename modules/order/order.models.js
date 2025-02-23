@@ -58,12 +58,12 @@ const OrderSchema = new Schema(
 
     flight: {
       type: [FlightSchema, Boolean],
-      default: false, 
+      default: false,
     },
 
     insurance: {
       type: [InsuranceSchema, Boolean],
-      default: false, 
+      default: false,
     },
 
     flightPrice: {

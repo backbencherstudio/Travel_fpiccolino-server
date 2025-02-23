@@ -4,7 +4,7 @@ const cors = require("cors");
 const session = require("express-session");
 const bodyParser = require("body-parser");
 const cookieParser = require("cookie-parser");
-const helmet = require('helmet');
+const helmet = require("helmet");
 const path = require("path");
 const user = require("./modules/users/users.routes");
 
@@ -37,19 +37,25 @@ const shorts = require("./modules/shorts/short.route");
 const app = express();
 
 // Apply Helmet first
-app.use(helmet({
-  contentSecurityPolicy: false,
-  crossOriginEmbedderPolicy: false,
-  crossOriginResourcePolicy: false
-}));
+app.use(
+  helmet({
+    contentSecurityPolicy: false,
+    crossOriginEmbedderPolicy: false,
+    crossOriginResourcePolicy: false,
+  })
+);
 
 // CORS configuration
 app.use(
   cors({
-    origin: ['http://46.202.164.243', 'http://localhost:5173', 'http://localhost:5174'],
+    origin: [
+      "http://46.202.164.243",
+      "http://localhost:5173",
+      "http://localhost:5174",
+    ],
     credentials: true,
-    methods: ['GET', 'POST', 'PUT', 'DELETE', 'OPTIONS', 'PATCH'],
-    allowedHeaders: ['Content-Type', 'Authorization'],
+    methods: ["GET", "POST", "PUT", "DELETE", "OPTIONS", "PATCH"],
+    allowedHeaders: ["Content-Type", "Authorization"],
   })
 );
 
@@ -62,14 +68,14 @@ app.use(
     cookie: {
       maxAge: 30 * 24 * 60 * 60 * 1000, // 30 days
       secure: false, // Set to false if not using HTTPS
-      sameSite: 'lax',
-      httpOnly: true
-    }
+      sameSite: "None",
+      httpOnly: true,
+    },
   })
 );
 
 // Trust proxy
-app.set('trust proxy', 1);
+app.set("trust proxy", 1);
 
 // Other middleware
 app.use(cookieParser());
