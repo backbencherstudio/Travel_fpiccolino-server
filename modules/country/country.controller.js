@@ -5,7 +5,8 @@ const path = require("path");
 
 const create = async (req, res) => {
   try {
-    const { name, contentTitle, contentDescription, isHome } = req.body;
+    const { name, contentTitle, contentDescription, isHome, homeOrder } =
+      req.body;
 
     // Initialize country object
     const countryData = {
@@ -13,6 +14,7 @@ const create = async (req, res) => {
       contentTitle,
       contentDescription,
       isHome,
+      homeOrder,
     };
 
     if (req.file) {
@@ -77,7 +79,8 @@ const getOne = async (req, res) => {
 const update = async (req, res) => {
   try {
     const id = req.params.id;
-    const { name, contentTitle, contentDescription, isHome } = req.body;
+    const { name, contentTitle, contentDescription, isHome, homeOrder } =
+      req.body;
 
     // First get the existing country to check for previous image
     const existingCountry = await Country.findById(id);
@@ -90,6 +93,7 @@ const update = async (req, res) => {
       contentTitle,
       contentDescription,
       isHome,
+      homeOrder,
     };
 
     if (req.file) {
