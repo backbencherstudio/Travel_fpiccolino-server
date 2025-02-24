@@ -18,10 +18,14 @@ const countrySchema = new mongoose.Schema(
         ref: "Package",
       },
     ],
-    
+
     image: {
       type: String,
-    }
+    },
+    isHome: {
+      type: Boolean,
+      default: false,
+    },
   },
   {
     timestamps: true,
