@@ -19,7 +19,7 @@ const stripePaymentFun = async (req, res) => {
   try {
     const paymentIntent = await stripe.paymentIntents.create({
       amount: amount * 100,
-      currency: "usd",
+      currency: "eur",
       payment_method: paymentMethodId,
       payment_method_types: ["card"],
       confirm: true,

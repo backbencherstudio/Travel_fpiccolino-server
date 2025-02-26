@@ -14,7 +14,7 @@ const makePayment = async (req, res) => {
       checkoutSessionId: session.id,
       order_id: order_id,
       amount: amount,
-      currency: "usd",
+      currency: "eur",
       status: "pending",
     });
 

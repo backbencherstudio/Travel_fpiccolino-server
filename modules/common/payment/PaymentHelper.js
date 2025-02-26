@@ -13,7 +13,7 @@ paymentHelper.makePayment = async ({ package_name, amount, order_id }) => {
       checkoutSessionId: session.id,
       amount: amount,
       order_id: order_id,
-      currency: "usd",
+      currency: "eur",
       status: "pending",
     });
     await transaction.save();

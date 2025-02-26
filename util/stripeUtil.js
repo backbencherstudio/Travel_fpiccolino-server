@@ -22,7 +22,7 @@ const createCheckoutSession = async ({ name, amount }) => {
       line_items: [
         {
           price_data: {
-            currency: "usd",
+            currency: "eur",
             product_data: {
               name: name,
             },
