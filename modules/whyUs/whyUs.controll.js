@@ -41,6 +41,11 @@ exports.whyUsPost = [
     { name: "logo1", maxCount: 1 },
     { name: "logo2", maxCount: 1 },
     { name: "logo3", maxCount: 1 },
+    // Add dynamic company logo fields
+    ...Array.from({ length: 20 }, (_, i) => ({
+      name: `companyLogo${i}`,
+      maxCount: 1,
+    })),
   ]),
   async (req, res) => {
     try {
@@ -101,6 +106,55 @@ exports.whyUsPost = [
         }
       }
 
+      // Get the list of company logos to be retained
+      const retainedCompanyLogos = new Set();
+      const companiesCount = parseInt(req.body.companiesCount) || 0;
+
+      // Add all existing/new company logos that should be retained
+      for (let i = 0; i < companiesCount; i++) {
+        const existingCompanyLogo = req.body[`existingCompanyLogo${i}`];
+        if (existingCompanyLogo) {
+          retainedCompanyLogos.add(existingCompanyLogo);
+        }
+      }
+
+      // Delete files for removed companies
+      if (currentWhyUs && currentWhyUs.companies) {
+        currentWhyUs.companies.forEach((company) => {
+          if (
+            company.companyLogo &&
+            !retainedCompanyLogos.has(company.companyLogo) &&
+            company.companyLogo !== "placeholder.jpg"
+          ) {
+            deleteFile(company.companyLogo);
+          }
+        });
+      }
+
+      // Rest of your existing code for handling companies
+      const updatedCompanies = [];
+      for (let i = 0; i < companiesCount; i++) {
+        const existingCompanyLogo = req.body[`existingCompanyLogo${i}`];
+        const originalCompanyLogo = req.body[`companyOriginalLogo${i}`];
+        const newCompanyLogo = req.files?.[`companyLogo${i}`]?.[0];
+        const companyName = req.body[`companyName${i}`];
+
+        // Delete old company logo if new one is uploaded
+        if (newCompanyLogo && originalCompanyLogo) {
+          deleteFile(originalCompanyLogo);
+        }
+
+        // Only add company if we have either a name or logo
+        if (companyName || newCompanyLogo || existingCompanyLogo) {
+          updatedCompanies.push({
+            companyLogo: newCompanyLogo
+              ? newCompanyLogo.path
+              : existingCompanyLogo || "",
+            companyName: companyName || "",
+          });
+        }
+      }
+
       // Update the document
       const updatedWhyUs = await WhyUs.findOneAndUpdate(
         {},
@@ -109,6 +163,10 @@ exports.whyUsPost = [
           sideImage,
           logos:
             updatedLogos.length > 0 ? updatedLogos : currentWhyUs?.logos || [],
+          companies:
+            updatedCompanies.length > 0
+              ? updatedCompanies
+              : currentWhyUs?.companies || [],
         },
         {
           new: true,

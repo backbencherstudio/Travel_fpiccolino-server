@@ -25,6 +25,18 @@ const whyUsSchema = new mongoose.Schema(
         },
       },
     ],
+    companies: [
+      {
+        companyLogo: {
+          type: String,
+          default: "placeholder.jpg",
+        },
+        companyName: {
+          type: String,
+          required: true,
+        },
+      },
+    ],
   },
   {
     timestamps: true,
