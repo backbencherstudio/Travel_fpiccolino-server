@@ -48,6 +48,14 @@ exports.updateAuthBanners = [
     { name: "registerBanner", maxCount: 1 },
     { name: "forgotBanner", maxCount: 1 },
     { name: "otpBanner", maxCount: 1 },
+    { name: "homeBanner", maxCount: 1 },
+    { name: "countryBanner", maxCount: 1 },
+    { name: "tourBanner", maxCount: 1 },
+    { name: "aboutBanner", maxCount: 1 },
+    { name: "blogBanner", maxCount: 1 },
+    { name: "contactBanner", maxCount: 1 },
+    { name: "policyBanner", maxCount: 1 },
+    { name: "faqBanner", maxCount: 1 },
   ]),
   async (req, res) => {
     try {
@@ -63,10 +71,31 @@ exports.updateAuthBanners = [
           registerBanner: "",
           forgotBanner: "",
           otpBanner: "",
+          homeBanner: "",
+          countryBanner: "",
+          tourBanner: "",
+          aboutBanner: "",
+          blogBanner: "",
+          contactBanner: "",
+          policyBanner: "",
+          faqBanner: "",
         });
       }
 
-      const bannerTypes = ["login", "register", "forgot", "otp"];
+      const bannerTypes = [
+        "login",
+        "register",
+        "forgot",
+        "otp",
+        "home",
+        "country",
+        "tour",
+        "about",
+        "blog",
+        "contact",
+        "policy",
+        "faq",
+      ];
       const updatedBanners = {};
 
       // Process each banner type
@@ -132,6 +161,14 @@ exports.getAuthBanners = async (req, res) => {
         registerBanner: "",
         forgotBanner: "",
         otpBanner: "",
+        homeBanner: "",
+        countryBanner: "",
+        tourBanner: "",
+        aboutBanner: "",
+        blogBanner: "",
+        contactBanner: "",
+        policyBanner: "",
+        faqBanner: "",
       });
     }
 
