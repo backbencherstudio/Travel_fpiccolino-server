@@ -4,7 +4,7 @@ const Review = require("./review.model");
 const mongoose = require("mongoose");
 
 exports.createReview = async (req, res) => {
-  const { userId, orderId } = req.params;
+  const { userId, packageId } = req.params;
   const { comment, rating } = req.body;
 
   const user = await User.findById(userId);
@@ -12,15 +12,11 @@ exports.createReview = async (req, res) => {
   if (!user) {
     return res.status(404).json({ error: "User not found" });
   }
-  const order = await Order.findById(orderId);
-  if (!order) {
-    return res.status(404).json({ error: "Order not found" });
-  }
+
   try {
     const review = new Review({
       userId,
-      orderId,
-      packageId: order.packageId,
+      packageId,
       comment,
       rating,
     });
