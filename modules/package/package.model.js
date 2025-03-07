@@ -59,6 +59,9 @@ const packageSchema = new mongoose.Schema(
     ],
     bookedFlights: [
       {
+        flightType: {
+          type: String,
+        },
         flightFrom: {
           type: String,
         },
@@ -71,10 +74,24 @@ const packageSchema = new mongoose.Schema(
         arrivalTime: {
           type: String,
         },
-        breakTime: {
+        flightFrom2: {
           type: String,
         },
-        flightClass: { type: String },
+        flightTo2: {
+          type: String,
+        },
+        departureTime2: {
+          type: String,
+        },
+        arrivalTime2: {
+          type: String,
+        },
+        duration1: {
+          type: String,
+        },
+        duration2: {
+          type: String,
+        },
         price: {
           type: Number,
           // required: true,
