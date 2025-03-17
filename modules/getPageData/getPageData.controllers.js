@@ -110,7 +110,7 @@ const getHomePage = async (req, res) => {
     ] = await Promise.all([
       Header.findOne({ pageName: "home" }).lean(),
       SectinTitle.find({ name: { $regex: /^landing/ } }).lean(),
-      Package.find().lean(),
+      Package.find().lean().sort({ createdAt: -1 }),
       Country.find().lean(),
       Review.find().lean(),
       Blogs.find().select("_id category heroSection").lean(),
@@ -334,7 +334,7 @@ const country_wise = async (req, res) => {
         subtitle: sectionTitles?.[0]?.description,
         data: transformedPackages,
       },
-      
+
       footer: footer.map((item) => ({
         companyName: item.companyName,
         description: item.description,
