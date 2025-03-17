@@ -253,7 +253,9 @@ const getAllPackages = async (req, res) => {
 const getPackageById = async (req, res) => {
   try {
     const packageId = req.params.id;
-    const package = await Package.findById(packageId).populate("country");
+    const package = await Package.findById(packageId)
+      .populate("country")
+      .sort({ createdAt: -1 });
 
     if (!package) {
       return res.status(404).json({ message: "Package not found" });

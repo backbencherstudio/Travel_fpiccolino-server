@@ -307,9 +307,13 @@ const get_all_inclusive_TourPage = async (req, res) => {
 const country_wise = async (req, res) => {
   try {
     const countryId = req.params.id;
-    const country = await Country.findOne({ _id: countryId }).lean();
+    const country = await Country.findOne({ _id: countryId }).lean().sort({
+      createdAt: -1,
+    });
     const [packages, sectionTitles, footer] = await Promise.all([
-      Package.find({ country: country.name }).lean(),
+      Package.find({ country: country.name }).lean().sort({
+        createdAt: -1,
+      }),
       SectinTitle.find({ name: { $regex: /^country_wise/ } })
         .select("title description")
         .lean(),
