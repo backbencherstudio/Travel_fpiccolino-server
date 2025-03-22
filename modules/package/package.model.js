@@ -59,6 +59,9 @@ const packageSchema = new mongoose.Schema(
     ],
     bookedFlights: [
       {
+        flightDate: {
+          type: Date,
+        },
         flightType: {
           type: String,
         },
