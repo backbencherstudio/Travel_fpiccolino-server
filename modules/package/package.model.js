@@ -14,6 +14,10 @@ const packageSchema = new mongoose.Schema(
       type: Date,
       // required: true,
     },
+    offerEndsIn: {
+      type: Date,
+      // required: true,
+    },
     tourDuration: {
       nights: {
         type: Number,
