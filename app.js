@@ -36,14 +36,6 @@ const authBanners = require("./modules/authBanners/authBanners.routes");
 const shorts = require("./modules/shorts/short.route");
 const app = express();
 
-// Apply Helmet first
-app.use(
-  helmet({
-    contentSecurityPolicy: false,
-    crossOriginEmbedderPolicy: false,
-    crossOriginResourcePolicy: false,
-  })
-);
 
 // CORS configuration
 app.use(
@@ -57,32 +49,27 @@ app.use(
       "192.168.40.103",
     ],
     credentials: true,
-    methods: ["GET", "POST", "PUT", "DELETE", "OPTIONS", "PATCH"],
-    allowedHeaders: ["Content-Type", "Authorization"],
   })
 );
+
+// Other middleware
+app.use(cookieParser());
 
 // Session configuration
 app.use(
   session({
-    secret: process.env.SESSION_SECRET || "changeit",
-    resave: false,
-    saveUninitialized: false,
-    cookie: {
-      maxAge: 30 * 24 * 60 * 60 * 1000, // 30 days
-      secure: false, // Set to false if not using HTTPS
-      sameSite: "None",
-      httpOnly: true,
-    },
+    secret: "changeit",                
+    resave: false,                     
+    saveUninitialized: true,           
+    cookie: { maxAge: 2 * 60 * 1000 },
   })
 );
 
-// Trust proxy
-app.set("trust proxy", 1);
 
-// Other middleware
-app.use(cookieParser());
+
 app.use(morgan("dev"));
+
+app.use(express.json());
 app.use(express.urlencoded({ extended: true }));
 
 // Custom body parser middleware
@@ -130,6 +117,7 @@ app.use("/api/texts", textsRoutes);
 app.use("/api/whyUs", whyUs);
 app.use("/api/policy", policy);
 app.use("/api/auth-banners", authBanners);
+
 app.use((req, res, next) => {
   res.status.json({
     message: "404! Route is not found",
