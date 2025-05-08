@@ -1,5 +1,5 @@
 const nodemailer = require("nodemailer");
-const { emailForgotPasswordOTP, emailMessage, emailUpdateOTP, resendRegistrationOTPEmail } = require("../constants/email_message");
+const { emailForgotPasswordOTP, emailMessage, emailUpdateOTP, resendRegistrationOTPEmail, paymentSuccessEmailNotification } = require("../constants/email_message");
 require("dotenv").config();
 
 // const generateOTP = () => {
@@ -15,13 +15,13 @@ const sendEmail = async (to, subject, htmlContent) => {
     host: "smtp.mailtrap.io",
     service: "gmail",
     auth: {
-      user: process.env.NODE_MAILER_USER,
+      user: process.env.node_mailer_user,
       pass: process.env.NODE_MAILER_PASSWORD,
     },
   });
-
+ 
   const mailOptions = {
-    from: `"LA TUA FUGA"<2003monowar@gmail.com>`,
+    from: `"LA TUA FUGA"<tqmhosain@gmail.com>`,
     to,
     subject,
     html: htmlContent,
@@ -47,6 +47,10 @@ const resendRegistrationOTP = async (userName, email, otp) => {
   await sendEmail(email, "Your OTP Code for SocialApp", resendRegistrationOTPEmail(userName, email, otp));
 };
 
+const paymentSuccessEmail = async (email) => {
+  await sendEmail(email, "Payment successfull", paymentSuccessEmailNotification(email) )
+}
+
 module.exports = {
   generateOTP,
   sendEmail,
@@ -54,5 +58,6 @@ module.exports = {
   sendUpdateEmailOTP,
   sendForgotPasswordOTP,
   resendRegistrationOTP,
+  paymentSuccessEmail
 };
 

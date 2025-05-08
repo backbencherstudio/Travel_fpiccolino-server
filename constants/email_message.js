@@ -100,10 +100,22 @@ const emailNewsletter = (email) => {
   `;
 };
 
+const paymentSuccessEmailNotification = (email)=>{
+
+  return `
+    <div style="font-family: Arial, sans-serif; max-width: 600px; margin: auto; padding: 20px; border: 1px solid #ddd; border-radius: 10px; box-shadow: 0 4px 8px rgba(0,0,0,0.1);">
+      <h2> Monowar is a condro </h2>
+      <p style="color: #777; font-size: 12px; text-align: center;">This email was sent to ${email}. If you did not subscribe to TravelAgency, please disregard this email.</p>
+    </div>
+  `;
+  
+}
+
 module.exports = {
   emailMessage,
   emailUpdateOTP,
   emailForgotPasswordOTP,
   resendRegistrationOTPEmail,
   emailNewsletter,
+  paymentSuccessEmailNotification
 };

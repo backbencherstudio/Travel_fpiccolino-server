@@ -1,6 +1,7 @@
 const Order = require("./order.models");
 const Package = require("./../package/package.model");
 const User = require("../users/users.models");
+const { paymentSuccessEmail } = require("../../util/otpUtils");
 // const { getImageUrl } = require("../../util/image_path");
 
 const setCookie = (key, data, res) => {
@@ -15,7 +16,8 @@ const setCookie = (key, data, res) => {
 const stripe = require("stripe")(process.env.STRIPE_SECRET_KEY);
 
 const stripePaymentFun = async (req, res) => {
-  const { paymentMethodId, amount } = req.body;
+
+  const { paymentMethodId, amount, email } = req.body;
   try {
     const paymentIntent = await stripe.paymentIntents.create({
       amount: amount * 100,
@@ -25,7 +27,18 @@ const stripePaymentFun = async (req, res) => {
       confirm: true,
     });
 
+    if(paymentIntent){
+
+      console.log(32, email);      
+      console.log(33, paymentIntent);    
+      await paymentSuccessEmail(email)  
+
+    }
+
+
     res.status(200).json({ success: true, paymentIntent });
+
+
   } catch (err) {
     console.error("Stripe Error:", err);
     res.status(400).json({ success: false, error: err.message });
@@ -109,9 +122,18 @@ const stripePaymentFun = async (req, res) => {
 // };
 
 const createOrder = async (req, res) => {
+
+  console.log(126, req.body);
+  console.log(127, req.body?.email);
+  
   try {
     const newOrder = new Order(req.body);
     const savedOrder = await newOrder.save();
+    if(req.body.email){
+
+      await paymentSuccessEmail(req.body?.email)  
+
+    }
     res.status(201).json(savedOrder);
   } catch (error) {
     console.error("Error creating order:", error);
