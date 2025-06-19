@@ -44,7 +44,7 @@ router.get("/user/:userId", getUserOrders);
 
 router.get("/user/:userId/status", getUserStatus);   
 
-router.put("/:id/status", verifyUser, updateOrderStatus);
+router.put("/:id/status", verifyUser, updateOrderStatus); 
 
 router.put("/:id", verifyUser, updateOrder);
 

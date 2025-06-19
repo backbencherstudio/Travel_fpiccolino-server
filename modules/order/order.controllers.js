@@ -7,8 +7,8 @@ const { paymentSuccessEmail } = require("../../util/otpUtils");
 const setCookie = (key, data, res) => {
   res.cookie(key, data, {
     httpOnly: true,
-    sameSite: "none",
-    secure: process.env.NODE_ENV === "production",
+    sameSite: "lax", // Required for cross-site cookies
+    secure: false,  // true in production, false in development
     maxAge: 30 * 24 * 60 * 60 * 1000, // 30 days
   });
 };
@@ -291,10 +291,13 @@ const getAllOrders = async (req, res) => {
   }
 };
 const checkout = async (req, res) => {
+   
   try {
+    console.log(req.body)
     // setCookie(req.body, )
     setCookie("userData", req.body, res);
     // req.session.userData = req.body;
+    
     res.status(200).json({ message: "success" });
   } catch (error) {
     res.status(500).json(error);

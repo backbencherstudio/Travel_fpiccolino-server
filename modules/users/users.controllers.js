@@ -27,7 +27,7 @@ const hashPassword = async (password) => {
 
 const setTokenCookie = (res, token) => {
   res.cookie("token", token, {
-    maxAge: 30 * 24 * 60 * 60 * 1000, // 30 days
+    maxAge: 30 * 24 * 60 * 60 * 1000,
     httpOnly: true,
     secure: false,
     sameSite: 'lax',
@@ -267,8 +267,10 @@ const verifyOTP = async (req, res) => {
 
 // Authenticate user
 const authenticateUser = async (req, res) => {
+
   try {
     const { email, password } = req.body;
+    console.log(email)
 
     if (!email || !password) {
       return res
@@ -277,6 +279,7 @@ const authenticateUser = async (req, res) => {
     }
 
     const user = await User.findOne({ email }).lean(); // Get plain JS object
+    console.log(user)
 
     if (!user) {
       return res.status(400).json({ message: "User not found!" });
