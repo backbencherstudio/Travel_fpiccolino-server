@@ -7,8 +7,9 @@ const { paymentSuccessEmail } = require("../../util/otpUtils");
 const setCookie = (key, data, res) => {
   res.cookie(key, data, {
     httpOnly: true,
-    sameSite: "lax", // Required for cross-site cookies
-    secure: false, // true in production, false in development
+    secure: true,
+    sameSite: 'none',
+    path: '/',
     maxAge: 30 * 24 * 60 * 60 * 1000, // 30 days
   });
 };
