@@ -7,8 +7,9 @@ const { paymentSuccessEmail } = require("../../util/otpUtils");
 const setCookie = (key, data, res) => {
   res.cookie(key, data, {
     httpOnly: true,
-    sameSite: "lax", // Required for cross-site cookies
-    secure: false,  // true in production, false in development
+    secure: true,
+    sameSite: 'none',
+    path: '/',
     maxAge: 30 * 24 * 60 * 60 * 1000, // 30 days
   });
 };
@@ -16,7 +17,6 @@ const setCookie = (key, data, res) => {
 const stripe = require("stripe")(process.env.STRIPE_SECRET_KEY);
 
 const stripePaymentFun = async (req, res) => {
-
   const { paymentMethodId, amount, email } = req.body;
   try {
     const paymentIntent = await stripe.paymentIntents.create({
@@ -27,18 +27,13 @@ const stripePaymentFun = async (req, res) => {
       confirm: true,
     });
 
-    if(paymentIntent){
-
-      console.log(32, email);      
-      console.log(33, paymentIntent);    
-      await paymentSuccessEmail(email)  
-
+    if (paymentIntent) {
+      console.log(30, email);
+      console.log(31, paymentIntent);
+      // await paymentSuccessEmail(email);
     }
 
-
     res.status(200).json({ success: true, paymentIntent });
-
-
   } catch (err) {
     console.error("Stripe Error:", err);
     res.status(400).json({ success: false, error: err.message });
@@ -122,24 +117,85 @@ const stripePaymentFun = async (req, res) => {
 // };
 
 const createOrder = async (req, res) => {
-
-  console.log(126, req.body);
-  console.log(127, req.body?.email);
-  
+  console.log("Request Body", req.body);
   try {
-    const newOrder = new Order(req.body);
-    const savedOrder = await newOrder.save();
-    if(req.body.email){
+    // Step 1: Fetch user and package details
+    const [user, package] = await Promise.all([
+      User.findById(req.body.userId),
+      Package.findById(req.body.packageId)
+    ]);
 
-      await paymentSuccessEmail(req.body?.email)  
-
+    if (!user) {
+      return res.status(404).json({ message: "User not found" });
     }
-    res.status(201).json(savedOrder);
+    if (!package) {
+      return res.status(404).json({ message: "Package not found" });
+    }
+
+    // Step 2: Save the order in DB
+    const newOrder = new Order({
+      ...req.body,
+    });
+    const savedOrder = await newOrder.save();
+
+    // Step 3: Generate Invoice Data from req.body, user, and package
+    const invoiceData = {
+      invoiceId: `INV-${savedOrder._id.toString().slice(-6).toUpperCase()}`,
+      customerName: `${user?.firstName || ""} ${user?.lastName || ""}`.trim(),
+      customerEmail: user.email,
+      customerPhone: user.phone || '',
+      customerAddress: {
+        address: user.address || '',
+        city: user.city || '',
+        country: user.country || ''
+      },
+      orderDate: new Date(savedOrder.createdAt).toLocaleDateString(),
+      tourDate: new Date(req.body.tourDate).toLocaleDateString(),
+      packageDetails: {
+        name: package.tourName,
+        description: package.tourDescription,
+        duration: package.tourDuration,
+        destination: package.destination,
+        country: package.country,
+        hotelName: package.hotelName,
+        hotelAbout: package.hotelAbout,
+        images: package.images,
+        includeItems: package.includeItems,
+        notIncludeItems: package.notIncludeItems
+      },
+      packageAmount: req.body.totalPackageAmount,
+      flightPrice: req.body.flightPrice,
+      insurance: req.body.insurance,
+      totalAmount: req.body.toureAmount,
+      travelers: req.body.travelers,
+      flights: req.body.flights,
+      paymentId: req.body.paymentId,
+      numberOfPersons: req.body.person,
+    };
+
+    // Step 4: Send Email with invoiceData (including user and package details)
+    await paymentSuccessEmail(user.email, invoiceData);
+
+    // Step 5: Respond
+    res.status(201).json({ 
+      order: savedOrder, 
+      invoice: invoiceData,
+      user: {
+        name: `${user?.firstName || ""} ${user?.lastName || ""}`.trim(),
+        email: user.email,
+        phone: user.phone,
+        address: user.address
+      },
+      package: {
+        name: package.tourName,
+        description: package.tourDescription,
+        destination: package.destination
+      }
+    });
+
   } catch (error) {
     console.error("Error creating order:", error);
-    res
-      .status(500)
-      .json({ message: "An error occurred while creating the order", error });
+    res.status(500).json({ message: "An error occurred while creating the order", error });
   }
 };
 
@@ -290,14 +346,15 @@ const getAllOrders = async (req, res) => {
       .json({ message: "Failed to retrieve Orders", error: error.message });
   }
 };
+
 const checkout = async (req, res) => {
-   
   try {
-    console.log(req.body)
+    console.log(286);
+    console.log(req.body);
     // setCookie(req.body, )
     setCookie("userData", req.body, res);
     // req.session.userData = req.body;
-    
+
     res.status(200).json({ message: "success" });
   } catch (error) {
     res.status(500).json(error);

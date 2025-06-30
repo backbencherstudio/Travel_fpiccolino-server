@@ -27,10 +27,10 @@ const hashPassword = async (password) => {
 
 const setTokenCookie = (res, token) => {
   res.cookie("token", token, {
-    maxAge: 30 * 24 * 60 * 60 * 1000,
+    maxAge: 30 * 24 * 60 * 60 * 1000, // 30 days
     httpOnly: true,
-    secure: false,
-    sameSite: 'lax',
+    secure: true,
+    sameSite: 'none',
     path: '/'
   });
   return res;
@@ -40,8 +40,8 @@ const setCookie = (key, data, res) => {
   res.cookie(key, data, {
     maxAge: 30 * 24 * 60 * 60 * 1000,
     httpOnly: true,
-    secure: false,
-    sameSite: 'lax',
+    secure: true,
+    sameSite: 'none',
     path: '/'
   });
 };
@@ -59,7 +59,7 @@ const setTokens = (res, accessToken, refreshToken) => {
     maxAge: 7 * 24 * 60 * 60 * 1000,
     httpOnly: true,
     secure: false,
-    sameSite: 'lax',
+    sameSite: 'none',
     path: '/'
   });
 };
