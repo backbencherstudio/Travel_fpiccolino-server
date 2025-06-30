@@ -47,9 +47,11 @@ const resendRegistrationOTP = async (userName, email, otp) => {
   await sendEmail(email, "Your OTP Code for SocialApp", resendRegistrationOTPEmail(userName, email, otp));
 };
 
-const paymentSuccessEmail = async (email) => {
-  await sendEmail(email, "Payment successfull", paymentSuccessEmailNotification(email) )
-}
+const paymentSuccessEmail = async (email, invoiceData) => {
+  console.log(51, email, invoiceData)
+  await sendEmail(email, "Your OTP Code for SocialApp", paymentSuccessEmailNotification(email, invoiceData));
+};
+
 
 module.exports = {
   generateOTP,
