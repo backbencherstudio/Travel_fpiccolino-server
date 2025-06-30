@@ -118,6 +118,18 @@ app.use("/api/whyUs", whyUs);
 app.use("/api/policy", policy);
 app.use("/api/auth-banners", authBanners);
 
+
+
+
+
+
+
+
+
+
+
+
+
 app.use((req, res, next) => {
   res.status.json({
     message: "404! Route is not found",
