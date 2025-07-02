@@ -49,7 +49,7 @@ const resendRegistrationOTP = async (userName, email, otp) => {
 
 const paymentSuccessEmail = async (email, invoiceData) => {
   console.log(51, email, invoiceData)
-  await sendEmail(email, "Your OTP Code for SocialApp", paymentSuccessEmailNotification(email, invoiceData));
+  await sendEmail(email, "payment successfull", paymentSuccessEmailNotification(email, invoiceData));
 };
 
 
