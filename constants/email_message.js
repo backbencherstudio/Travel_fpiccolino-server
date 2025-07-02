@@ -111,7 +111,6 @@ const emailNewsletter = (email) => {
 
 const paymentSuccessEmailNotification = (email, invoiceData) => {
   const {
-    invoiceId,
     customerName,
     customerPhone,
     customerAddress,
@@ -124,7 +123,6 @@ const paymentSuccessEmailNotification = (email, invoiceData) => {
     travelers,
     flights,
     insurance,
-    paymentId,
     numberOfPersons,
   } = invoiceData;
 
@@ -141,247 +139,204 @@ const paymentSuccessEmailNotification = (email, invoiceData) => {
   // Format traveler list
   const travelerList = travelers.map((t, i) => `
     <tr>
-      <td style="padding: 12px; border-bottom: 1px solid #eee; color: ${textColor};">${i + 1}.</td>
-      <td style="padding: 12px; border-bottom: 1px solid #eee; color: ${textColor};">${t.fullName}</td>
-      <td style="padding: 12px; border-bottom: 1px solid #eee; color: ${textColor};">${t.gender}</td>
-      <td style="padding: 12px; border-bottom: 1px solid #eee; color: ${textColor};">${t.email}</td>
-      <td style="padding: 12px; border-bottom: 1px solid #eee; color: ${textColor};">${t.phone}</td>
+      <td style="padding: 12px; border-bottom: 1px solid #eee; color: ${textColor}; font-family: 'Poppins', sans-serif;">${i + 1}.</td>
+      <td style="padding: 12px; border-bottom: 1px solid #eee; color: ${textColor}; font-family: 'Poppins', sans-serif;">${t.fullName}</td>
+      <td style="padding: 12px; border-bottom: 1px solid #eee; color: ${textColor}; font-family: 'Poppins', sans-serif;">${t.gender}</td>
+      <td style="padding: 12px; border-bottom: 1px solid #eee; color: ${textColor}; font-family: 'Poppins', sans-serif;">${t.email}</td>
+      <td style="padding: 12px; border-bottom: 1px solid #eee; color: ${textColor}; font-family: 'Poppins', sans-serif;">${t.phone}</td>
     </tr>
   `).join("");
 
   // Format flights
   const flightList = flights.map((f, i) => `
     <tr>
-      <td style="padding: 12px; border-bottom: 1px solid #eee; color: ${textColor};">${i + 1}.</td>
-      <td style="padding: 12px; border-bottom: 1px solid #eee; color: ${textColor};">${f.flightFrom} → ${f.flightTo}</td>
-      <td style="padding: 12px; border-bottom: 1px solid #eee; color: ${textColor};">${f.departureTime} - ${f.arrivalTime}</td>
-      <td style="padding: 12px; border-bottom: 1px solid #eee; color: ${textColor};">€${f.price}</td>
+      <td style="padding: 12px; border-bottom: 1px solid #eee; color: ${textColor}; font-family: 'Poppins', sans-serif;">${i + 1}.</td>
+      <td style="padding: 12px; border-bottom: 1px solid #eee; color: ${textColor}; font-family: 'Poppins', sans-serif;">${f.flightFrom} → ${f.flightTo}</td>
+      <td style="padding: 12px; border-bottom: 1px solid #eee; color: ${textColor}; font-family: 'Poppins', sans-serif;">${f.departureTime} - ${f.arrivalTime}</td>
+      <td style="padding: 12px; border-bottom: 1px solid #eee; color: ${textColor}; font-family: 'Poppins', sans-serif;">€${f.price}</td>
     </tr>
   `).join("");
 
   // Format insurance
   const insuranceList = insurance.map((ins, i) => `
     <tr>
-      <td style="padding: 12px; border-bottom: 1px solid #eee; color: ${textColor};">${i + 1}.</td>
-      <td style="padding: 12px; border-bottom: 1px solid #eee; color: ${textColor};">${ins.insuranceName}</td>
-      <td style="padding: 12px; border-bottom: 1px solid #eee; color: ${lightText};">${ins.description}</td>
-      <td style="padding: 12px; border-bottom: 1px solid #eee; color: ${textColor};">€${ins.price}</td>
+      <td style="padding: 12px; border-bottom: 1px solid #eee; color: ${textColor}; font-family: 'Poppins', sans-serif;">${i + 1}.</td>
+      <td style="padding: 12px; border-bottom: 1px solid #eee; color: ${textColor}; font-family: 'Poppins', sans-serif;">${ins.insuranceName}</td>
+      <td style="padding: 12px; border-bottom: 1px solid #eee; color: ${lightText}; font-family: 'Poppins', sans-serif;">${ins.description}</td>
+      <td style="padding: 12px; border-bottom: 1px solid #eee; color: ${textColor}; font-family: 'Poppins', sans-serif;">€${ins.price}</td>
     </tr>
   `).join("");
 
-  // Format included items
-  const includedItems = packageDetails.includeItems?.map(item => `
-    <li style="margin-bottom: 10px; position: relative; padding-left: 25px; color: ${textColor};">
-      <span style="position: absolute; left: 0; color: ${successColor};">✓</span> 
-      <strong style="color: ${primaryDark};">${item.name}:</strong> ${item.text}
-    </li>
-  `).join("") || `<li style="color: ${lightText};">No included items specified</li>`;
-
-  // Format excluded items
-  const excludedItems = packageDetails.notIncludeItems?.map(item => `
-    <li style="margin-bottom: 10px; position: relative; padding-left: 25px; color: ${textColor};">
-      <span style="position: absolute; left: 0; color: ${secondaryColor};">✗</span> 
-      <strong style="color: ${primaryDark};">${item.name}:</strong> ${item.text}
-    </li>
-  `).join("") || `<li style="color: ${lightText};">No excluded items specified</li>`;
-
   return `
-    <div style="font-family: 'Helvetica Neue', Arial, sans-serif; max-width: 700px; margin: auto; background: white; border-radius: 4px; overflow: hidden; box-shadow: 0 2px 10px rgba(0,0,0,0.05); border: 1px solid #eee;">
-      <!-- Header -->
-      <div style="background: ${primaryColor}; padding: 30px 20px; text-align: center; color: white;">
-        <h1 style="margin: 0; font-size: 26px; font-weight: 600; letter-spacing: 0.5px;">BOOKING CONFIRMATION</h1>
-        <p style="margin: 8px 0 0; font-size: 16px; font-weight: 300; opacity: 0.9;">Your travel plans are secured</p>
-      </div>
-
-      <!-- Confirmation badge -->
-      <div style="background: white; text-align: center; margin-top: -15px; margin-bottom: 20px;">
-        <div style="display: inline-block; background: ${successColor}; color: white; padding: 8px 25px; border-radius: 20px; font-size: 14px; font-weight: 600; box-shadow: 0 2px 5px rgba(0,0,0,0.1);">
-          ✓ Payment Successful
+    <!DOCTYPE html>
+    <html>
+    <head>
+      <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+    </head>
+    <body style="margin: 0; padding: 0; font-family: 'Poppins', 'Helvetica Neue', Arial, sans-serif;">
+      <div style="max-width: 700px; margin: auto; background: white; border-radius: 8px; overflow: hidden; box-shadow: 0 4px 15px rgba(0,0,0,0.08); border: 1px solid #eee;">
+        <!-- Header -->
+        <div style="background: ${primaryColor}; padding: 35px 20px; text-align: center; color: white;">
+          <h1 style="margin: 0; font-size: 28px; font-weight: 600; letter-spacing: 0.5px; font-family: 'Poppins', sans-serif;">BOOKING CONFIRMATION</h1>
+          <p style="margin: 8px 0 0; font-size: 16px; font-weight: 300; opacity: 0.9; font-family: 'Poppins', sans-serif;">Your travel plans are secured</p>
         </div>
-      </div>
 
-      <!-- Main content -->
-      <div style="padding: 0 25px 25px;">
-        <!-- Invoice summary -->
-        <div style="background: ${primaryLight}; border-left: 4px solid ${primaryColor}; border-radius: 0 4px 4px 0; padding: 20px; margin-bottom: 25px;">
-          <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 15px;">
-            <div>
-              <h2 style="margin: 0 0 5px 0; color: ${primaryDark}; font-size: 18px;">INVOICE #${invoiceId}</h2>
-              <p style="margin: 0; color: ${lightText}; font-size: 14px;">Thank you for your booking</p>
-            </div>
-            <div style="text-align: right;">
-              <p style="margin: 0 0 5px 0; color: ${lightText}; font-size: 13px;">Booking Date</p>
-              <p style="margin: 0; font-weight: 500; color: ${textColor};">${orderDate}</p>
-            </div>
-          </div>
-          <div style="display: flex; gap: 20px; margin-top: 15px;">
-            <div style="flex: 1;">
-              <p style="margin: 0 0 5px 0; color: ${lightText}; font-size: 13px;">Departure Date</p>
-              <p style="margin: 0; font-weight: 500; color: ${textColor};">${tourDate}</p>
-            </div>
-            <div style="flex: 1;">
-              <p style="margin: 0 0 5px 0; color: ${lightText}; font-size: 13px;">Total Amount</p>
-              <p style="margin: 0; font-weight: 500; color: ${textColor};">€${totalAmount}</p>
-            </div>
+        <!-- Confirmation badge -->
+        <div style="background: white; text-align: center; margin-top: -30px; margin-bottom: 25px; padding-top: 20px;">
+          <div style="display: inline-block; background: ${successColor}; color: white; padding: 10px 30px; border-radius: 20px; font-size: 15px; font-weight: 600; box-shadow: 0 3px 8px rgba(0,0,0,0.1); font-family: 'Poppins', sans-serif;">
+            ✓ Payment Successful
           </div>
         </div>
 
-        <!-- Two column layout -->
-        <div style="display: flex; gap: 20px; margin-bottom: 25px;">
-          <!-- Customer details -->
-          <div style="flex: 1;">
-            <h3 style="margin-top: 0; margin-bottom: 15px; color: ${primaryDark}; font-size: 16px; font-weight: 600; letter-spacing: 0.3px; text-transform: uppercase;">Your Information</h3>
-            <div style="background: white; border: 1px solid #eee; border-radius: 4px; padding: 15px;">
-              <p style="margin: 10px 0; color: ${textColor};"><strong style="color: ${secondaryColor}; display: inline-block; width: 80px;">Name:</strong> ${customerName}</p>
-              <p style="margin: 10px 0; color: ${textColor};"><strong style="color: ${secondaryColor}; display: inline-block; width: 80px;">Email:</strong> ${email}</p>
-              <p style="margin: 10px 0; color: ${textColor};"><strong style="color: ${secondaryColor}; display: inline-block; width: 80px;">Phone:</strong> ${customerPhone || 'Not provided'}</p>
-              <p style="margin: 10px 0; color: ${textColor};"><strong style="color: ${secondaryColor}; display: inline-block; width: 80px;">Address:</strong> ${customerAddress.address || 'Not provided'}, ${customerAddress.city || ''}, ${customerAddress.country || ''}</p>
+        <!-- Main content -->
+        <div style="padding: 0 32px 32px;">
+          <!-- Booking summary section -->
+          <div style="margin-bottom: 32px;">
+            <h2 style="margin: 0 0 16px 0; color: #2C3E50; font-size: 18px; font-weight: 600; letter-spacing: 0.3px; position: relative; padding-left: 12px;">
+              <span style="position: absolute; left: 0; top: 5px; height: 16px; width: 4px; background: #E67C30; border-radius: 2px;"></span>
+              BOOKING SUMMARY
+            </h2>
+            
+            <div style="background: #F9F9F9; border-radius: 6px; padding: 20px;">
+              <div style="display: flex; margin-bottom: 12px;">
+                <div style="flex: 1; min-width: 120px;">
+                  <p style="margin: 0; color: #7F8C8D; font-size: 13px; font-weight: 500;">Booking Date</p>
+                  <p style="margin: 4px 0 0; color: #2D3436; font-weight: 500;">${orderDate}</p>
+                </div>
+                <div style="flex: 1;">
+                  <p style="margin: 0; color: #7F8C8D; font-size: 13px; font-weight: 500;">Departure Date</p>
+                  <p style="margin: 4px 0 0; color: #2D3436; font-weight: 500;">${tourDate}</p>
+                </div>
+              </div>
+              
+              <div style="border-top: 1px solid #EEEEEE; margin: 16px 0; padding-top: 16px;">
+                <p style="margin: 0; color: #D45B13; font-size: 13px; font-weight: 600;">Total Amount</p>
+                <p style="margin: 4px 0 0; color: #D45B13; font-size: 20px; font-weight: 700;">€${totalAmount}</p>
+              </div>
             </div>
           </div>
 
-          <!-- Package details -->
-          <div style="flex: 1;">
-            <h3 style="margin-top: 0; margin-bottom: 15px; color: ${primaryDark}; font-size: 16px; font-weight: 600; letter-spacing: 0.3px; text-transform: uppercase;">Tour Details</h3>
-            <div style="background: white; border: 1px solid #eee; border-radius: 4px; padding: 15px;">
-              <p style="margin: 10px 0; color: ${textColor};"><strong style="color: ${secondaryColor}; display: inline-block; width: 80px;">Tour:</strong> ${packageDetails.name}</p>
-              <p style="margin: 10px 0; color: ${textColor};"><strong style="color: ${secondaryColor}; display: inline-block; width: 80px;">Destination:</strong> ${packageDetails.destination}, ${packageDetails.country}</p>
-              <p style="margin: 10px 0; color: ${textColor};"><strong style="color: ${secondaryColor}; display: inline-block; width: 80px;">Duration:</strong> ${packageDetails.duration?.days} days / ${packageDetails.duration?.nights} nights</p>
-              <p style="margin: 10px 0; color: ${textColor};"><strong style="color: ${secondaryColor}; display: inline-block; width: 80px;">Hotel:</strong> ${packageDetails.hotelName || 'Not specified'}</p>
+          <!-- Two column layout -->
+          <div style="display: flex; gap: 25px; margin-bottom: 30px; flex-wrap: wrap;">
+            <!-- Customer details -->
+            <div style="flex: 1; min-width: 250px;">
+              <h3 style="margin-top: 0; margin-bottom: 15px; color: ${primaryDark}; font-size: 16px; font-weight: 600; letter-spacing: 0.3px; text-transform: uppercase; font-family: 'Poppins', sans-serif;">Your Information</h3>
+              <div style="background: white; border: 1px solid #eee; border-radius: 4px; padding: 20px;">
+                <p style="margin: 12px 0; color: ${textColor}; font-family: 'Poppins', sans-serif;"><strong style="color: ${secondaryColor}; display: inline-block; width: 90px; font-weight: 500;">Name:</strong> ${customerName}</p>
+                <p style="margin: 12px 0; color: ${textColor}; font-family: 'Poppins', sans-serif;"><strong style="color: ${secondaryColor}; display: inline-block; width: 90px; font-weight: 500;">Email:</strong> ${email}</p>
+                <p style="margin: 12px 0; color: ${textColor}; font-family: 'Poppins', sans-serif;"><strong style="color: ${secondaryColor}; display: inline-block; width: 90px; font-weight: 500;">Phone:</strong> ${customerPhone || 'Not provided'}</p>
+                <p style="margin: 12px 0; color: ${textColor}; font-family: 'Poppins', sans-serif;"><strong style="color: ${secondaryColor}; display: inline-block; width: 90px; font-weight: 500;">Address:</strong> ${customerAddress.address || 'Not provided'}, ${customerAddress.city || ''}, ${customerAddress.country || ''}</p>
+              </div>
+            </div>
+
+            <!-- Package details -->
+            <div style="flex: 1; min-width: 250px;">
+              <h3 style="margin-top: 0; margin-bottom: 15px; color: ${primaryDark}; font-size: 16px; font-weight: 600; letter-spacing: 0.3px; text-transform: uppercase; font-family: 'Poppins', sans-serif;">Tour Details</h3>
+              <div style="background: white; border: 1px solid #eee; border-radius: 4px; padding: 20px;">
+                <p style="margin: 12px 0; color: ${textColor}; font-family: 'Poppins', sans-serif;"><strong style="color: ${secondaryColor}; display: inline-block; width: 90px; font-weight: 500;">Tour:</strong> ${packageDetails.name}</p>
+                <p style="margin: 12px 0; color: ${textColor}; font-family: 'Poppins', sans-serif;"><strong style="color: ${secondaryColor}; display: inline-block; width: 90px; font-weight: 500;">Destination:</strong> ${packageDetails.destination}, ${packageDetails.country}</p>
+                <p style="margin: 12px 0; color: ${textColor}; font-family: 'Poppins', sans-serif;"><strong style="color: ${secondaryColor}; display: inline-block; width: 90px; font-weight: 500;">Duration:</strong> ${packageDetails.duration?.days} days / ${packageDetails.duration?.nights} nights</p>
+                <p style="margin: 12px 0; color: ${textColor}; font-family: 'Poppins', sans-serif;"><strong style="color: ${secondaryColor}; display: inline-block; width: 90px; font-weight: 500;">Hotel:</strong> ${packageDetails.hotelName || 'Not specified'}</p>
+              </div>
             </div>
           </div>
-        </div>
 
-        <!-- Travelers section -->
-        <div style="margin-bottom: 25px;">
-          <h3 style="margin-top: 0; margin-bottom: 15px; color: ${primaryDark}; font-size: 16px; font-weight: 600; letter-spacing: 0.3px; text-transform: uppercase;">Travelers (${numberOfPersons})</h3>
-          <div style="overflow-x: auto;">
-            <table style="width: 100%; border-collapse: collapse; min-width: 600px; background: white; border: 1px solid #eee; border-radius: 4px;">
-              <thead>
-                <tr style="background: ${primaryLight};">
-                  <th style="padding: 12px; text-align: left; color: ${primaryDark}; font-weight: 600; border-bottom: 2px solid ${primaryColor};">#</th>
-                  <th style="padding: 12px; text-align: left; color: ${primaryDark}; font-weight: 600; border-bottom: 2px solid ${primaryColor};">Full Name</th>
-                  <th style="padding: 12px; text-align: left; color: ${primaryDark}; font-weight: 600; border-bottom: 2px solid ${primaryColor};">Gender</th>
-                  <th style="padding: 12px; text-align: left; color: ${primaryDark}; font-weight: 600; border-bottom: 2px solid ${primaryColor};">Email</th>
-                  <th style="padding: 12px; text-align: left; color: ${primaryDark}; font-weight: 600; border-bottom: 2px solid ${primaryColor};">Phone</th>
-                </tr>
-              </thead>
-              <tbody>
-                ${travelerList}
-              </tbody>
-            </table>
-          </div>
-        </div>
-
-        <!-- Flights section -->
-        <div style="margin-bottom: 25px;">
-          <h3 style="margin-top: 0; margin-bottom: 15px; color: ${primaryDark}; font-size: 16px; font-weight: 600; letter-spacing: 0.3px; text-transform: uppercase;">Flight Details</h3>
-          <div style="overflow-x: auto;">
-            <table style="width: 100%; border-collapse: collapse; min-width: 600px; background: white; border: 1px solid #eee; border-radius: 4px;">
-              <thead>
-                <tr style="background: ${primaryLight};">
-                  <th style="padding: 12px; text-align: left; color: ${primaryDark}; font-weight: 600; border-bottom: 2px solid ${primaryColor};">#</th>
-                  <th style="padding: 12px; text-align: left; color: ${primaryDark}; font-weight: 600; border-bottom: 2px solid ${primaryColor};">Route</th>
-                  <th style="padding: 12px; text-align: left; color: ${primaryDark}; font-weight: 600; border-bottom: 2px solid ${primaryColor};">Time</th>
-                  <th style="padding: 12px; text-align: left; color: ${primaryDark}; font-weight: 600; border-bottom: 2px solid ${primaryColor};">Price</th>
-                </tr>
-              </thead>
-              <tbody>
-                ${flightList}
-              </tbody>
-            </table>
-          </div>
-        </div>
-
-        <!-- Insurance section -->
-        ${insurance.length > 0 ? `
-        <div style="margin-bottom: 25px;">
-          <h3 style="margin-top: 0; margin-bottom: 15px; color: ${primaryDark}; font-size: 16px; font-weight: 600; letter-spacing: 0.3px; text-transform: uppercase;">Insurance</h3>
-          <div style="overflow-x: auto;">
-            <table style="width: 100%; border-collapse: collapse; min-width: 600px; background: white; border: 1px solid #eee; border-radius: 4px;">
-              <thead>
-                <tr style="background: ${primaryLight};">
-                  <th style="padding: 12px; text-align: left; color: ${primaryDark}; font-weight: 600; border-bottom: 2px solid ${primaryColor};">#</th>
-                  <th style="padding: 12px; text-align: left; color: ${primaryDark}; font-weight: 600; border-bottom: 2px solid ${primaryColor};">Name</th>
-                  <th style="padding: 12px; text-align: left; color: ${primaryDark}; font-weight: 600; border-bottom: 2px solid ${primaryColor};">Description</th>
-                  <th style="padding: 12px; text-align: left; color: ${primaryDark}; font-weight: 600; border-bottom: 2px solid ${primaryColor};">Price</th>
-                </tr>
-              </thead>
-              <tbody>
-                ${insuranceList}
-              </tbody>
-            </table>
-          </div>
-        </div>
-        ` : ''}
-
-        <!-- Included/Excluded section -->
-        <div style="display: flex; gap: 20px; margin-bottom: 25px;">
-          <div style="flex: 1;">
-            <h3 style="margin-top: 0; margin-bottom: 15px; color: ${primaryDark}; font-size: 16px; font-weight: 600; letter-spacing: 0.3px; text-transform: uppercase;">What's Included</h3>
-            <div style="background: white; border: 1px solid #eee; border-radius: 4px; padding: 15px;">
-              <ul style="margin: 0; padding-left: 0; list-style: none;">
-                ${includedItems}
-              </ul>
+          <!-- Travelers section -->
+          <div style="margin-bottom: 30px;">
+            <h3 style="margin-top: 0; margin-bottom: 15px; color: ${primaryDark}; font-size: 16px; font-weight: 600; letter-spacing: 0.3px; text-transform: uppercase; font-family: 'Poppins', sans-serif;">Travelers (${numberOfPersons})</h3>
+            <div style="overflow-x: auto;">
+              <table style="width: 100%; border-collapse: collapse; min-width: 600px; background: white; border: 1px solid #eee; border-radius: 4px;">
+                <thead>
+                  <tr style="background: ${primaryLight};">
+                    <th style="padding: 12px; text-align: left; color: ${primaryDark}; font-weight: 600; border-bottom: 2px solid ${primaryColor}; font-family: 'Poppins', sans-serif;">#</th>
+                    <th style="padding: 12px; text-align: left; color: ${primaryDark}; font-weight: 600; border-bottom: 2px solid ${primaryColor}; font-family: 'Poppins', sans-serif;">Full Name</th>
+                    <th style="padding: 12px; text-align: left; color: ${primaryDark}; font-weight: 600; border-bottom: 2px solid ${primaryColor}; font-family: 'Poppins', sans-serif;">Gender</th>
+                    <th style="padding: 12px; text-align: left; color: ${primaryDark}; font-weight: 600; border-bottom: 2px solid ${primaryColor}; font-family: 'Poppins', sans-serif;">Email</th>
+                    <th style="padding: 12px; text-align: left; color: ${primaryDark}; font-weight: 600; border-bottom: 2px solid ${primaryColor}; font-family: 'Poppins', sans-serif;">Phone</th>
+                  </tr>
+                </thead>
+                <tbody>
+                  ${travelerList}
+                </tbody>
+              </table>
             </div>
           </div>
-          <div style="flex: 1;">
-            <h3 style="margin-top: 0; margin-bottom: 15px; color: ${primaryDark}; font-size: 16px; font-weight: 600; letter-spacing: 0.3px; text-transform: uppercase;">What's Not Included</h3>
-            <div style="background: white; border: 1px solid #eee; border-radius: 4px; padding: 15px;">
-              <ul style="margin: 0; padding-left: 0; list-style: none;">
-                ${excludedItems}
-              </ul>
+
+          <!-- Flights section -->
+          <div style="margin-bottom: 30px;">
+            <h3 style="margin-top: 0; margin-bottom: 15px; color: ${primaryDark}; font-size: 16px; font-weight: 600; letter-spacing: 0.3px; text-transform: uppercase; font-family: 'Poppins', sans-serif;">Flight Details</h3>
+            <div style="overflow-x: auto;">
+              <table style="width: 100%; border-collapse: collapse; min-width: 600px; background: white; border: 1px solid #eee; border-radius: 4px;">
+                <thead>
+                  <tr style="background: ${primaryLight};">
+                    <th style="padding: 12px; text-align: left; color: ${primaryDark}; font-weight: 600; border-bottom: 2px solid ${primaryColor}; font-family: 'Poppins', sans-serif;">#</th>
+                    <th style="padding: 12px; text-align: left; color: ${primaryDark}; font-weight: 600; border-bottom: 2px solid ${primaryColor}; font-family: 'Poppins', sans-serif;">Route</th>
+                    <th style="padding: 12px; text-align: left; color: ${primaryDark}; font-weight: 600; border-bottom: 2px solid ${primaryColor}; font-family: 'Poppins', sans-serif;">Time</th>
+                    <th style="padding: 12px; text-align: left; color: ${primaryDark}; font-weight: 600; border-bottom: 2px solid ${primaryColor}; font-family: 'Poppins', sans-serif;">Price</th>
+                  </tr>
+                </thead>
+                <tbody>
+                  ${flightList}
+                </tbody>
+              </table>
             </div>
           </div>
-        </div>
 
-        <!-- Payment summary -->
-        <div style="background: ${primaryColor}; border-radius: 4px; padding: 20px; color: white;">
-          <h3 style="margin-top: 0; margin-bottom: 20px; font-size: 16px; font-weight: 600; letter-spacing: 0.3px; text-transform: uppercase; border-bottom: 1px solid rgba(255,255,255,0.3); padding-bottom: 10px;">Payment Summary</h3>
-          <div style="display: flex; justify-content: space-between; margin-bottom: 10px;">
-            <span style="opacity: 0.9;">Package Price:</span>
-            <span style="font-weight: 500;">€${packageAmount}</span>
-          </div>
-          <div style="display: flex; justify-content: space-between; margin-bottom: 10px;">
-            <span style="opacity: 0.9;">Flight Price:</span>
-            <span style="font-weight: 500;">€${flightPrice}</span>
-          </div>
+          <!-- Insurance section -->
           ${insurance.length > 0 ? `
-          <div style="display: flex; justify-content: space-between; margin-bottom: 10px;">
-            <span style="opacity: 0.9;">Insurance:</span>
-            <span style="font-weight: 500;">€${insurance.reduce((sum, ins) => sum + parseFloat(ins.price), 0)}</span>
+          <div style="margin-bottom: 30px;">
+            <h3 style="margin-top: 0; margin-bottom: 15px; color: ${primaryDark}; font-size: 16px; font-weight: 600; letter-spacing: 0.3px; text-transform: uppercase; font-family: 'Poppins', sans-serif;">Insurance</h3>
+            <div style="overflow-x: auto;">
+              <table style="width: 100%; border-collapse: collapse; min-width: 600px; background: white; border: 1px solid #eee; border-radius: 4px;">
+                <thead>
+                  <tr style="background: ${primaryLight};">
+                    <th style="padding: 12px; text-align: left; color: ${primaryDark}; font-weight: 600; border-bottom: 2px solid ${primaryColor}; font-family: 'Poppins', sans-serif;">#</th>
+                    <th style="padding: 12px; text-align: left; color: ${primaryDark}; font-weight: 600; border-bottom: 2px solid ${primaryColor}; font-family: 'Poppins', sans-serif;">Name</th>
+                    <th style="padding: 12px; text-align: left; color: ${primaryDark}; font-weight: 600; border-bottom: 2px solid ${primaryColor}; font-family: 'Poppins', sans-serif;">Description</th>
+                    <th style="padding: 12px; text-align: left; color: ${primaryDark}; font-weight: 600; border-bottom: 2px solid ${primaryColor}; font-family: 'Poppins', sans-serif;">Price</th>
+                  </tr>
+                </thead>
+                <tbody>
+                  ${insuranceList}
+                </tbody>
+              </table>
+            </div>
           </div>
           ` : ''}
-          <div style="display: flex; justify-content: space-between; margin-top: 15px; font-size: 18px; font-weight: 600; border-top: 1px solid rgba(255,255,255,0.3); padding-top: 10px;">
-            <span>Total Paid:</span>
-            <span>€${totalAmount}</span>
+
+          <!-- Payment summary -->
+          <div style="background: ${primaryColor}; border-radius: 4px; padding: 25px; color: white;">
+            <h3 style="margin-top: 0; margin-bottom: 20px; font-size: 16px; font-weight: 600; letter-spacing: 0.3px; text-transform: uppercase; border-bottom: 1px solid rgba(255,255,255,0.3); padding-bottom: 10px; font-family: 'Poppins', sans-serif;">Payment Summary</h3>
+            <div style="display: flex; justify-content: space-between; margin-bottom: 10px; font-family: 'Poppins', sans-serif;">
+              <span style="opacity: 0.9;">Package Price:</span>
+              <span style="font-weight: 500;">€${packageAmount}</span>
+            </div>
+            <div style="display: flex; justify-content: space-between; margin-bottom: 10px; font-family: 'Poppins', sans-serif;">
+              <span style="opacity: 0.9;">Flight Price:</span>
+              <span style="font-weight: 500;">€${flightPrice}</span>
+            </div>
+            ${insurance.length > 0 ? `
+            <div style="display: flex; justify-content: space-between; margin-bottom: 10px; font-family: 'Poppins', sans-serif;">
+              <span style="opacity: 0.9;">Insurance:</span>
+              <span style="font-weight: 500;">€${insurance.reduce((sum, ins) => sum + parseFloat(ins.price), 0)}</span>
+            </div>
+            ` : ''}
+            <div style="display: flex; justify-content: space-between; margin-top: 15px; font-size: 18px; font-weight: 600; border-top: 1px solid rgba(255,255,255,0.3); padding-top: 10px; font-family: 'Poppins', sans-serif;">
+              <span>Total Paid:</span>
+              <span>€${totalAmount}</span>
+            </div>
           </div>
-          <p style="margin-bottom: 0; margin-top: 20px; font-size: 13px; opacity: 0.8;"><strong>Payment Reference:</strong> ${paymentId}</p>
-        </div>
 
-        <!-- Next steps -->
-        <div style="background: ${primaryLight}; border-left: 4px solid ${primaryColor}; border-radius: 0 4px 4px 0; padding: 20px; margin-top: 25px;">
-          <h3 style="margin-top: 0; margin-bottom: 10px; color: ${primaryDark}; font-size: 16px; font-weight: 600;">Next Steps</h3>
-          <ol style="margin: 0; padding-left: 20px; color: ${textColor};">
-            <li style="margin-bottom: 8px;">You'll receive a detailed itinerary 7 days before departure</li>
-            <li style="margin-bottom: 8px;">Check your email for important updates about your trip</li>
-            <li>Contact our support team if you have any questions</li>
-          </ol>
-        </div>
-
-        <!-- Footer -->
-        <div style="text-align: center; margin-top: 30px; color: ${lightText}; font-size: 13px; border-top: 1px solid #eee; padding-top: 20px;">
-          <p style="margin: 0 0 10px 0;">Thank you for choosing us for your travel plans.</p>
-          <p style="margin: 0;">
-            <a href="#" style="color: ${primaryColor}; text-decoration: none; margin: 0 10px;">Contact Support</a> | 
-            <a href="#" style="color: ${primaryColor}; text-decoration: none; margin: 0 10px;">Manage Booking</a> | 
-            <a href="#" style="color: ${primaryColor}; text-decoration: none; margin: 0 10px;">Terms & Conditions</a>
-          </p>
-          <p style="margin: 15px 0 0; font-size: 12px;">
-            This email was sent to ${email}. If you didn't make this booking, please contact us immediately.
-          </p>
+          <!-- Footer -->
+          <div style="text-align: center; margin-top: 30px; color: ${lightText}; font-size: 14px; font-family: 'Poppins', sans-serif;">
+            <p style="margin: 5px 0;">Thank you for choosing La Tua Fuga LowCost</p>
+            <p style="margin: 5px 0;">For any questions, contact us at <a href="mailto:info@latuafugalowcost.it" style="color: ${primaryColor}; text-decoration: none;">info@latuafugalowcost.it</a></p>
+            <p style="margin: 5px 0;"><a href="https://latuafugalowcost.it" style="color: ${primaryColor}; text-decoration: none;">www.latuafugalowcost.it</a></p>
+          </div>
         </div>
       </div>
-    </div>
+    </body>
+    </html>
   `;
 };
 
