@@ -44,9 +44,8 @@ app.use(
       "http://46.202.164.243",
       "http://localhost:5173",
       "http://localhost:5174",
-      "192.168.40.103:5173",
-      "192.168.40.103:*",
-      "192.168.40.103",
+      "https://latuafugalowcost.it",
+      "https://www.latuafugalowcost.it"
     ],
     credentials: true,
   })
