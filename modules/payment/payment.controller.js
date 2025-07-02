@@ -13,7 +13,7 @@ const makePayment = async (req, res) => {
       paymentIntentId: session.payment_intent,
       checkoutSessionId: session.id,
       order_id: order_id,
-      amount: amount,
+      amount: parseInt(amount) * 100,
       currency: "eur",
       status: "pending",
     });

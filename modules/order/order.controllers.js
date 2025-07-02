@@ -20,7 +20,7 @@ const stripePaymentFun = async (req, res) => {
   const { paymentMethodId, amount, email } = req.body;
   try {
     const paymentIntent = await stripe.paymentIntents.create({
-      amount: amount * 100,
+      amount: parseInt(amount) * 100,
       currency: "eur",
       payment_method: paymentMethodId,
       payment_method_types: ["card"],
