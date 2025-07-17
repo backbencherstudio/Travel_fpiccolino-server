@@ -498,9 +498,15 @@ const checkAuthStatus = async (req, res) => {
   }
 };
 
+
 const logout = (req, res) => {
+  console.log("heat");
   try {
-    res.clearCookie("token");
+    res.clearCookie("token", {
+        httpOnly: true,
+        secure: true,
+        sameSite: 'none',
+    });
     res.status(200).json({ message: "Logged out successfully" });
   } catch (error) {
     res.status(400).json({ message: error.message });
