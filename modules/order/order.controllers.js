@@ -349,14 +349,25 @@ const getAllOrders = async (req, res) => {
 
 const checkout = async (req, res) => {
   try {
-    console.log(286);
-    console.log(req.body);
-    // setCookie(req.body, )
-    setCookie("userData", req.body, res);
-    // req.session.userData = req.body;
+    console.log("Checkout data received:", req.body);
+    console.log("Person field in request:", req.body.person);
+    
+    // Ensure person field is always a valid number
+    const checkoutData = {
+      ...req.body,
+      person: Math.max(Number(req.body.person) || 1, 1),
+      // Ensure all numeric fields are properly converted
+      totalPackageAmount: Number(req.body.totalPackageAmount) || 0,
+      flightPrice: req.body.flightPrice ? Number(req.body.flightPrice) : 0,
+      toureAmount: Number(req.body.toureAmount) || 0
+    };
+    
+    console.log("Processed checkout data:", checkoutData);
+    setCookie("userData", checkoutData, res);
 
-    res.status(200).json({ message: "success" });
+    res.status(200).json(checkoutData);
   } catch (error) {
+    console.error("Checkout error:", error);
     res.status(500).json(error);
   }
 };
@@ -364,8 +375,11 @@ const checkout = async (req, res) => {
 const accesCheckoutData = async (req, res) => {
   try {
     let data = req.cookies.userData;
+    console.log("Retrieved checkout data:", data);
+    console.log("Person field in retrieved data:", data?.person);
     res.status(200).json(data);
   } catch (error) {
+    console.error("Error retrieving checkout data:", error);
     res.status(500).json(error);
   }
 };
@@ -383,20 +397,36 @@ const deleteCheckoutData = async (req, res) => {
 
 const checkoutNewUserData = async (req, res) => {
   try {
-    // req.session.userUpdateData = req.body;
-    setCookie("userUpdateData", req.body, res);
-    res.status(200).json({ message: "success" });
+    console.log("CheckoutNewUserData received:", req.body);
+    console.log("Person field in request:", req.body.person);
+    
+    // Ensure person field is always a valid number
+    const checkoutData = {
+      ...req.body,
+      person: Math.max(Number(req.body.person) || 1, 1),
+      // Ensure all numeric fields are properly converted
+      totalPackageAmount: Number(req.body.totalPackageAmount) || 0,
+      flightPrice: req.body.flightPrice ? Number(req.body.flightPrice) : 0,
+      toureAmount: Number(req.body.toureAmount) || 0
+    };
+    
+    console.log("Processed checkoutNewUserData:", checkoutData);
+    setCookie("userUpdateData", checkoutData, res);
+    res.status(200).json(checkoutData);
   } catch (error) {
+    console.error("CheckoutNewUserData error:", error);
     res.status(500).json(error);
   }
 };
 
 const accesCheckoutNewData = async (req, res) => {
   try {
-    let data = req.cookies.userUpdateData; //req.session.userUpdateData;
-
+    let data = req.cookies.userUpdateData;
+    console.log("Retrieved checkoutNewData:", data);
+    console.log("Person field in retrieved data:", data?.person);
     res.status(200).json(data);
   } catch (error) {
+    console.error("Error retrieving checkoutNewData:", error);
     res.status(500).json(error);
   }
 };

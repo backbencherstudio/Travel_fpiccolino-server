@@ -29,12 +29,12 @@ router.post("/stripePayment", stripePaymentFun);
 // router.post("/webhook", bodyParser.raw({ type: 'application/json' }), handleWebhook )
 
 // ==================================>>> created by ami ( checkout data )
-router.post("/checkout", verifyUser, checkout);
+router.post("/checkout", checkout);
 router.get("/checkout", accesCheckoutData);
-router.delete("/checkout", verifyUser, deleteCheckoutData);
+router.delete("/checkout", deleteCheckoutData);
 
 // ==================================>>> created by ami  ( new checkout data )
-router.post("/checkoutWithNewData", verifyUser, checkoutNewUserData);
+router.post("/checkoutWithNewData", checkoutNewUserData);
 router.get("/checkoutWithNewData", accesCheckoutNewData);
 
 router.get("/:id", getOrderById);
