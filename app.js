@@ -45,7 +45,8 @@ app.use(
       "http://localhost:5173",
       "http://localhost:5174",
       "https://latuafugalowcost.it",
-      "https://www.latuafugalowcost.it"
+      "https://www.latuafugalowcost.it",
+      "http://localhost:5173"
     ],
     credentials: true,
   })

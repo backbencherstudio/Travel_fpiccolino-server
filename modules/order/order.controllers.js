@@ -2,6 +2,7 @@ const Order = require("./order.models");
 const Package = require("./../package/package.model");
 const User = require("../users/users.models");
 const { paymentSuccessEmail } = require("../../util/otpUtils");
+const CheckoutTemp = require("./checkoutTemp.model");
 // const { getImageUrl } = require("../../util/image_path");
 
 const setCookie = (key, data, res) => {
@@ -37,6 +38,73 @@ const stripePaymentFun = async (req, res) => {
   } catch (err) {
     console.error("Stripe Error:", err);
     res.status(400).json({ success: false, error: err.message });
+  }
+};
+
+// Cookie-free checkout session APIs (iOS Safari safe)
+const createCheckoutSession = async (req, res) => {
+  try {
+    // Normalize numeric fields
+    const payload = {
+      ...req.body,
+      person: Math.max(Number(req.body.person) || 1, 1),
+      totalPackageAmount: Number(req.body.totalPackageAmount) || 0,
+      flightPrice: req.body.flightPrice ? Number(req.body.flightPrice) : 0,
+      toureAmount: Number(req.body.toureAmount) || 0,
+    };
+
+    const doc = await CheckoutTemp.create({
+      userId: req.body.userId,
+      packageId: req.body.packageId,
+      payload,
+    });
+    return res.status(201).json({ checkoutId: doc._id.toString(), payload: doc.payload });
+  } catch (error) {
+    console.error("createCheckoutSession error:", error);
+    return res.status(500).json({ message: "Failed to create checkout session" });
+  }
+};
+
+const getCheckoutSession = async (req, res) => {
+  try {
+    const { id } = req.params;
+    const doc = await CheckoutTemp.findById(id);
+    if (!doc) return res.status(404).json({ message: "Checkout session not found" });
+    return res.status(200).json({ checkoutId: doc._id.toString(), payload: doc.payload });
+  } catch (error) {
+    console.error("getCheckoutSession error:", error);
+    return res.status(500).json({ message: "Failed to retrieve checkout session" });
+  }
+};
+
+const updateCheckoutSession = async (req, res) => {
+  try {
+    const { id } = req.params;
+    const patch = {
+      ...req.body,
+      person: req.body.person !== undefined ? Math.max(Number(req.body.person) || 1, 1) : undefined,
+    };
+    const update = {};
+    for (const k of Object.keys(patch)) {
+      if (patch[k] !== undefined) update[`payload.${k}`] = patch[k];
+    }
+    const doc = await CheckoutTemp.findByIdAndUpdate(id, { $set: update }, { new: true });
+    if (!doc) return res.status(404).json({ message: "Checkout session not found" });
+    return res.status(200).json({ checkoutId: doc._id.toString(), payload: doc.payload });
+  } catch (error) {
+    console.error("updateCheckoutSession error:", error);
+    return res.status(500).json({ message: "Failed to update checkout session" });
+  }
+};
+
+const deleteCheckoutSession = async (req, res) => {
+  try {
+    const { id } = req.params;
+    await CheckoutTemp.findByIdAndDelete(id);
+    return res.status(200).json({ message: "Checkout session deleted" });
+  } catch (error) {
+    console.error("deleteCheckoutSession error:", error);
+    return res.status(500).json({ message: "Failed to delete checkout session" });
   }
 };
 
@@ -628,6 +696,10 @@ const getUserStatus = async (req, res) => {
 module.exports = {
   stripePaymentFun,
   // handleWebhook,
+  createCheckoutSession,
+  getCheckoutSession,
+  updateCheckoutSession,
+  deleteCheckoutSession,
   checkoutNewUserData,
   accesCheckoutNewData,
   createOrder,

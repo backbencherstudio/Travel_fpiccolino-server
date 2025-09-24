@@ -17,6 +17,10 @@ const {
   checkoutNewUserData,
   accesCheckoutNewData,
   getAllOrders,
+  createCheckoutSession,
+  getCheckoutSession,
+  updateCheckoutSession,
+  deleteCheckoutSession,
   // handleWebhook,
 } = require("./order.controllers");
 const { verifyUser } = require("../../middleware/verifyUser");
@@ -36,6 +40,12 @@ router.delete("/checkout", deleteCheckoutData);
 // ==================================>>> created by ami  ( new checkout data )
 router.post("/checkoutWithNewData", checkoutNewUserData);
 router.get("/checkoutWithNewData", accesCheckoutNewData);
+
+// Cookie-free checkout session (ID-based)
+router.post("/checkout-session", createCheckoutSession);
+router.get("/checkout-session/:id", getCheckoutSession);
+router.patch("/checkout-session/:id", updateCheckoutSession);
+router.delete("/checkout-session/:id", deleteCheckoutSession);
 
 router.get("/:id", getOrderById);
 router.get("/", getAllOrders);
