@@ -14,6 +14,7 @@ const router = express.Router();
 
 router.post(
   "/",
+  // verifyAdmin,
   upload.fields([{ name: "images" }, { name: "hotelImages" }]),
   createPackage
 );
@@ -24,6 +25,7 @@ router.get("/:id", getPackageById);
 
 router.put(
   "/:id",
+  // verifyAdmin,
   upload.fields([{ name: "images" }, { name: "hotelImages" }]),
   updatePackage
 );
