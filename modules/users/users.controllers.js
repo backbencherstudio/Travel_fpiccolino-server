@@ -25,12 +25,14 @@ const hashPassword = async (password) => {
   return await bcrypt.hash(password, salt);
 };
 
+const isProduction = process.env.NODE_ENV === 'production';
+
 const setTokenCookie = (res, token) => {
   res.cookie("token", token, {
     maxAge: 3 * 365 * 24 * 60 * 60 * 1000, // 30 days
     httpOnly: true,
-    secure: true,
-    sameSite: 'none',
+    secure: isProduction,
+    sameSite: isProduction ? 'none' : 'lax',
     path: '/'
   });
   return res;
@@ -40,8 +42,8 @@ const setCookie = (key, data, res) => {
   res.cookie(key, data, {
     maxAge: 3 * 365 * 24 * 60 * 60 * 1000,
     httpOnly: true,
-    secure: true,
-    sameSite: 'none',
+    secure: isProduction,
+    sameSite: isProduction ? 'none' : 'lax',
     path: '/'
   });
 };
@@ -58,8 +60,8 @@ const setTokens = (res, accessToken, refreshToken) => {
   res.cookie('refreshToken', refreshToken, {
     maxAge: 3 * 365 * 24 * 60 * 60 * 1000,
     httpOnly: true,
-    secure: false,
-    sameSite: 'none',
+    secure: isProduction,
+    sameSite: isProduction ? 'none' : 'lax',
     path: '/'
   });
 };
@@ -504,8 +506,16 @@ const logout = (req, res) => {
   try {
     res.clearCookie("token", {
         httpOnly: true,
-        secure: true,
-        sameSite: 'none',
+        secure: isProduction,
+        sameSite: isProduction ? 'none' : 'lax',
+        path: '/'
+    });
+    // In case a refresh token is also used
+    res.clearCookie('refreshToken', {
+        httpOnly: true,
+        secure: isProduction,
+        sameSite: isProduction ? 'none' : 'lax',
+        path: '/'
     });
     res.status(200).json({ message: "Logged out successfully" });
   } catch (error) {
