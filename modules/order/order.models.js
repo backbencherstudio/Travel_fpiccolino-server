@@ -41,7 +41,7 @@ const OrderSchema = new Schema(
     userId: {
       type: mongoose.Types.ObjectId,
       ref: "User",
-      required: true,
+      required: false,
     },
     paymentId: {
       type: String,

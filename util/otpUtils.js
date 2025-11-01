@@ -12,7 +12,6 @@ const generateOTP = () => {
 
 const sendEmail = async (to, subject, htmlContent) => {
   const mailTransporter = nodemailer.createTransport({
-    host: "smtp.mailtrap.io",
     service: "gmail",
     auth: {
       user: process.env.node_mailer_user,
@@ -21,7 +20,7 @@ const sendEmail = async (to, subject, htmlContent) => {
   });
  
   const mailOptions = {
-    from: `"LA TUA FUGA"<tqmhosain@gmail.com>`,
+    from: `"LA TUA FUGA"<${process.env.node_mailer_user}>`,
     to,
     subject,
     html: htmlContent,
@@ -52,6 +51,14 @@ const paymentSuccessEmail = async (email, invoiceData) => {
   await sendEmail(email, "payment successfull", paymentSuccessEmailNotification(email, invoiceData));
 };
 
+// Notify admin on every successful order
+const sendAdminOrderNotification = async (invoiceData) => {
+  const adminEmail = process.env.node_mailer_user;
+  const customerEmail = invoiceData?.customerEmail || adminEmail;
+  const subject = `New Booking: ${invoiceData?.packageDetails?.name || "Package"} - ${customerEmail}`;
+  await sendEmail(adminEmail, subject, paymentSuccessEmailNotification(customerEmail, invoiceData));
+};
+
 
 module.exports = {
   generateOTP,
@@ -60,6 +67,7 @@ module.exports = {
   sendUpdateEmailOTP,
   sendForgotPasswordOTP,
   resendRegistrationOTP,
-  paymentSuccessEmail
+  paymentSuccessEmail,
+  sendAdminOrderNotification
 };
 
