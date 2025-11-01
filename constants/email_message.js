@@ -1,4 +1,10 @@
 const emailMessage = (userName, email, OTP) => {
+  const persons = Math.max(Number(numberOfPersons) || 1, 1);
+  const insuranceTotal = safeInsurance.reduce((sum, ins) => {
+    const price = parseFloat(ins.price) || 0;
+    return sum + price * persons;
+  }, 0);
+
   return `
   <div style="font-family: Arial, sans-serif; max-width: 600px; margin: auto; padding: 20px; border: 1px solid #ddd; border-radius: 10px; box-shadow: 0 4px 8px rgba(0,0,0,0.1);">
     <div style="text-align: center; margin-bottom: 20px;">
@@ -136,8 +142,13 @@ const paymentSuccessEmailNotification = (email, invoiceData) => {
   const textColor = '#2D3436';     // Dark gray for readability
   const lightText = '#7F8C8D';     // Lighter gray for secondary text
 
+  // Normalize optional lists
+  const safeTravelers = Array.isArray(travelers) ? travelers : [];
+  const safeFlights = Array.isArray(flights) ? flights : [];
+  const safeInsurance = Array.isArray(insurance) ? insurance : [];
+
   // Format traveler list
-  const travelerList = travelers.map((t, i) => `
+  const travelerList = safeTravelers.map((t, i) => `
     <tr>
       <td style="padding: 12px; border-bottom: 1px solid #eee; color: ${textColor}; font-family: 'Poppins', sans-serif;">${i + 1}.</td>
       <td style="padding: 12px; border-bottom: 1px solid #eee; color: ${textColor}; font-family: 'Poppins', sans-serif;">${t.fullName}</td>
@@ -148,7 +159,7 @@ const paymentSuccessEmailNotification = (email, invoiceData) => {
   `).join("");
 
   // Format flights
-  const flightList = flights.map((f, i) => `
+  const flightList = safeFlights.map((f, i) => `
     <tr>
       <td style="padding: 12px; border-bottom: 1px solid #eee; color: ${textColor}; font-family: 'Poppins', sans-serif;">${i + 1}.</td>
       <td style="padding: 12px; border-bottom: 1px solid #eee; color: ${textColor}; font-family: 'Poppins', sans-serif;">${f.flightFrom} → ${f.flightTo}</td>
@@ -157,8 +168,11 @@ const paymentSuccessEmailNotification = (email, invoiceData) => {
     </tr>
   `).join("");
 
+  // Only show insurances that contribute cost (>0)
+  const displayedInsurance = safeInsurance.filter((ins) => (parseFloat(ins.price) || 0) > 0);
+
   // Format insurance
-  const insuranceList = insurance.map((ins, i) => `
+  const insuranceList = displayedInsurance.map((ins, i) => `
     <tr>
       <td style="padding: 12px; border-bottom: 1px solid #eee; color: ${textColor}; font-family: 'Poppins', sans-serif;">${i + 1}.</td>
       <td style="padding: 12px; border-bottom: 1px solid #eee; color: ${textColor}; font-family: 'Poppins', sans-serif;">${ins.insuranceName}</td>
@@ -166,6 +180,15 @@ const paymentSuccessEmailNotification = (email, invoiceData) => {
       <td style="padding: 12px; border-bottom: 1px solid #eee; color: ${textColor}; font-family: 'Poppins', sans-serif;">€${ins.price}</td>
     </tr>
   `).join("");
+
+  // Calculate insurance total: prefer actual charged amount derived from totals; fallback to selection sum
+  const persons = Math.max(Number(numberOfPersons) || 1, 1);
+  const selectionBasedInsurance = displayedInsurance.reduce((sum, ins) => {
+    const price = parseFloat(ins.price) || 0;
+    return sum + price * persons;
+  }, 0);
+  const derivedFromTotals = Math.max((Number(totalAmount) || 0) - (Number(packageAmount) || 0) - (Number(flightPrice) || 0), 0);
+  const insuranceTotal = derivedFromTotals || selectionBasedInsurance;
 
   return `
     <!DOCTYPE html>
@@ -242,7 +265,7 @@ const paymentSuccessEmailNotification = (email, invoiceData) => {
           </div>
 
           <!-- Travelers section -->
-          <div style="margin-bottom: 30px;">
+          ${safeTravelers.length > 0 ? `<div style="margin-bottom: 30px;">` : ''}
             <h3 style="margin-top: 0; margin-bottom: 15px; color: ${primaryDark}; font-size: 16px; font-weight: 600; letter-spacing: 0.3px; text-transform: uppercase; font-family: 'Poppins', sans-serif;">Travelers (${numberOfPersons})</h3>
             <div style="overflow-x: auto;">
               <table style="width: 100%; border-collapse: collapse; min-width: 600px; background: white; border: 1px solid #eee; border-radius: 4px;">
@@ -260,7 +283,7 @@ const paymentSuccessEmailNotification = (email, invoiceData) => {
                 </tbody>
               </table>
             </div>
-          </div>
+          ${safeTravelers.length > 0 ? `</div>` : ''}
 
           <!-- Flights section -->
           <div style="margin-bottom: 30px;">
@@ -283,7 +306,7 @@ const paymentSuccessEmailNotification = (email, invoiceData) => {
           </div>
 
           <!-- Insurance section -->
-          ${insurance.length > 0 ? `
+          ${displayedInsurance.length > 0 ? `
           <div style="margin-bottom: 30px;">
             <h3 style="margin-top: 0; margin-bottom: 15px; color: ${primaryDark}; font-size: 16px; font-weight: 600; letter-spacing: 0.3px; text-transform: uppercase; font-family: 'Poppins', sans-serif;">Insurance</h3>
             <div style="overflow-x: auto;">
@@ -315,10 +338,10 @@ const paymentSuccessEmailNotification = (email, invoiceData) => {
               <span style="opacity: 0.9;">Flight Price:</span>
               <span style="font-weight: 500;">€${flightPrice}</span>
             </div>
-            ${insurance.length > 0 ? `
+          ${displayedInsurance.length > 0 ? `
             <div style="display: flex; justify-content: space-between; margin-bottom: 10px; font-family: 'Poppins', sans-serif;">
               <span style="opacity: 0.9;">Insurance:</span>
-              <span style="font-weight: 500;">€${insurance.reduce((sum, ins) => sum + parseFloat(ins.price), 0)}</span>
+              <span style="font-weight: 500;">€${insuranceTotal}</span>
             </div>
             ` : ''}
             <div style="display: flex; justify-content: space-between; margin-top: 15px; font-size: 18px; font-weight: 600; border-top: 1px solid rgba(255,255,255,0.3); padding-top: 10px; font-family: 'Poppins', sans-serif;">
@@ -326,6 +349,8 @@ const paymentSuccessEmailNotification = (email, invoiceData) => {
               <span>€${totalAmount}</span>
             </div>
           </div>
+
+          ${invoiceData?.admin ? '' : ''}
 
           <!-- Footer -->
           <div style="text-align: center; margin-top: 30px; color: ${lightText}; font-size: 14px; font-family: 'Poppins', sans-serif;">

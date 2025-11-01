@@ -1,7 +1,7 @@
 const Order = require("./order.models");
 const Package = require("./../package/package.model");
 const User = require("../users/users.models");
-const { paymentSuccessEmail } = require("../../util/otpUtils");
+const { paymentSuccessEmail, sendAdminOrderNotification } = require("../../util/otpUtils");
 const CheckoutTemp = require("./checkoutTemp.model");
 // const { getImageUrl } = require("../../util/image_path");
 
@@ -18,26 +18,24 @@ const setCookie = (key, data, res) => {
 const stripe = require("stripe")(process.env.STRIPE_SECRET_KEY);
 
 const stripePaymentFun = async (req, res) => {
-  const { paymentMethodId, amount, email } = req.body;
+  // Client will confirm the PaymentIntent with card details via confirmCardPayment
+  const { amount, email } = req.body;
   try {
+    if (!amount || Number.isNaN(Number(amount))) {
+      return res.status(400).json({ success: false, error: "Invalid amount" });
+    }
+
     const paymentIntent = await stripe.paymentIntents.create({
       amount: parseInt(amount) * 100,
       currency: "eur",
-      payment_method: paymentMethodId,
-      payment_method_types: ["card"],
-      confirm: true,
+      automatic_payment_methods: { enabled: true },
+      metadata: email ? { email } : undefined,
     });
 
-    if (paymentIntent) {
-      console.log(30, email);
-      console.log(31, paymentIntent);
-      // await paymentSuccessEmail(email);
-    }
-
-    res.status(200).json({ success: true, paymentIntent });
+    return res.status(200).json({ success: true, clientSecret: paymentIntent.client_secret });
   } catch (err) {
     console.error("Stripe Error:", err);
-    res.status(400).json({ success: false, error: err.message });
+    return res.status(400).json({ success: false, error: err.message });
   }
 };
 
@@ -187,15 +185,12 @@ const deleteCheckoutSession = async (req, res) => {
 const createOrder = async (req, res) => {
   console.log("Request Body", req.body);
   try {
-    // Step 1: Fetch user and package details
+    // Step 1: Fetch optional user and required package details
     const [user, package] = await Promise.all([
-      User.findById(req.body.userId),
-      Package.findById(req.body.packageId)
+      req.body.userId ? User.findById(req.body.userId) : Promise.resolve(null),
+      Package.findById(req.body.packageId),
     ]);
 
-    if (!user) {
-      return res.status(404).json({ message: "User not found" });
-    }
     if (!package) {
       return res.status(404).json({ message: "Package not found" });
     }
@@ -209,13 +204,13 @@ const createOrder = async (req, res) => {
     // Step 3: Generate Invoice Data from req.body, user, and package
     const invoiceData = {
       invoiceId: `INV-${savedOrder._id.toString().slice(-6).toUpperCase()}`,
-      customerName: `${user?.firstName || ""} ${user?.lastName || ""}`.trim(),
-      customerEmail: user.email,
-      customerPhone: user.phone || '',
+      customerName: `${user?.firstName || ""} ${user?.lastName || ""}`.trim() || (req.body.name || "Guest"),
+      customerEmail: (user && user.email) || req.body.email,
+      customerPhone: (user && user.phone) || '',
       customerAddress: {
-        address: user.address || '',
-        city: user.city || '',
-        country: user.country || ''
+        address: (user && user.address) || '',
+        city: (user && user.city) || '',
+        country: (user && user.country) || ''
       },
       orderDate: new Date(savedOrder.createdAt).toLocaleDateString(),
       tourDate: new Date(req.body.tourDate).toLocaleDateString(),
@@ -239,21 +234,30 @@ const createOrder = async (req, res) => {
       flights: req.body.flights,
       paymentId: req.body.paymentId,
       numberOfPersons: req.body.person,
+      orderId: savedOrder._id.toString(),
+      userId: req.body.userId || null,
+      packageId: req.body.packageId || null,
     };
 
-    // Step 4: Send Email with invoiceData (including user and package details)
-    await paymentSuccessEmail(user.email, invoiceData);
+    // Step 4: Send Email with invoiceData
+    // Prefer checkout-provided email when user is not logged in
+    const recipientEmail = req.body.email || (user && user.email);
+    if (recipientEmail) {
+      await paymentSuccessEmail(recipientEmail, invoiceData);
+    }
+    // Admin notification (always send) with extra context
+    await sendAdminOrderNotification({ ...invoiceData, admin: true, rawPayload: req.body });
 
     // Step 5: Respond
     res.status(201).json({ 
       order: savedOrder, 
       invoice: invoiceData,
-      user: {
+      user: user ? {
         name: `${user?.firstName || ""} ${user?.lastName || ""}`.trim(),
         email: user.email,
         phone: user.phone,
         address: user.address
-      },
+      } : null,
       package: {
         name: package.tourName,
         description: package.tourDescription,
@@ -396,9 +400,11 @@ const getAllOrders = async (req, res) => {
     let Orders = queryConditions.length
       ? await Order.find({ $and: queryConditions })
           .populate("userId", "-password")
+          .populate("packageId")
           .sort({ createdAt: -1 })
       : await Order.find()
           .populate("userId", "-password")
+          .populate("packageId")
           .sort({ createdAt: -1 });
 
     Orders = Orders.map((order) => {
